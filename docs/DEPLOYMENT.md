@@ -43,6 +43,29 @@ npm run storybook        # Start Storybook (localhost:6006)
 npm run build-storybook  # Build static Storybook
 ```
 
+## Backend Commands
+
+```bash
+cd backend
+
+# Setup
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+pip install -r requirements-dev.txt
+
+# Development
+uvicorn app.main:app --reload --port 8001
+
+# Testing
+pytest tests/ -v          # Run all tests
+pytest tests/ -v --tb=short  # Run with short traceback
+pytest tests/test_endpoints.py -v  # Run specific test file
+
+# API Documentation
+# Visit http://localhost:8001/docs (Swagger UI)
+# Visit http://localhost:8001/redoc (ReDoc)
+```
+
 ## Environment Variables
 
 ### Frontend

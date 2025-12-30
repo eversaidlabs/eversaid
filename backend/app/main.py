@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
-from app.core_client import CoreAPIClient
+from app.core_client import CoreAPIClient, CoreAPIError
 from app.database import Base, engine
 from app import models  # noqa: F401 - Import models to register them with Base
+from app.routes.core import router as core_router
 
 
 @asynccontextmanager
@@ -31,6 +33,19 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# Register routers
+app.include_router(core_router)
+
+
+# Exception handlers
+@app.exception_handler(CoreAPIError)
+async def core_api_error_handler(request: Request, exc: CoreAPIError) -> JSONResponse:
+    """Convert CoreAPIError to HTTP response."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 @app.get("/health")

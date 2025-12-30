@@ -13,7 +13,6 @@ from sqlalchemy.pool import StaticPool
 from app.config import Settings, get_settings
 from app.core_client import CoreAPIClient
 from app.database import Base, get_db
-from app.main import app
 
 
 @pytest.fixture
@@ -33,6 +32,9 @@ def test_settings() -> Settings:
 @pytest.fixture
 def test_engine():
     """Create an in-memory SQLite engine for testing."""
+    # Import models to ensure they're registered with Base
+    from app import models  # noqa: F401
+
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -63,7 +65,14 @@ def mock_core_api_client(test_settings: Settings) -> Generator[CoreAPIClient, No
 
 @pytest.fixture
 def client(test_engine, test_settings: Settings) -> Generator[TestClient, None, None]:
-    """Create a test client with mocked database and settings."""
+    """Create a test client with mocked database, settings, and Core API.
+
+    This fixture sets up respx mocking internally to ensure proper ordering.
+    Use test_settings to add additional mocks in tests.
+    """
+    from app.main import app as fastapi_app
+    import app.main as main_module
+
     TestingSessionLocal = sessionmaker(bind=test_engine)
 
     def override_get_db() -> Generator[Session, None, None]:
@@ -73,25 +82,17 @@ def client(test_engine, test_settings: Settings) -> Generator[TestClient, None, 
         finally:
             db.close()
 
-    app.dependency_overrides[get_db] = override_get_db
-    app.dependency_overrides[get_settings] = lambda: test_settings
+    # Clear the lru_cache to ensure test settings are used in lifespan
+    get_settings.cache_clear()
 
-    # Create mock Core API client
-    core_api = CoreAPIClient(base_url=test_settings.CORE_API_URL)
-    app.state.core_api = core_api
+    fastapi_app.dependency_overrides[get_db] = override_get_db
+    fastapi_app.dependency_overrides[get_settings] = lambda: test_settings
 
-    with TestClient(app, raise_server_exceptions=False) as test_client:
-        yield test_client
+    # Patch get_settings at module level for lifespan (which calls it directly)
+    original_get_settings = main_module.get_settings
+    main_module.get_settings = lambda: test_settings
 
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def mock_core_api(test_settings: Settings):
-    """Mock all Core API calls with respx.
-
-    Provides mock responses that match actual Core API schemas.
-    """
+    # Start respx mocking with base auth mocks
     with respx.mock:
         # Register endpoint - returns user object
         respx.post(f"{test_settings.CORE_API_URL}/api/v1/auth/register").mock(
@@ -145,4 +146,12 @@ def mock_core_api(test_settings: Settings):
             )
         )
 
-        yield
+        with TestClient(fastapi_app, raise_server_exceptions=False) as test_client:
+            yield test_client
+
+    # Restore original
+    main_module.get_settings = original_get_settings
+    fastapi_app.dependency_overrides.clear()
+    get_settings.cache_clear()
+
+
