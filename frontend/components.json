@@ -6,9 +6,8 @@
   "tailwind": {
     "config": "",
     "css": "src/app/globals.css",
-    "baseColor": "zinc",
-    "cssVariables": true,
-    "prefix": ""
+    "baseColor": "neutral",
+    "cssVariables": true
   },
   "iconLibrary": "lucide",
   "aliases": {
@@ -18,5 +17,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@v0": "https://v0.app/chat/b/{name}"
+  }
 }
