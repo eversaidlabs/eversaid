@@ -9,5 +9,6 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/tests/setup.ts'],
     include: ['./src/**/*.test.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/.storybook/**'],
   },
 })
