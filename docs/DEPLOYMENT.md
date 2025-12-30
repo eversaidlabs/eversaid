@@ -9,15 +9,36 @@
 ## Local Development
 
 ```bash
-# Start with Docker Compose
+# Start with Docker Compose (when backend is ready)
 docker-compose up
 
 # Or run individually:
 # Frontend
 cd frontend && npm run dev
 
-# Backend
+# Backend (not yet implemented)
 cd backend && uvicorn app.main:app --reload --port 8001
+```
+
+## Frontend Commands
+
+```bash
+cd frontend
+
+# Development
+npm run dev              # Start dev server (localhost:3000)
+npm run build            # Production build
+npm run lint             # Run ESLint
+
+# Testing
+npm run test             # Unit tests (watch mode)
+npm run test:run         # Unit tests (single run)
+npm run test:e2e         # E2E tests (headless)
+npm run test:e2e:ui      # E2E tests (UI mode)
+
+# Component Development
+npm run storybook        # Start Storybook (localhost:6006)
+npm run build-storybook  # Build static Storybook
 ```
 
 ## Environment Variables
@@ -25,7 +46,7 @@ cd backend && uvicorn app.main:app --reload --port 8001
 ### Frontend
 - `NEXT_PUBLIC_API_URL` - Wrapper backend URL
 
-### Backend
+### Backend (Not Yet Implemented)
 - `BACKBONE_URL` - Core API URL
 - `DEMO_USER_EMAIL` - Demo user email
 - `DEMO_USER_PASSWORD` - Demo user password
@@ -33,6 +54,17 @@ cd backend && uvicorn app.main:app --reload --port 8001
 - `RATE_LIMIT_DAY` - Uploads per day (default: 20)
 - `RATE_LIMIT_IP_DAY` - Uploads per IP per day (default: 100)
 - `RATE_LIMIT_GLOBAL_DAY` - Global daily limit (default: 1000)
+
+## CI/CD
+
+GitHub Actions runs on every PR:
+- Linting
+- Unit tests (Vitest)
+- Build verification
+- Storybook build
+- E2E tests (Playwright)
+
+See `.github/workflows/pr-tests.yml` for configuration.
 
 ## Vercel Deployment
 

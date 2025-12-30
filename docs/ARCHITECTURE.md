@@ -5,7 +5,7 @@
 Eversaid is a monorepo containing:
 
 - **frontend/** - Next.js 15 with App Router
-- **backend/** - FastAPI wrapper backend
+- **backend/** - FastAPI wrapper backend (not yet implemented)
 - **docs/** - Documentation
 
 ## System Design
@@ -23,11 +23,40 @@ Core API Backend (asr-llm-core, private)
 ## Key Components
 
 ### Frontend
-- Presentation layer with V0-generated components
-- Business logic in features/ and lib/
-- Internationalization with next-intl (sl/en)
 
-### Wrapper Backend
+**Framework & Styling:**
+- Next.js 15 with App Router
+- Tailwind CSS v4
+- shadcn/ui components (Vega/Nova style)
+- Lucide React icons
+
+**Structure:**
+```
+frontend/src/
+├── app/                    # Next.js routes
+│   ├── page.tsx           # Landing page
+│   ├── demo/page.tsx      # Demo page
+│   └── api-docs/page.tsx  # API documentation
+├── components/            # V0-generated, presentation only
+│   ├── demo/             # Demo page components
+│   ├── waitlist/         # Waitlist flow components
+│   └── ui/               # shadcn/ui base components
+├── hooks/                # Custom React hooks
+│   ├── useTranscription.ts
+│   ├── useAudioPlayer.ts
+│   ├── useFeedback.ts
+│   ├── useDiff.ts
+│   └── useSyncScroll.ts
+└── lib/                  # Utilities
+```
+
+**Testing Infrastructure:**
+- **Unit tests:** Vitest + React Testing Library
+- **Component dev:** Storybook 8
+- **E2E tests:** Playwright (Chromium)
+- **CI:** GitHub Actions on PR
+
+### Wrapper Backend (Not Yet Implemented)
 - Session management with SQLite
 - Rate limiting (configurable)
 - Proxies requests to Core API
@@ -45,3 +74,14 @@ Core API Backend (asr-llm-core, private)
 3. Wrapper creates anonymous user in Core API
 4. Core API processes transcription
 5. Results displayed with side-by-side comparison
+
+## Testing & CI
+
+| Layer     | Tool         | Command            | Runs in CI |
+| --------- | ------------ | ------------------ | ---------- |
+| Lint      | ESLint       | `npm run lint`     | Yes        |
+| Unit      | Vitest + RTL | `npm run test:run` | Yes        |
+| Component | Storybook    | `npm run storybook`| Yes (build)|
+| E2E       | Playwright   | `npm run test:e2e` | Yes        |
+
+CI runs on every PR via GitHub Actions (`.github/workflows/pr-tests.yml`).
