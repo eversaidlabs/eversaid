@@ -14,7 +14,7 @@ services:
       - "8001:8001"
     environment:
       BACKBONE_URL: http://host.docker.internal:8000
-      DEMO_USER_EMAIL: demo@smart-transcribe.local
+      DEMO_USER_EMAIL: demo@eversaid.local
       DEMO_USER_PASSWORD: ${DEMO_PASSWORD}
       # Rate limits (configurable)
       RATE_LIMIT_HOUR: 5

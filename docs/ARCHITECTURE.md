@@ -2,7 +2,7 @@
 
 ## Overview
 
-Smart Transcribe is a monorepo containing:
+Eversaid is a monorepo containing:
 
 - **frontend/** - Next.js 15 with App Router
 - **backend/** - FastAPI wrapper backend

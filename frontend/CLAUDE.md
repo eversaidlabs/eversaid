@@ -1,4 +1,4 @@
-# Smart Transcribe - Frontend
+# Eversaid - Frontend
 
 ## V0 Prototype URLs
 - Landing page: [paste after creating]
