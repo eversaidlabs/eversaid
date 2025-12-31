@@ -11,6 +11,7 @@ import { TranscriptComparisonLayout } from "@/components/demo/transcript-compari
 import { AudioPlayer } from "@/components/demo/audio-player"
 import type { Segment, HistoryEntry, SpellcheckError, TextMoveSelection } from "@/components/demo/types"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { useTranscription } from "@/features/transcription/useTranscription"
 
 // Mock spellcheck - in production, call a Slovenian spellcheck API
 const checkSpelling = (text: string): SpellcheckError[] => {
@@ -40,101 +41,11 @@ const checkSpelling = (text: string): SpellcheckError[] => {
   return mockErrors
 }
 
-const mockSegmentsSingleSpeaker: Segment[] = [
-  {
-    id: "seg-1",
-    speaker: 1,
-    time: "0:00 – 3:28",
-    rawText:
-      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page. Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need. That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project. Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline. Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas? Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean. Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that. Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
-    cleanedText:
-      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page. I think we should probably start with the research phase first and then move on to the design work after we have all the data we need. That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project. That's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline. What about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas? I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed. Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that. I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
-    originalRawText:
-      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page. Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need. That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project. Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline. Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas? Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean. Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that. Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
-    paragraphs: [
-      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
-      "I think we should probably start with the research phase first and then move on to the design work after we have all the data we need. That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
-      "That's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
-      "What about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
-      "I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
-      "Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that.",
-      "I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
-    ],
-  },
-]
-
-const mockSegmentsMultiSpeaker: Segment[] = [
-  {
-    id: "seg-1",
-    speaker: 1,
-    time: "0:00 – 0:18",
-    rawText:
-      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
-    cleanedText:
-      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
-    originalRawText:
-      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
-  },
-  {
-    id: "seg-2",
-    speaker: 2,
-    time: "0:19 – 0:42",
-    rawText:
-      "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
-    cleanedText:
-      "Yes, I think we should probably start with the research phase first and then move on to the design work after we have all the data we need.",
-    originalRawText:
-      "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
-  },
-  {
-    id: "seg-3",
-    speaker: 1,
-    time: "0:43 – 1:05",
-    rawText:
-      "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
-    cleanedText:
-      "That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
-    originalRawText:
-      "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
-  },
-  {
-    id: "seg-4",
-    speaker: 2,
-    time: "1:06 – 1:28",
-    rawText:
-      "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
-    cleanedText:
-      "That's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
-    originalRawText:
-      "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
-  },
-  {
-    id: "seg-5",
-    speaker: 1,
-    time: "1:29 – 2:15",
-    rawText:
-      "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
-    cleanedText:
-      "What about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
-    originalRawText:
-      "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
-  },
-  {
-    id: "seg-6",
-    speaker: 2,
-    time: "2:16 – 3:28",
-    rawText:
-      "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
-    cleanedText:
-      "I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
-    originalRawText:
-      "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
-  },
-]
-
 export default function DemoPage() {
+  // Transcription hook
+  const transcription = useTranscription({ mockMode: false })
+
   // UI State
-  const [uiState, setUiState] = useState<"empty" | "upload" | "complete">("complete")
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null)
 
   // Audio Player State
@@ -146,8 +57,6 @@ export default function DemoPage() {
   // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedSpeakerCount, setSelectedSpeakerCount] = useState(2)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
 
   // Editing State
   const [editingSegmentId, setEditingSegmentId] = useState<string | null>(null)
@@ -174,19 +83,6 @@ export default function DemoPage() {
   // Feedback State
   const [rating, setRating] = useState(0)
   const [feedback, setFeedback] = useState("")
-
-  // Single Speaker Mode State
-  const [isSingleSpeaker, setIsSingleSpeaker] = useState(false)
-
-  const [segments, setSegments] = useState<Segment[]>(mockSegmentsMultiSpeaker)
-
-  useEffect(() => {
-    console.log("[v0] Segments changed:", segments.length, "segments")
-    console.log(
-      "[v0] Segment IDs:",
-      segments.map((s) => s.id),
-    )
-  }, [segments])
 
   // History entries
   const [historyEntries] = useState<HistoryEntry[]>([
@@ -272,7 +168,7 @@ export default function DemoPage() {
   // Sync segment heights
   useEffect(() => {
     const syncHeights = () => {
-      segments.forEach((seg) => {
+      transcription.segments.forEach((seg) => {
         const rawSegment = document.querySelector(`[data-segment-id="${seg.id}"]`) as HTMLElement
         const cleanedSegments = document.querySelectorAll(`[data-segment-id="${seg.id}"]`) as NodeListOf<HTMLElement>
 
@@ -291,39 +187,36 @@ export default function DemoPage() {
     syncHeights()
     window.addEventListener("resize", syncHeights)
     return () => window.removeEventListener("resize", syncHeights)
-  }, [segments, showDiff])
+  }, [transcription.segments, showDiff])
 
   // Segment Handlers
   const handleRevertSegment = useCallback(
-    (segmentId: string) => {
-      const segment = segments.find((s) => s.id === segmentId)
-      if (segment) {
-        setRevertedSegments((prev) => new Map(prev).set(segmentId, segment.cleanedText))
-        setSegments((prev) => prev.map((seg) => (seg.id === segmentId ? { ...seg, cleanedText: seg.rawText } : seg)))
+    async (segmentId: string) => {
+      const originalCleaned = await transcription.revertSegmentToRaw(segmentId)
+      if (originalCleaned) {
+        setRevertedSegments((prev) => new Map(prev).set(segmentId, originalCleaned))
       }
     },
-    [segments],
+    [transcription],
   )
 
   const handleUndoRevert = useCallback((segmentId: string) => {
-    setRevertedSegments((prev) => {
-      const originalCleanedText = prev.get(segmentId)
-      if (originalCleanedText) {
-        setSegments((prevSegs) =>
-          prevSegs.map((seg) => (seg.id === segmentId ? { ...seg, cleanedText: originalCleanedText } : seg)),
-        )
-      }
-      const newMap = new Map(prev)
-      newMap.delete(segmentId)
-      return newMap
-    })
-  }, [])
+    const originalCleanedText = revertedSegments.get(segmentId)
+    if (originalCleanedText) {
+      transcription.undoRevert(segmentId, originalCleanedText)
+      setRevertedSegments((prev) => {
+        const newMap = new Map(prev)
+        newMap.delete(segmentId)
+        return newMap
+      })
+    }
+  }, [revertedSegments, transcription])
 
   const handleSaveSegment = useCallback(
-    (segmentId: string) => {
+    async (segmentId: string) => {
       const newText = editedTexts.get(segmentId)
       if (newText !== undefined) {
-        setSegments((prev) => prev.map((seg) => (seg.id === segmentId ? { ...seg, cleanedText: newText } : seg)))
+        await transcription.updateSegmentCleanedText(segmentId, newText)
       }
       setEditingSegmentId(null)
       setEditedTexts((prev) => {
@@ -337,12 +230,12 @@ export default function DemoPage() {
         return newMap
       })
     },
-    [editedTexts],
+    [editedTexts, transcription],
   )
 
   const handleSegmentEditStart = useCallback(
     (segmentId: string) => {
-      const segment = segments.find((s) => s.id === segmentId)
+      const segment = transcription.segments.find((s) => s.id === segmentId)
       if (segment) {
         setEditingSegmentId(segmentId)
         if (!editedTexts.has(segmentId)) {
@@ -350,7 +243,7 @@ export default function DemoPage() {
         }
       }
     },
-    [segments, editedTexts],
+    [transcription.segments, editedTexts],
   )
 
   const handleSegmentEditCancel = useCallback((segmentId: string) => {
@@ -400,13 +293,14 @@ export default function DemoPage() {
     setActiveSuggestion(null)
   }, [])
 
-  const handleUpdateAllSegments = useCallback(() => {
-    editedTexts.forEach((text, segmentId) => {
-      setSegments((prev) => prev.map((seg) => (seg.id === segmentId ? { ...seg, cleanedText: text } : seg)))
-    })
+  const handleUpdateAllSegments = useCallback(async () => {
+    // Save all edited texts to API
+    for (const [segmentId, text] of editedTexts.entries()) {
+      await transcription.updateSegmentCleanedText(segmentId, text)
+    }
     setEditingSegmentId(null)
     setEditedTexts(new Map())
-  }, [editedTexts])
+  }, [editedTexts, transcription])
 
   const handleToggleDiff = useCallback(() => {
     setShowDiff((prev) => !prev)
@@ -459,31 +353,9 @@ export default function DemoPage() {
 
   const handleRawMoveTargetClick = useCallback(
     (targetSegmentId: string) => {
-      if (!textMoveSelection || textMoveSelection.sourceColumn !== "raw") return
-
-      const sourceId = textMoveSelection.sourceSegmentId
-      const selectedText = textMoveSelection.text
-
-      setSegments((prev) => {
-        return prev.map((seg) => {
-          if (seg.id === sourceId) {
-            // Remove text from source
-            const currentText = seg.rawText
-            const newText = currentText.replace(selectedText, "").replace(/\s+/g, " ").trim()
-            return { ...seg, rawText: newText }
-          }
-          if (seg.id === targetSegmentId) {
-            const trimmedSelected = selectedText.trim()
-            const currentText = seg.rawText.trim()
-            const startsWithPunctuation = /^[,.!?;:]/.test(trimmedSelected)
-            const separator = startsWithPunctuation ? "" : " "
-            const newText = currentText ? `${currentText}${separator}${trimmedSelected}` : trimmedSelected
-            return { ...seg, rawText: newText }
-          }
-          return seg
-        })
-      })
-
+      // TODO: Text move feature needs API support for moving text between segments
+      // For now, this feature is disabled until API endpoint is available
+      console.warn("Text move feature not yet implemented with API")
       setTextMoveSelection(null)
       setIsSelectingMoveTarget(false)
       window.getSelection()?.removeAllRanges()
@@ -493,31 +365,9 @@ export default function DemoPage() {
 
   const handleCleanedMoveTargetClick = useCallback(
     (targetSegmentId: string) => {
-      if (!textMoveSelection || textMoveSelection.sourceColumn !== "cleaned") return
-
-      const sourceId = textMoveSelection.sourceSegmentId
-      const selectedText = textMoveSelection.text
-
-      setSegments((prev) => {
-        return prev.map((seg) => {
-          if (seg.id === sourceId) {
-            // Remove text from source
-            const currentText = seg.cleanedText
-            const newText = currentText.replace(selectedText, "").replace(/\s+/g, " ").trim()
-            return { ...seg, cleanedText: newText }
-          }
-          if (seg.id === targetSegmentId) {
-            const trimmedSelected = selectedText.trim()
-            const currentText = seg.cleanedText.trim()
-            const startsWithPunctuation = /^[,.!?;:]/.test(trimmedSelected)
-            const separator = startsWithPunctuation ? "" : " "
-            const newText = currentText ? `${currentText}${separator}${trimmedSelected}` : trimmedSelected
-            return { ...seg, cleanedText: newText }
-          }
-          return seg
-        })
-      })
-
+      // TODO: Text move feature needs API support for moving text between segments
+      // For now, this feature is disabled until API endpoint is available
+      console.warn("Text move feature not yet implemented with API")
       setTextMoveSelection(null)
       setIsSelectingMoveTarget(false)
       window.getSelection()?.removeAllRanges()
@@ -532,25 +382,19 @@ export default function DemoPage() {
 
   const handleSpeakerCountChange = useCallback((count: number) => {
     setSelectedSpeakerCount(count)
-    setIsSingleSpeaker(count === 1)
-    setSegments(count === 1 ? [...mockSegmentsSingleSpeaker] : [...mockSegmentsMultiSpeaker])
+    // Speaker count will be used on next upload
+    // No segment switching - real data comes from API
   }, [])
 
-  const handleTranscribeClick = useCallback(() => {
+  const handleTranscribeClick = useCallback(async () => {
     if (!selectedFile) return
-    setIsUploading(true)
-    // Simulate upload progress
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 10
-      setUploadProgress(progress)
-      if (progress >= 100) {
-        clearInterval(interval)
-        setIsUploading(false)
-        setUiState("complete")
-      }
-    }, 200)
-  }, [selectedFile])
+    try {
+      await transcription.uploadAudio(selectedFile, selectedSpeakerCount)
+    } catch (err) {
+      // Error is captured in transcription.error
+      console.error('Upload failed:', err)
+    }
+  }, [selectedFile, selectedSpeakerCount, transcription])
 
   // Feedback Handlers
   const handleRatingChange = useCallback((newRating: number) => {
@@ -607,14 +451,14 @@ export default function DemoPage() {
   }, [])
 
   const editingCount = Array.from(editedTexts.entries()).filter(([id, text]) => {
-    const segment = segments.find((s) => s.id === id)
+    const segment = transcription.segments.find((s) => s.id === id)
     return segment && text !== segment.cleanedText
   }).length
 
   const showSpeakerLabels = useMemo(() => {
-    const uniqueSpeakers = new Set(segments.map((seg) => seg.speaker))
+    const uniqueSpeakers = new Set(transcription.segments.map((seg) => seg.speaker))
     return uniqueSpeakers.size > 1
-  }, [segments])
+  }, [transcription.segments])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
@@ -633,39 +477,6 @@ export default function DemoPage() {
               <span className="text-sm font-semibold text-[#64748B]">15/20</span>
               <span className="text-xs text-[#94A3B8] ml-1">daily</span>
             </div>
-          </div>
-        </div>
-        <div className="mt-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <label htmlFor="speaker-mode" className="text-sm text-muted-foreground">
-              Demo mode:
-            </label>
-            <button
-              onClick={() => {
-                setIsSingleSpeaker(false)
-                setSegments([...mockSegmentsMultiSpeaker])
-              }}
-              className={`px-3 py-1 rounded text-sm transition-colors ${
-                !isSingleSpeaker
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Multi-Speaker
-            </button>
-            <button
-              onClick={() => {
-                setIsSingleSpeaker(true)
-                setSegments([...mockSegmentsSingleSpeaker])
-              }}
-              className={`px-3 py-1 rounded text-sm transition-colors ${
-                isSingleSpeaker
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Single Speaker
-            </button>
           </div>
         </div>
       </div>
@@ -687,7 +498,7 @@ export default function DemoPage() {
 
           {/* Transcript comparison directly below */}
           <TranscriptComparisonLayout
-            segments={segments}
+            segments={transcription.segments}
             activeSegmentId={activeSegmentId}
             editingSegmentId={editingSegmentId}
             editedTexts={editedTexts}
