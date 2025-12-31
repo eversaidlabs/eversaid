@@ -10,7 +10,7 @@ test.describe("Demo Page", () => {
     await expect(page.getByRole("heading", { name: "Try eversaid" })).toBeVisible()
 
     // Audio player - target by the play icon container (button with Play/Pause icon)
-    await expect(page.locator("button").filter({ has: page.locator("svg.fill-white") }).first()).toBeVisible()
+    await expect(page.locator("button").filter({ has: page.locator("svg[class*='fill-white']") }).first()).toBeVisible()
 
     // Transcript sections visible
     await expect(page.getByText("Raw Transcription")).toBeVisible()
@@ -22,7 +22,7 @@ test.describe("Demo Page", () => {
 
   test("audio player controls work", async ({ page }) => {
     // Find play button by the gradient background container
-    const playButton = page.locator("button").filter({ has: page.locator("svg.fill-white") }).first()
+    const playButton = page.locator("button").filter({ has: page.locator("svg[class*='fill-white']") }).first()
 
     await expect(playButton).toBeVisible()
     await playButton.click()

@@ -11,6 +11,7 @@ export default function HomePage() {
   const [waitlistType, setWaitlistType] = useState<"extended_usage" | "api_access">("extended_usage")
   const [waitlistEmail, setWaitlistEmail] = useState("")
   const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
+  const [waitlistCopied, setWaitlistCopied] = useState(false)
 
   const handleWaitlistClick = useCallback((type: "extended_usage" | "api_access") => {
     setWaitlistType(type)
@@ -32,6 +33,7 @@ export default function HomePage() {
     setWaitlistState("hidden")
     setWaitlistEmail("")
     setWaitlistReferralCode("")
+    setWaitlistCopied(false)
   }, [])
 
   const handleWaitlistCopyCode = useCallback(() => {
@@ -41,6 +43,8 @@ export default function HomePage() {
   const handleWaitlistCopyLink = useCallback(() => {
     const referralLink = `https://eversaid.com?ref=${waitlistReferralCode}`
     navigator.clipboard.writeText(referralLink)
+    setWaitlistCopied(true)
+    setTimeout(() => setWaitlistCopied(false), 2000)
   }, [waitlistReferralCode])
 
   return (
@@ -473,6 +477,7 @@ export default function HomePage() {
         type={waitlistType}
         email={waitlistEmail}
         referralCode={waitlistReferralCode}
+        copied={waitlistCopied}
         onEmailChange={handleWaitlistEmailChange}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
