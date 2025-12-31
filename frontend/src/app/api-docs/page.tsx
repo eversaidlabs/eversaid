@@ -96,8 +96,7 @@ export default function ApiDocsPage() {
         onClose={() => setWaitlistState("hidden")}
         onEmailChange={setWaitlistEmail}
         onSubmit={handleWaitlistSubmit}
-        onCopyCode={() => navigator.clipboard.writeText(waitlistReferralCode)}
-        onCopyLink={() => navigator.clipboard.writeText(`https://eversaid.com?ref=${waitlistReferralCode}`)}
+        onToastAction={() => setWaitlistState("form")}
       />
 
       {/* Navigation */}

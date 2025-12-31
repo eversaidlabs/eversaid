@@ -608,13 +608,7 @@ export default function DemoPage() {
 
                 {/* Transcript Content */}
                 <div className="grid grid-cols-2 h-[600px] bg-white">
-                  <RawSegmentList
-                    ref={rawScrollRef}
-                    segments={segments}
-                    activeSegmentId={activeSegmentId}
-                    onSegmentClick={setActiveSegmentId}
-                    onScroll={handleRawScroll}
-                  />
+                  <RawSegmentList ref={rawScrollRef} segments={segments} onScroll={handleRawScroll} />
                   <EditableSegmentList
                     ref={cleanedScrollRef}
                     segments={segments}

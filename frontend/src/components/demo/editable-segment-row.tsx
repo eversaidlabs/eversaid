@@ -92,9 +92,6 @@ export function EditableSegmentRow({
   }
 
   const renderContent = () => {
-    if (isEditing) {
-      return renderTextWithSpellcheck()
-    }
     if (showDiff && !isReverted) {
       return <DiffSegmentDisplay rawText={rawText} cleanedText={text} showDiff={showDiff} />
     }
@@ -166,17 +163,21 @@ export function EditableSegmentRow({
             )}
           </div>
         </div>
-        <div
-          className={`text-[15px] leading-[1.7] text-[#334155] ${
-            isEditing ? "outline-none p-2 -m-2 rounded border-2 border-[#38BDF8] bg-white" : ""
-          }`}
-          contentEditable={isEditing}
-          suppressContentEditableWarning
-          onDoubleClick={onEditStart}
-          onInput={(e) => onTextChange(e.currentTarget.textContent || "")}
-        >
-          {renderContent()}
-        </div>
+
+        {isEditing ? (
+          <textarea
+            value={editedText}
+            onChange={(e) => onTextChange(e.target.value)}
+            onDoubleClick={onEditStart}
+            className="w-full text-[15px] leading-[1.7] text-[#334155] p-2 rounded border-2 border-[#38BDF8] bg-white font-inherit resize-none focus:outline-none focus:ring-0"
+            style={{ fontFamily: "inherit" }}
+          />
+        ) : (
+          <div className="text-[15px] leading-[1.7] text-[#334155]" onDoubleClick={onEditStart}>
+            {renderContent()}
+          </div>
+        )}
+
         {!isEditing && (
           <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
             <div className="absolute top-2 right-2 bg-[#0F172A] text-white text-[10px] px-2 py-1 rounded font-medium">
