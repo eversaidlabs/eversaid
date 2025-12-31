@@ -42,7 +42,7 @@ describe('useTranscription', () => {
 
     it('initializes with custom segments', () => {
       const customSegments: Segment[] = [
-        { id: 'custom-1', speaker: 1, time: '0:00 – 0:10', rawText: 'raw', cleanedText: 'clean' },
+        { id: 'custom-1', speaker: 1, time: '0:00 – 0:10', rawText: 'raw', cleanedText: 'clean', originalRawText: 'raw' },
       ]
 
       const { result } = renderHook(() =>
@@ -497,7 +497,7 @@ describe('useTranscription', () => {
       })
 
       const customSegments: Segment[] = [
-        { id: 'seg-1', speaker: 1, time: '0:00 – 0:10', rawText: 'raw', cleanedText: 'clean' },
+        { id: 'seg-1', speaker: 1, time: '0:00 – 0:10', rawText: 'raw', cleanedText: 'clean', originalRawText: 'raw' },
       ]
 
       const { result } = renderHook(() =>

@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { useMemo, useEffect, useRef, useState, useCallback } from "react"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
 import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
@@ -161,7 +162,7 @@ export interface LiveTranscriptPreviewProps {
   onSegmentEditStart?: (segmentId: string) => void
   onSegmentEditCancel?: (segmentId: string) => void
   onTextChange?: (segmentId: string, text: string) => void
-  onWordClick?: (segmentId: string, word: string, errors: string[]) => void
+  onWordClick?: (segmentId: string, e: React.MouseEvent, error: SpellcheckError) => void
   onSuggestionSelect?: () => void
   onCloseSuggestions?: () => void
   onUpdateAllSegments?: () => void
@@ -349,8 +350,8 @@ export function LiveTranscriptPreview({
   )
 
   const handleWordClick = useCallback(
-    (segmentId: string, word: string, errors: string[]) => {
-      onWordClick?.(segmentId, word, errors)
+    (segmentId: string, e: React.MouseEvent, error: SpellcheckError) => {
+      onWordClick?.(segmentId, e, error)
     },
     [onWordClick],
   )

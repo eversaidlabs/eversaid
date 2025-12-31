@@ -4,8 +4,8 @@ import { useSyncScroll } from './useSyncScroll'
 import type { Segment } from '@/components/demo/types'
 
 const mockSegments: Segment[] = [
-  { id: 'seg-1', speaker: 1, time: '0:00 – 0:18', rawText: 'raw1', cleanedText: 'clean1' },
-  { id: 'seg-2', speaker: 2, time: '0:19 – 0:42', rawText: 'raw2', cleanedText: 'clean2' },
+  { id: 'seg-1', speaker: 1, time: '0:00 – 0:18', rawText: 'raw1', cleanedText: 'clean1', originalRawText: 'raw1' },
+  { id: 'seg-2', speaker: 2, time: '0:19 – 0:42', rawText: 'raw2', cleanedText: 'clean2', originalRawText: 'raw2' },
 ]
 
 describe('useSyncScroll', () => {

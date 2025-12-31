@@ -11,6 +11,7 @@ export interface Segment {
   time: string
   rawText: string
   cleanedText: string
+  originalRawText: string // Immutable original raw text for revert functionality
   paragraphs?: string[] // Optional array of paragraphs for cleaned text
 }
 

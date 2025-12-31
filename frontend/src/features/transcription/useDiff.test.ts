@@ -10,6 +10,7 @@ const mockSegments: Segment[] = [
     time: '0:00 – 0:18',
     rawText: 'Um hello world',
     cleanedText: 'Hello world',
+    originalRawText: 'Um hello world',
   },
   {
     id: 'seg-2',
@@ -17,6 +18,7 @@ const mockSegments: Segment[] = [
     time: '0:19 – 0:42',
     rawText: 'So basically uh we need',
     cleanedText: 'So basically we need',
+    originalRawText: 'So basically uh we need',
   },
 ]
 
@@ -91,6 +93,7 @@ describe('useDiff', () => {
         time: '0:43 – 1:05',
         rawText: 'New segment',
         cleanedText: 'New segment',
+        originalRawText: 'New segment',
       },
     ]
 

@@ -18,6 +18,7 @@ export interface WaitlistFlowProps {
   onSourceChange?: (source: string) => void
   onSubmit: () => void
   onClose: () => void
+  onOpenForm?: () => void
   onCopyCode?: () => void
   onCopyLink?: () => void
 }
@@ -38,6 +39,7 @@ export function WaitlistFlow({
   onSourceChange,
   onSubmit,
   onClose,
+  onOpenForm,
   onCopyCode,
   onCopyLink,
 }: WaitlistFlowProps) {

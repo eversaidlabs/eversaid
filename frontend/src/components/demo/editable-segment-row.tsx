@@ -12,6 +12,7 @@ export interface EditableSegmentRowProps {
   time: string
   text: string
   rawText: string
+  originalRawText: string
   paragraphs?: string[]
   isActive: boolean
   isReverted: boolean
@@ -49,6 +50,7 @@ export function EditableSegmentRow({
   time,
   text,
   rawText,
+  originalRawText,
   paragraphs,
   isActive,
   isReverted,

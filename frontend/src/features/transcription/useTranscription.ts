@@ -38,6 +38,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
     cleanedText:
       "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
+    originalRawText:
+      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
   },
   {
     id: "seg-2",
@@ -47,6 +49,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
     cleanedText:
       "Yes, I think we should probably start with the research phase first and then move on to the design work after we have all the data we need.",
+    originalRawText:
+      "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
   },
   {
     id: "seg-3",
@@ -56,6 +60,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
     cleanedText:
       "That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
+    originalRawText:
+      "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
   },
   {
     id: "seg-4",
@@ -65,6 +71,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
     cleanedText:
       "Sure, that's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
+    originalRawText:
+      "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
   },
   {
     id: "seg-5",
@@ -74,6 +82,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
     cleanedText:
       "Right, and what about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
+    originalRawText:
+      "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
   },
   {
     id: "seg-6",
@@ -83,6 +93,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
     cleanedText:
       "Well, I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
+    originalRawText:
+      "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
   },
   {
     id: "seg-7",
@@ -92,6 +104,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that.",
     cleanedText:
       "Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that.",
+    originalRawText:
+      "Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that.",
   },
   {
     id: "seg-8",
@@ -101,6 +115,8 @@ const MOCK_SEGMENTS: Segment[] = [
       "Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
     cleanedText:
       "Sounds good. I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
+    originalRawText:
+      "Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
   },
 ]
 
@@ -228,6 +244,7 @@ function transformApiSegments(
       time: timeStr,
       rawText: rawSeg.text,
       cleanedText: cleanedSeg?.text || rawSeg.text,
+      originalRawText: rawSeg.text, // Store immutable original raw text
     }
   })
 }
