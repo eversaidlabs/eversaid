@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { Shield, Play } from "lucide-react"
+import { Shield } from "lucide-react"
 import { useState, useCallback } from "react"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { LiveTranscriptPreview } from "@/components/landing/live-transcript-preview"
 
 export default function HomePage() {
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
@@ -158,110 +159,7 @@ export default function HomePage() {
             Every edit visible. Every word verifiable.
           </h2>
 
-          <div className="bg-white rounded-3xl overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.08)] border border-[#E2E8F0]">
-            {/* Mockup Header */}
-            <div className="bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_100%)] text-white px-6 py-4 flex justify-between items-center text-sm">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
-                <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
-                <div className="w-3 h-3 rounded-full bg-[#10B981]" />
-              </div>
-              <span className="flex items-center gap-2">
-                <Play className="w-4 h-4" /> 0:00 / 2:34
-              </span>
-            </div>
-
-            {/* Mockup Content */}
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              {/* Raw Transcript */}
-              <div className="p-8 border-r border-[#E2E8F0]">
-                <div className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-6">Raw Transcript</div>
-                <div className="space-y-4">
-                  <div className="p-5 rounded-xl bg-[#F8FAFC] border-l-4 border-[#38BDF8]">
-                    <div className="text-xs font-bold text-[#0284C7] mb-2.5 flex items-center gap-2">
-                      Speaker 1 · 0:00
-                    </div>
-                    <div className="text-[15px] leading-[1.7]">
-                      Uh so basically what we're trying to do here is um figure out the best approach for the the
-                      project timeline.
-                    </div>
-                  </div>
-                  <div className="p-5 rounded-xl bg-[#F8FAFC] border-l-4 border-[#A855F7]">
-                    <div className="text-xs font-bold text-[#7C3AED] mb-2.5 flex items-center gap-2">
-                      Speaker 2 · 0:08
-                    </div>
-                    <div className="text-[15px] leading-[1.7]">
-                      Yeah I think we should we should probably start with the the research phase first you know.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cleaned Transcript */}
-              <div className="p-8 bg-[linear-gradient(180deg,rgba(56,189,248,0.03)_0%,transparent_100%)]">
-                <div className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-6">
-                  Cleaned Transcript
-                </div>
-                <div className="space-y-4">
-                  <div className="p-5 rounded-xl bg-[#F8FAFC] border-l-4 border-[#38BDF8]">
-                    <div className="text-xs font-bold text-[#0284C7] mb-2.5 flex items-center gap-2">
-                      Speaker 1 · 0:00
-                    </div>
-                    <div className="text-[15px] leading-[1.7]">
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        Uh so
-                      </span>{" "}
-                      <span className="bg-[linear-gradient(135deg,#DCFCE7_0%,#BBF7D0_100%)] text-[#166534] px-1.5 py-0.5 rounded font-medium">
-                        So
-                      </span>{" "}
-                      basically what we're trying to do here is{" "}
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        um
-                      </span>{" "}
-                      figure out the best approach for{" "}
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        the the
-                      </span>{" "}
-                      <span className="bg-[linear-gradient(135deg,#DCFCE7_0%,#BBF7D0_100%)] text-[#166534] px-1.5 py-0.5 rounded font-medium">
-                        the
-                      </span>{" "}
-                      project timeline.
-                    </div>
-                  </div>
-                  <div className="p-5 rounded-xl bg-[#F8FAFC] border-l-4 border-[#A855F7]">
-                    <div className="text-xs font-bold text-[#7C3AED] mb-2.5 flex items-center gap-2">
-                      Speaker 2 · 0:08
-                    </div>
-                    <div className="text-[15px] leading-[1.7]">
-                      <span className="bg-[linear-gradient(135deg,#DCFCE7_0%,#BBF7D0_100%)] text-[#166534] px-1.5 py-0.5 rounded font-medium">
-                        Yes,
-                      </span>{" "}
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        Yeah
-                      </span>{" "}
-                      I think we should{" "}
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        we should
-                      </span>{" "}
-                      probably start with{" "}
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        the the
-                      </span>{" "}
-                      <span className="bg-[linear-gradient(135deg,#DCFCE7_0%,#BBF7D0_100%)] text-[#166534] px-1.5 py-0.5 rounded font-medium">
-                        the
-                      </span>{" "}
-                      research phase first
-                      <span className="bg-[#FEE2E2] text-[#991B1B] line-through px-1.5 py-0.5 rounded opacity-70">
-                        {" "}
-                        you know
-                      </span>
-                      .
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <LiveTranscriptPreview />
         </div>
       </section>
 

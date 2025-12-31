@@ -1,58 +1,46 @@
 "use client"
 
-import { useState } from "react"
 import { X, UserPlus, Check, Copy, Upload, Info, AlertCircle } from "lucide-react"
-
-export interface WaitlistFormData {
-  useCase: string
-  volume: string
-  source: string
-}
 
 export interface WaitlistFlowProps {
   state: "hidden" | "toast" | "form" | "success"
   type: "extended_usage" | "api_access"
   email: string
+  useCase: string
+  volume: string
+  source: string
+  isSubmitting: boolean
+  copied: boolean
   referralCode: string
-  isSubmitting?: boolean
-  error?: string | null
   onEmailChange: (email: string) => void
-  onSubmit: (data: WaitlistFormData) => void
+  onUseCaseChange: (useCase: string) => void
+  onVolumeChange: (volume: string) => void
+  onSourceChange: (source: string) => void
+  onSubmit: () => void
   onClose: () => void
   onCopyCode: () => void
   onCopyLink: () => void
-  onOpenForm?: () => void
 }
 
 export function WaitlistFlow({
   state,
   type,
   email,
+  useCase,
+  volume,
+  source,
+  isSubmitting,
+  copied,
   referralCode,
-  isSubmitting = false,
-  error,
   onEmailChange,
+  onUseCaseChange,
+  onVolumeChange,
+  onSourceChange,
   onSubmit,
   onClose,
   onCopyCode,
   onCopyLink,
-  onOpenForm,
 }: WaitlistFlowProps) {
-  const [useCase, setUseCase] = useState("")
-  const [volume, setVolume] = useState("")
-  const [source, setSource] = useState("")
-  const [copied, setCopied] = useState(false)
-
-  const handleSubmit = () => {
-    onSubmit({ useCase, volume, source })
-  }
-
-  const handleCopyLink = () => {
-    onCopyLink()
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   const referralLink = `https://eversaid.com?ref=${referralCode}`
 
   const isExtendedUsage = type === "extended_usage"
@@ -86,7 +74,7 @@ export function WaitlistFlow({
             Later
           </button>
           <button
-            onClick={onOpenForm}
+            onClick={() => {}}
             className="flex-1 md:flex-none px-4 py-2.5 bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] hover:shadow-[0_4px_12px_rgba(56,189,248,0.3)] hover:-translate-y-px text-white rounded-[10px] text-[13px] font-semibold transition-all"
           >
             Join Waitlist
@@ -138,7 +126,7 @@ export function WaitlistFlow({
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
-                  handleSubmit()
+                  onSubmit()
                 }}
               >
                 {/* Email Field */}
@@ -164,7 +152,7 @@ export function WaitlistFlow({
                   />
                 </div>
 
-                {/* Use Case Field */}
+                {/* Use Case Field - now uses prop value and callback */}
                 <div className="mb-5">
                   <label
                     htmlFor="waitlist-usecase"
@@ -180,7 +168,7 @@ export function WaitlistFlow({
                     required
                     aria-required="true"
                     value={useCase}
-                    onChange={(e) => setUseCase(e.target.value)}
+                    onChange={(e) => onUseCaseChange(e.target.value)}
                     placeholder={
                       isApiAccess
                         ? "e.g., Voice journal app, meeting notes automation"
@@ -193,7 +181,7 @@ export function WaitlistFlow({
                   </div>
                 </div>
 
-                {/* Volume Field (API Access Only) */}
+                {/* Volume Field (API Access Only) - now uses prop value and callback */}
                 {isApiAccess && (
                   <div className="mb-5">
                     <label
@@ -206,7 +194,7 @@ export function WaitlistFlow({
                     <select
                       id="waitlist-volume"
                       value={volume}
-                      onChange={(e) => setVolume(e.target.value)}
+                      onChange={(e) => onVolumeChange(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)]"
                     >
                       <option value="">Select volume</option>
@@ -218,7 +206,7 @@ export function WaitlistFlow({
                   </div>
                 )}
 
-                {/* Source Field */}
+                {/* Source Field - now uses prop value and callback */}
                 <div className="mb-5">
                   <label
                     htmlFor="waitlist-source"
@@ -231,20 +219,13 @@ export function WaitlistFlow({
                     type="text"
                     id="waitlist-source"
                     value={source}
-                    onChange={(e) => setSource(e.target.value)}
+                    onChange={(e) => onSourceChange(e.target.value)}
                     placeholder="e.g., Twitter, friend, search"
                     className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)] placeholder:text-[#94A3B8]"
                   />
                 </div>
 
-                {/* Error Message */}
-                {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600">
-                    {error}
-                  </div>
-                )}
-
-                {/* Submit Button */}
+                {/* Submit Button - uses isSubmitting prop */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -303,7 +284,7 @@ export function WaitlistFlow({
                     className="flex-1 px-3.5 py-2.5 bg-white border border-[#E2E8F0] rounded-[10px] text-[13px] font-mono text-[#0F172A] min-w-0"
                   />
                   <button
-                    onClick={handleCopyLink}
+                    onClick={onCopyLink}
                     aria-label="Copy referral link to clipboard"
                     className="px-4 py-2.5 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
                   >

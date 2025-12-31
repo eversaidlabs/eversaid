@@ -4,7 +4,7 @@ import type React from "react"
 import { forwardRef } from "react"
 import { Check } from "lucide-react"
 import { EditableSegmentRow } from "./editable-segment-row"
-import type { SpellcheckError } from "./types"
+import type { SpellcheckError, TextMoveSelection } from "./types"
 
 export interface EditableSegmentListProps {
   segments: Array<{
@@ -13,6 +13,7 @@ export interface EditableSegmentListProps {
     time: string
     rawText: string
     cleanedText: string
+    paragraphs?: string[]
   }>
   activeSegmentId: string | null
   editingSegmentId: string | null
@@ -20,6 +21,10 @@ export interface EditableSegmentListProps {
   revertedSegments: Map<string, string>
   spellcheckErrors: Map<string, SpellcheckError[]>
   showDiff: boolean
+  showSpeakerLabels?: boolean
+  showRevertButton?: boolean
+  textMoveSelection: TextMoveSelection | null
+  isSelectingMoveTarget: boolean
   activeSuggestion: {
     segmentId: string
     word: string
@@ -37,6 +42,8 @@ export interface EditableSegmentListProps {
   onCloseSuggestions: () => void
   onUpdateAll: () => void
   onToggleDiff: () => void
+  onTextSelect: (segmentId: string, text: string, startOffset: number, endOffset: number) => void
+  onMoveTargetClick: (targetSegmentId: string) => void
   editingCount: number
   onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
 }
@@ -51,6 +58,10 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
       revertedSegments,
       spellcheckErrors,
       showDiff,
+      showSpeakerLabels = true,
+      showRevertButton = true,
+      textMoveSelection,
+      isSelectingMoveTarget,
       activeSuggestion,
       onRevert,
       onUndoRevert,
@@ -63,14 +74,23 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
       onCloseSuggestions,
       onUpdateAll,
       onToggleDiff,
+      onTextSelect,
+      onMoveTargetClick,
       editingCount,
       onScroll,
     },
     ref,
   ) => {
+    console.log(
+      "[v0] EditableSegmentList rendering with segments:",
+      segments.length,
+      segments.map((s) => s.id),
+    )
+
     return (
       <div
         ref={ref}
+        data-column="cleaned"
         className="p-5 overflow-y-auto bg-[linear-gradient(180deg,rgba(56,189,248,0.02)_0%,transparent_100%)]"
         onScroll={onScroll}
       >
@@ -88,6 +108,10 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
         <div className="space-y-0">
           {segments.map((seg) => {
             const hasUnsavedEdits = editedTexts.has(seg.id) && editedTexts.get(seg.id) !== seg.cleanedText
+            const isMoveSource =
+              textMoveSelection?.sourceSegmentId === seg.id && textMoveSelection?.sourceColumn === "cleaned"
+            const isValidMoveTarget =
+              isSelectingMoveTarget && textMoveSelection?.sourceColumn === "cleaned" && !isMoveSource
 
             return (
               <EditableSegmentRow
@@ -97,12 +121,18 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
                 time={seg.time}
                 text={seg.cleanedText}
                 rawText={seg.rawText}
+                paragraphs={seg.paragraphs}
                 isActive={seg.id === activeSegmentId}
                 isReverted={revertedSegments.has(seg.id)}
                 isEditing={editingSegmentId === seg.id}
                 editedText={editedTexts.get(seg.id) || seg.cleanedText}
                 hasUnsavedEdits={hasUnsavedEdits}
                 showDiff={showDiff}
+                showSpeakerLabels={showSpeakerLabels}
+                showRevertButton={showRevertButton}
+                isSelectingMoveTarget={isSelectingMoveTarget}
+                isValidMoveTarget={isValidMoveTarget}
+                isMoveSource={isMoveSource}
                 spellcheckErrors={spellcheckErrors.get(seg.id) || []}
                 activeSuggestion={
                   activeSuggestion?.segmentId === seg.id
@@ -122,6 +152,8 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
                 onWordClick={(e, error) => onWordClick(seg.id, e, error)}
                 onSuggestionSelect={onSuggestionSelect}
                 onCloseSuggestions={onCloseSuggestions}
+                onTextSelect={(text, start, end) => onTextSelect(seg.id, text, start, end)}
+                onMoveTargetClick={() => onMoveTargetClick(seg.id)}
               />
             )
           })}

@@ -49,6 +49,11 @@ export function computeDiff(rawText: string, cleanedText: string): DiffToken[] {
   const rawTokens = tokenize(rawText)
   const cleanTokens = tokenize(cleanedText)
 
+  console.log("[v0] computeDiff - rawText:", rawText)
+  console.log("[v0] computeDiff - cleanedText:", cleanedText)
+  console.log("[v0] computeDiff - rawTokens:", rawTokens)
+  console.log("[v0] computeDiff - cleanTokens:", cleanTokens)
+
   // Find LCS to identify unchanged words
   const common = lcs(
     rawTokens.filter((t) => t.trim()),
@@ -108,6 +113,7 @@ export function computeDiff(rawText: string, cleanedText: string): DiffToken[] {
     rawIdx++
   }
 
+  console.log("[v0] computeDiff - result tokens before grouping:", result)
   return result
 }
 
@@ -120,8 +126,40 @@ export function groupDiffTokens(tokens: DiffToken[]): DiffToken[] {
 
   for (let i = 1; i < tokens.length; i++) {
     const token = tokens[i]
+
+    // Check if this is an unchanged whitespace that could be absorbed
+    if (token.type === "unchanged" && !token.text.trim()) {
+      // Look ahead to see if the next non-whitespace token has the same type as current
+      let nextNonWhitespaceIdx = i + 1
+      while (nextNonWhitespaceIdx < tokens.length && !tokens[nextNonWhitespaceIdx].text.trim()) {
+        nextNonWhitespaceIdx++
+      }
+
+      // If the next non-whitespace token has the same type as current (and current is inserted or deleted),
+      // absorb this whitespace into the current group
+      if (
+        nextNonWhitespaceIdx < tokens.length &&
+        tokens[nextNonWhitespaceIdx].type === current.type &&
+        (current.type === "inserted" || current.type === "deleted")
+      ) {
+        current.text += token.text
+        continue
+      }
+    }
+
     if (token.type === current.type) {
-      current.text += token.text
+      // If both are non-whitespace, add a space between them only if current doesn't end with whitespace
+      if (current.text.trim() && token.text.trim()) {
+        // Only add space if current doesn't already end with whitespace
+        if (!current.text.match(/\s$/)) {
+          current.text += " " + token.text
+        } else {
+          current.text += token.text
+        }
+      } else {
+        // One or both are whitespace - just concatenate
+        current.text += token.text
+      }
     } else {
       grouped.push(current)
       current = { ...token }
@@ -129,5 +167,6 @@ export function groupDiffTokens(tokens: DiffToken[]): DiffToken[] {
   }
   grouped.push(current)
 
+  console.log("[v0] groupDiffTokens - output:", grouped)
   return grouped
 }

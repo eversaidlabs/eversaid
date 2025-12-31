@@ -10,19 +10,6 @@ export interface UploadZoneProps {
   onFileSelect: (file: File) => void
   onSpeakerCountChange: (count: number) => void
   onTranscribeClick: () => void
-  // Recording props
-  isRecording?: boolean
-  recordingDuration?: number
-  recordingError?: string | null
-  onStartRecording?: () => void
-  onStopRecording?: () => void
-}
-
-/** Format recording duration as M:SS */
-function formatDuration(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 export function UploadZone({
@@ -33,11 +20,6 @@ export function UploadZone({
   onFileSelect,
   onSpeakerCountChange,
   onTranscribeClick,
-  isRecording = false,
-  recordingDuration = 0,
-  recordingError = null,
-  onStartRecording,
-  onStopRecording,
 }: UploadZoneProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
@@ -78,29 +60,11 @@ export function UploadZone({
         <div className="flex-1 h-px bg-[#E2E8F0]" />
       </div>
 
-      <div className="p-6 flex flex-col items-center justify-center gap-2">
-        {isRecording ? (
-          <button
-            onClick={onStopRecording}
-            className="flex items-center gap-2.5 px-7 py-3.5 bg-[#FEF2F2] border-2 border-[#EF4444] rounded-xl text-[15px] font-semibold text-[#0F172A] transition-all hover:bg-[#FEE2E2]"
-          >
-            <div className="w-3 h-3 bg-[#EF4444] rounded-full animate-pulse" />
-            <span>Stop Recording</span>
-            <span className="text-[#EF4444] font-mono">{formatDuration(recordingDuration)}</span>
-          </button>
-        ) : (
-          <button
-            onClick={onStartRecording}
-            disabled={!onStartRecording}
-            className="flex items-center gap-2.5 px-7 py-3.5 bg-white hover:bg-[#FEF2F2] border-2 border-[#E2E8F0] hover:border-[#EF4444] rounded-xl text-[15px] font-semibold text-[#0F172A] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="w-3 h-3 bg-[#EF4444] rounded-full" />
-            Record Audio
-          </button>
-        )}
-        {recordingError && (
-          <p className="text-sm text-[#EF4444]">{recordingError}</p>
-        )}
+      <div className="p-6 flex items-center justify-center">
+        <button className="flex items-center gap-2.5 px-7 py-3.5 bg-white hover:bg-[#FEF2F2] border-2 border-[#E2E8F0] hover:border-[#EF4444] rounded-xl text-[15px] font-semibold text-[#0F172A] transition-all">
+          <div className="w-3 h-3 bg-[#EF4444] rounded-full" />
+          Record Audio
+        </button>
       </div>
 
       <div className="px-6 pb-6">

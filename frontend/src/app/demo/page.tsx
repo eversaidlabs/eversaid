@@ -1,24 +1,16 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useRef, useEffect, useMemo } from "react"
 import { DemoNavigation } from "@/components/demo/demo-navigation"
-import { AudioPlayer } from "@/components/demo/audio-player"
-import { TranscriptHeader } from "@/components/demo/transcript-header"
-import { RawSegmentList } from "@/components/demo/raw-segment-list"
-import { EditableSegmentList } from "@/components/demo/editable-segment-list"
 import { AnalysisSection } from "@/components/demo/analysis-section"
 import { EntryHistoryCard } from "@/components/demo/entry-history-card"
 import { FeedbackCard } from "@/components/demo/feedback-card"
-import { WaitlistCTA } from "@/components/demo/waitlist-cta"
-import { UploadZone } from "@/components/demo/upload-zone"
-import { FeaturesHint } from "@/components/demo/features-hint"
-import { DemoFooter } from "@/components/demo/demo-footer"
-import { WaitlistFlow, type WaitlistFormData } from "@/components/waitlist/waitlist-flow"
-import { useWaitlist } from "@/features/transcription/useWaitlist"
-import { useVoiceRecorder } from "@/features/transcription/useVoiceRecorder"
-import type { Segment, SpellcheckError, HistoryEntry } from "@/components/demo/types"
+import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
+import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
+import { AudioPlayer } from "@/components/demo/audio-player"
+import type { Segment, HistoryEntry, SpellcheckError, TextMoveSelection } from "@/components/demo/types"
+import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 
 // Mock spellcheck - in production, call a Slovenian spellcheck API
 const checkSpelling = (text: string): SpellcheckError[] => {
@@ -48,9 +40,87 @@ const checkSpelling = (text: string): SpellcheckError[] => {
   return mockErrors
 }
 
+const mockSegmentsSingleSpeaker: Segment[] = [
+  {
+    id: "seg-1",
+    speaker: 1,
+    time: "0:00 – 3:28",
+    rawText:
+      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page. Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need. That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project. Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline. Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas? Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean. Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that. Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
+    cleanedText:
+      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page. I think we should probably start with the research phase first and then move on to the design work after we have all the data we need. That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project. That's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline. What about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas? I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed. Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that. I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
+    paragraphs: [
+      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
+      "I think we should probably start with the research phase first and then move on to the design work after we have all the data we need. That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
+      "That's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
+      "What about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
+      "I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
+      "Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that.",
+      "I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
+    ],
+  },
+]
+
+const mockSegmentsMultiSpeaker: Segment[] = [
+  {
+    id: "seg-1",
+    speaker: 1,
+    time: "0:00 – 0:18",
+    rawText:
+      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
+    cleanedText:
+      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
+  },
+  {
+    id: "seg-2",
+    speaker: 2,
+    time: "0:19 – 0:42",
+    rawText:
+      "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
+    cleanedText:
+      "Yes, I think we should probably start with the research phase first and then move on to the design work after we have all the data we need.",
+  },
+  {
+    id: "seg-3",
+    speaker: 1,
+    time: "0:43 – 1:05",
+    rawText:
+      "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
+    cleanedText:
+      "That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
+  },
+  {
+    id: "seg-4",
+    speaker: 2,
+    time: "1:06 – 1:28",
+    rawText:
+      "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
+    cleanedText:
+      "That's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
+  },
+  {
+    id: "seg-5",
+    speaker: 1,
+    time: "1:29 – 2:15",
+    rawText:
+      "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
+    cleanedText:
+      "What about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
+  },
+  {
+    id: "seg-6",
+    speaker: 2,
+    time: "2:16 – 3:28",
+    rawText:
+      "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
+    cleanedText:
+      "I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
+  },
+]
+
 export default function DemoPage() {
   // UI State
-  const [uiState, setUiState] = useState<"empty" | "complete">("complete")
+  const [uiState, setUiState] = useState<"empty" | "upload" | "complete">("complete")
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null)
 
   // Audio Player State
@@ -81,6 +151,9 @@ export default function DemoPage() {
   const [showSpeedMenu, setShowSpeedMenu] = useState(false)
   const [showAnalysisMenu, setShowAnalysisMenu] = useState(false)
 
+  const [textMoveSelection, setTextMoveSelection] = useState<TextMoveSelection | null>(null)
+  const [isSelectingMoveTarget, setIsSelectingMoveTarget] = useState(false)
+
   // Analysis State
   const [analysisType, setAnalysisType] = useState<"summary" | "action-items" | "sentiment">("summary")
 
@@ -88,80 +161,18 @@ export default function DemoPage() {
   const [rating, setRating] = useState(0)
   const [feedback, setFeedback] = useState("")
 
-  const [segments, setSegments] = useState<Segment[]>([
-    {
-      id: "seg-1",
-      speaker: 1,
-      time: "0:00 – 0:18",
-      rawText:
-        "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
-      cleanedText:
-        "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
-    },
-    {
-      id: "seg-2",
-      speaker: 2,
-      time: "0:19 – 0:42",
-      rawText:
-        "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
-      cleanedText:
-        "Yes, I think we should probably start with the research phase first and then move on to the design work after we have all the data we need.",
-    },
-    {
-      id: "seg-3",
-      speaker: 1,
-      time: "0:43 – 1:05",
-      rawText:
-        "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
-      cleanedText:
-        "That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
-    },
-    {
-      id: "seg-4",
-      speaker: 2,
-      time: "1:06 – 1:28",
-      rawText:
-        "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
-      cleanedText:
-        "Sure, that's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
-    },
-    {
-      id: "seg-5",
-      speaker: 1,
-      time: "1:29 – 1:55",
-      rawText:
-        "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
-      cleanedText:
-        "Right, and what about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
-    },
-    {
-      id: "seg-6",
-      speaker: 2,
-      time: "1:56 – 2:24",
-      rawText:
-        "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
-      cleanedText:
-        "Well, I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
-    },
-    {
-      id: "seg-7",
-      speaker: 1,
-      time: "2:25 – 2:58",
-      rawText:
-        "Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that.",
-      cleanedText:
-        "Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that.",
-    },
-    {
-      id: "seg-8",
-      speaker: 2,
-      time: "2:59 – 3:28",
-      rawText:
-        "Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
-      cleanedText:
-        "Sounds good. I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
-    },
-  ])
+  // Single Speaker Mode State
+  const [isSingleSpeaker, setIsSingleSpeaker] = useState(false)
+
+  const [segments, setSegments] = useState<Segment[]>(mockSegmentsMultiSpeaker)
+
+  useEffect(() => {
+    console.log("[v0] Segments changed:", segments.length, "segments")
+    console.log(
+      "[v0] Segment IDs:",
+      segments.map((s) => s.id),
+    )
+  }, [segments])
 
   // History entries
   const [historyEntries] = useState<HistoryEntry[]>([
@@ -199,12 +210,8 @@ export default function DemoPage() {
   // Waitlist modal state
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
   const [waitlistType, setWaitlistType] = useState<"extended_usage" | "api_access">("extended_usage")
-
-  // Waitlist hook
-  const waitlist = useWaitlist({ waitlistType, sourcePage: '/demo' })
-
-  // Voice recorder hook
-  const voiceRecorder = useVoiceRecorder()
+  const [waitlistEmail, setWaitlistEmail] = useState("")
+  const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
 
   const rawScrollRef = useRef<HTMLDivElement>(null)
   const cleanedScrollRef = useRef<HTMLDivElement>(null)
@@ -248,51 +255,29 @@ export default function DemoPage() {
     })
   }
 
-  // Run spellcheck when editing starts or text changes
+  // Sync segment heights
   useEffect(() => {
-    if (editingSegmentId) {
-      const text =
-        editedTexts.get(editingSegmentId) || segments.find((s) => s.id === editingSegmentId)?.cleanedText || ""
-      const errors = checkSpelling(text)
-      setSpellcheckErrors((prev) => new Map(prev).set(editingSegmentId, errors))
+    const syncHeights = () => {
+      segments.forEach((seg) => {
+        const rawSegment = document.querySelector(`[data-segment-id="${seg.id}"]`) as HTMLElement
+        const cleanedSegments = document.querySelectorAll(`[data-segment-id="${seg.id}"]`) as NodeListOf<HTMLElement>
+
+        if (rawSegment && cleanedSegments.length === 2) {
+          const cleanedSegment = cleanedSegments[1]
+          const rawHeight = rawSegment.offsetHeight
+          const cleanedHeight = cleanedSegment.offsetHeight
+          const maxHeight = Math.max(rawHeight, cleanedHeight)
+
+          rawSegment.style.minHeight = `${maxHeight}px`
+          cleanedSegment.style.minHeight = `${maxHeight}px`
+        }
+      })
     }
-  }, [editingSegmentId, editedTexts, segments])
 
-  // Audio Player Handlers
-  const handlePlayPause = useCallback(() => {
-    setIsPlaying((prev) => !prev)
-  }, [])
-
-  const handleSeek = useCallback((time: number) => {
-    setCurrentTime(time)
-  }, [])
-
-  const handleSpeedChange = useCallback((speed: number) => {
-    setPlaybackSpeed(speed)
-  }, [])
-
-  const handleDownload = useCallback(() => {
-    console.log("Downloading audio...")
-  }, [])
-
-  // Transcript Handlers
-  const handleCopyRaw = useCallback(() => {
-    const rawText = segments.map((s) => `[${s.time}] Speaker ${s.speaker}: ${s.rawText}`).join("\n\n")
-    navigator.clipboard.writeText(rawText)
-  }, [segments])
-
-  const handleCopyClean = useCallback(() => {
-    const cleanText = segments.map((s) => `[${s.time}] Speaker ${s.speaker}: ${s.cleanedText}`).join("\n\n")
-    navigator.clipboard.writeText(cleanText)
-  }, [segments])
-
-  const handleDownloadRaw = useCallback(() => {
-    console.log("Downloading raw transcript...")
-  }, [])
-
-  const handleDownloadClean = useCallback(() => {
-    console.log("Downloading clean transcript...")
-  }, [])
+    syncHeights()
+    window.addEventListener("resize", syncHeights)
+    return () => window.removeEventListener("resize", syncHeights)
+  }, [segments, showDiff])
 
   // Segment Handlers
   const handleRevertSegment = useCallback(
@@ -421,6 +406,111 @@ export default function DemoPage() {
     setShowAnalysisMenu((prev) => !prev)
   }, [])
 
+  const handleRawTextSelect = useCallback((segmentId: string, text: string, startOffset: number, endOffset: number) => {
+    setTextMoveSelection({
+      text,
+      sourceSegmentId: segmentId,
+      sourceColumn: "raw",
+      startOffset,
+      endOffset,
+    })
+    setIsSelectingMoveTarget(false)
+  }, [])
+
+  const handleCleanedTextSelect = useCallback(
+    (segmentId: string, text: string, startOffset: number, endOffset: number) => {
+      setTextMoveSelection({
+        text,
+        sourceSegmentId: segmentId,
+        sourceColumn: "cleaned",
+        startOffset,
+        endOffset,
+      })
+      setIsSelectingMoveTarget(false)
+    },
+    [],
+  )
+
+  const handleMoveClick = useCallback(() => {
+    if (textMoveSelection) {
+      setIsSelectingMoveTarget(true)
+    }
+  }, [textMoveSelection])
+
+  const handleCancelTextMove = useCallback(() => {
+    setTextMoveSelection(null)
+    setIsSelectingMoveTarget(false)
+    window.getSelection()?.removeAllRanges()
+  }, [])
+
+  const handleRawMoveTargetClick = useCallback(
+    (targetSegmentId: string) => {
+      if (!textMoveSelection || textMoveSelection.sourceColumn !== "raw") return
+
+      const sourceId = textMoveSelection.sourceSegmentId
+      const selectedText = textMoveSelection.text
+
+      setSegments((prev) => {
+        return prev.map((seg) => {
+          if (seg.id === sourceId) {
+            // Remove text from source
+            const currentText = seg.rawText
+            const newText = currentText.replace(selectedText, "").replace(/\s+/g, " ").trim()
+            return { ...seg, rawText: newText }
+          }
+          if (seg.id === targetSegmentId) {
+            const trimmedSelected = selectedText.trim()
+            const currentText = seg.rawText.trim()
+            const startsWithPunctuation = /^[,.!?;:]/.test(trimmedSelected)
+            const separator = startsWithPunctuation ? "" : " "
+            const newText = currentText ? `${currentText}${separator}${trimmedSelected}` : trimmedSelected
+            return { ...seg, rawText: newText }
+          }
+          return seg
+        })
+      })
+
+      setTextMoveSelection(null)
+      setIsSelectingMoveTarget(false)
+      window.getSelection()?.removeAllRanges()
+    },
+    [textMoveSelection],
+  )
+
+  const handleCleanedMoveTargetClick = useCallback(
+    (targetSegmentId: string) => {
+      if (!textMoveSelection || textMoveSelection.sourceColumn !== "cleaned") return
+
+      const sourceId = textMoveSelection.sourceSegmentId
+      const selectedText = textMoveSelection.text
+
+      setSegments((prev) => {
+        return prev.map((seg) => {
+          if (seg.id === sourceId) {
+            // Remove text from source
+            const currentText = seg.cleanedText
+            const newText = currentText.replace(selectedText, "").replace(/\s+/g, " ").trim()
+            return { ...seg, cleanedText: newText }
+          }
+          if (seg.id === targetSegmentId) {
+            const trimmedSelected = selectedText.trim()
+            const currentText = seg.cleanedText.trim()
+            const startsWithPunctuation = /^[,.!?;:]/.test(trimmedSelected)
+            const separator = startsWithPunctuation ? "" : " "
+            const newText = currentText ? `${currentText}${separator}${trimmedSelected}` : trimmedSelected
+            return { ...seg, cleanedText: newText }
+          }
+          return seg
+        })
+      })
+
+      setTextMoveSelection(null)
+      setIsSelectingMoveTarget(false)
+      window.getSelection()?.removeAllRanges()
+    },
+    [textMoveSelection],
+  )
+
   // Upload Handlers
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file)
@@ -428,6 +518,8 @@ export default function DemoPage() {
 
   const handleSpeakerCountChange = useCallback((count: number) => {
     setSelectedSpeakerCount(count)
+    setIsSingleSpeaker(count === 1)
+    setSegments(count === 1 ? [...mockSegmentsSingleSpeaker] : [...mockSegmentsMultiSpeaker])
   }, [])
 
   const handleTranscribeClick = useCallback(() => {
@@ -462,265 +554,198 @@ export default function DemoPage() {
   }, [rating, feedback])
 
   // Waitlist Handlers
-  const handleWaitlistClick = useCallback(() => {
-    setWaitlistType("extended_usage")
+  const handleOpenWaitlist = useCallback((type: "extended_usage" | "api_access" = "extended_usage") => {
+    setWaitlistType(type)
     setWaitlistState("form")
   }, [])
 
-  const handleWaitlistSubmit = useCallback(async (formData: WaitlistFormData) => {
-    await waitlist.submit(formData)
-  }, [waitlist])
-
-  // Sync waitlist state with hook's isSubmitted
-  useEffect(() => {
-    if (waitlist.isSubmitted && waitlistState === "form") {
+  const handleWaitlistSubmit = useCallback(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setWaitlistReferralCode("EVERSAID-" + Math.random().toString(36).substring(2, 8).toUpperCase())
       setWaitlistState("success")
-    }
-  }, [waitlist.isSubmitted, waitlistState])
-
-  // Convert recorded audio blob to File when recording stops
-  useEffect(() => {
-    if (voiceRecorder.audioBlob && !voiceRecorder.isRecording) {
-      const file = new File(
-        [voiceRecorder.audioBlob],
-        `recording-${Date.now()}.webm`,
-        { type: voiceRecorder.audioBlob.type }
-      )
-      setSelectedFile(file)
-      voiceRecorder.resetRecording()
-    }
-  }, [voiceRecorder.audioBlob, voiceRecorder.isRecording, voiceRecorder])
+    }, 500)
+  }, [])
 
   const handleWaitlistClose = useCallback(() => {
     setWaitlistState("hidden")
-    waitlist.reset()
-  }, [waitlist])
-
-  const handleWaitlistOpenForm = useCallback(() => {
-    setWaitlistState("form")
+    setWaitlistEmail("")
   }, [])
 
-  const handleWaitlistCopyCode = useCallback(() => {
-    if (waitlist.referralCode) {
-      navigator.clipboard.writeText(waitlist.referralCode)
-    }
-  }, [waitlist.referralCode])
-
-  const handleWaitlistCopyLink = useCallback(() => {
-    if (waitlist.referralCode) {
-      const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
-      navigator.clipboard.writeText(referralLink)
-    }
-  }, [waitlist.referralCode])
-
-  const handleHistorySelect = useCallback((id: string) => {
-    console.log("Selected history entry:", id)
+  const handleSegmentClick = useCallback((id: string) => {
+    setActiveSegmentId(id)
   }, [])
 
-  useEffect(() => {
-    const syncSegmentHeights = () => {
-      if (!rawScrollRef.current || !cleanedScrollRef.current) return
+  const handlePlayPause = useCallback(() => {
+    setIsPlaying(!isPlaying)
+  }, [isPlaying])
 
-      const rawSegments = rawScrollRef.current.querySelectorAll("[data-segment-id]")
-      const cleanedSegments = cleanedScrollRef.current.querySelectorAll("[data-segment-id]")
+  const handleSeek = useCallback((time: number) => {
+    setCurrentTime(time)
+  }, [])
 
-      rawSegments.forEach((rawEl) => {
-        const segmentId = rawEl.getAttribute("data-segment-id")
-        const cleanedEl = Array.from(cleanedSegments).find((el) => el.getAttribute("data-segment-id") === segmentId)
+  const handleDownload = useCallback(() => {
+    console.log("Download requested")
+  }, [])
 
-        if (cleanedEl && rawEl instanceof HTMLElement && cleanedEl instanceof HTMLElement) {
-          // Reset heights first
-          rawEl.style.minHeight = ""
-          cleanedEl.style.minHeight = ""
+  const handleSpeedChange = useCallback((speed: number) => {
+    setPlaybackSpeed(speed)
+  }, [])
 
-          // Get natural heights
-          const rawHeight = rawEl.offsetHeight
-          const cleanedHeight = cleanedEl.offsetHeight
+  const editingCount = Array.from(editedTexts.entries()).filter(([id, text]) => {
+    const segment = segments.find((s) => s.id === id)
+    return segment && text !== segment.cleanedText
+  }).length
 
-          // Set both to the max height
-          const maxHeight = Math.max(rawHeight, cleanedHeight)
-          rawEl.style.minHeight = `${maxHeight}px`
-          cleanedEl.style.minHeight = `${maxHeight}px`
-        }
-      })
-    }
-
-    // Sync on mount and whenever showDiff changes (affects cleaned segment heights)
-    syncSegmentHeights()
-
-    // Re-sync after a short delay to account for dynamic content loading
-    const timer = setTimeout(syncSegmentHeights, 100)
-
-    return () => clearTimeout(timer)
-  }, [showDiff, segments])
+  const showSpeakerLabels = useMemo(() => {
+    const uniqueSpeakers = new Set(segments.map((seg) => seg.speaker))
+    return uniqueSpeakers.size > 1
+  }, [segments])
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#FEFEFF_0%,#F8FAFC_100%)]">
-      <DemoNavigation currentPage="demo" />
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      <DemoNavigation />
 
-      {/* Page Header */}
-      <div className="bg-[linear-gradient(180deg,white_0%,#F8FAFC_100%)] border-b border-[#E2E8F0] px-8 md:px-12 py-8">
-        <div className="max-w-[1400px] mx-auto flex justify-between items-start flex-wrap gap-4">
+      <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-[28px] font-extrabold text-[#0F172A] tracking-[-0.02em] mb-1.5">Try eversaid</h1>
-            <p className="text-[15px] text-[#64748B]">
+            <h1 className="text-4xl font-bold text-[#1E293B] mb-2">Try eversaid</h1>
+            <p className="text-[#64748B] text-lg">
               Upload audio or record directly. See the AI cleanup difference in seconds.
             </p>
           </div>
-          <div className="flex gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-[13px] text-[#64748B]">
-              <span className="font-bold text-[#0F172A]">3/5</span> hourly
+          <div className="flex gap-4">
+            <div className="px-4 py-2 bg-white rounded-lg border border-[#E2E8F0] shadow-sm">
+              <span className="text-sm font-semibold text-[#64748B]">15/20</span>
+              <span className="text-xs text-[#94A3B8] ml-1">daily</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-[13px] text-[#64748B]">
-              <span className="font-bold text-[#0F172A]">15/20</span> daily
-            </div>
+          </div>
+        </div>
+        <div className="mt-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <label htmlFor="speaker-mode" className="text-sm text-muted-foreground">
+              Demo mode:
+            </label>
+            <button
+              onClick={() => {
+                setIsSingleSpeaker(false)
+                setSegments([...mockSegmentsMultiSpeaker])
+              }}
+              className={`px-3 py-1 rounded text-sm transition-colors ${
+                !isSingleSpeaker
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Multi-Speaker
+            </button>
+            <button
+              onClick={() => {
+                setIsSingleSpeaker(true)
+                setSegments([...mockSegmentsSingleSpeaker])
+              }}
+              className={`px-3 py-1 rounded text-sm transition-colors ${
+                isSingleSpeaker
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Single Speaker
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Main Container */}
-      <main className="max-w-[1400px] mx-auto px-6 py-8">
-        {uiState === "empty" && (
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
-            <UploadZone
-              selectedSpeakerCount={selectedSpeakerCount}
-              isUploading={isUploading}
-              uploadProgress={uploadProgress}
-              hasFile={!!selectedFile}
-              onFileSelect={handleFileSelect}
-              onSpeakerCountChange={handleSpeakerCountChange}
-              onTranscribeClick={handleTranscribeClick}
-              isRecording={voiceRecorder.isRecording}
-              recordingDuration={voiceRecorder.duration}
-              recordingError={voiceRecorder.error}
-              onStartRecording={voiceRecorder.startRecording}
-              onStopRecording={voiceRecorder.stopRecording}
+      <main className="mx-auto px-6 max-w-[1400px]">
+        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden mb-8">
+          <div className="bg-gradient-to-b from-muted/30 to-transparent border-b border-border/50 rounded-t-lg">
+            <AudioPlayer
+              isPlaying={isPlaying}
+              currentTime={currentTime}
+              duration={duration}
+              playbackSpeed={playbackSpeed}
+              onPlayPause={handlePlayPause}
+              onSeek={handleSeek}
+              onSpeedChange={handleSpeedChange}
+              onDownload={handleDownload}
             />
-            <div className="flex flex-col gap-5">
-              <EntryHistoryCard
-                entries={historyEntries}
-                activeId={null}
-                isEmpty={true}
-                onSelect={handleHistorySelect}
-              />
-              <FeaturesHint />
-            </div>
           </div>
-        )}
 
-        {uiState === "complete" && (
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
-            <div className="flex flex-col gap-6">
-              <AudioPlayer
-                isPlaying={isPlaying}
-                currentTime={currentTime}
-                duration={duration}
-                playbackSpeed={playbackSpeed}
-                showSpeedMenu={showSpeedMenu}
-                onPlayPause={handlePlayPause}
-                onSeek={handleSeek}
-                onSpeedChange={handleSpeedChange}
-                onToggleSpeedMenu={handleToggleSpeedMenu}
-                onDownload={handleDownload}
-              />
+          {/* Transcript comparison directly below */}
+          <TranscriptComparisonLayout
+            segments={segments}
+            activeSegmentId={activeSegmentId}
+            editingSegmentId={editingSegmentId}
+            editedTexts={editedTexts}
+            revertedSegments={revertedSegments}
+            spellcheckErrors={spellcheckErrors}
+            showDiff={showDiff}
+            showSpeakerLabels={showSpeakerLabels}
+            textMoveSelection={textMoveSelection}
+            isSelectingMoveTarget={isSelectingMoveTarget}
+            activeSuggestion={activeSuggestion}
+            editingCount={editingCount}
+            onSegmentClick={handleSegmentClick}
+            onRevert={handleRevertSegment}
+            onUndoRevert={handleUndoRevert}
+            onSave={handleSaveSegment}
+            onEditStart={handleSegmentEditStart}
+            onEditCancel={handleSegmentEditCancel}
+            onTextChange={handleTextChange}
+            onWordClick={handleWordClick}
+            onSuggestionSelect={handleSuggestionSelect}
+            onCloseSuggestions={handleCloseSuggestions}
+            onUpdateAll={handleUpdateAllSegments}
+            onToggleDiff={handleToggleDiff}
+            onRawTextSelect={handleRawTextSelect}
+            onCleanedTextSelect={handleCleanedTextSelect}
+            onRawMoveTargetClick={handleRawMoveTargetClick}
+            onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
+          />
+        </div>
 
-              {/* Transcript Section */}
-              <div className="max-w-[1400px] mx-auto bg-white rounded-xl shadow-sm border border-[#E2E8F0] overflow-hidden mt-8">
-                <TranscriptHeader
-                  onCopyRaw={handleCopyRaw}
-                  onCopyClean={handleCopyClean}
-                  onDownloadRaw={handleDownloadRaw}
-                  onDownloadClean={handleDownloadClean}
-                  showDiff={showDiff}
-                  onToggleDiff={handleToggleDiff}
-                />
-
-                {/* Transcript Content */}
-                <div className="grid grid-cols-2 h-[600px] bg-white">
-                  <RawSegmentList
-                    ref={rawScrollRef}
-                    segments={segments}
-                    activeSegmentId={activeSegmentId}
-                    onSegmentClick={setActiveSegmentId}
-                    onScroll={handleRawScroll}
-                  />
-                  <EditableSegmentList
-                    ref={cleanedScrollRef}
-                    segments={segments}
-                    activeSegmentId={activeSegmentId}
-                    editingSegmentId={editingSegmentId}
-                    editedTexts={editedTexts}
-                    revertedSegments={revertedSegments}
-                    spellcheckErrors={spellcheckErrors}
-                    showDiff={showDiff}
-                    activeSuggestion={activeSuggestion}
-                    onRevert={handleRevertSegment}
-                    onUndoRevert={handleUndoRevert}
-                    onSave={handleSaveSegment}
-                    onEditStart={handleSegmentEditStart}
-                    onEditCancel={handleSegmentEditCancel}
-                    onTextChange={handleTextChange}
-                    onWordClick={handleWordClick}
-                    onSuggestionSelect={handleSuggestionSelect}
-                    onCloseSuggestions={handleCloseSuggestions}
-                    onUpdateAll={handleUpdateAllSegments}
-                    onToggleDiff={handleToggleDiff}
-                    editingCount={editedTexts.size}
-                    onScroll={handleCleanedScroll}
-                  />
-                </div>
-              </div>
-
-              <AnalysisSection
-                analysisType={analysisType}
-                summary={analysisData.summary}
-                topics={analysisData.topics}
-                keyPoints={analysisData.keyPoints}
-                showAnalysisMenu={showAnalysisMenu}
-                onChangeAnalysisType={setAnalysisType}
-                onToggleAnalysisMenu={handleToggleAnalysisMenu}
-              />
-            </div>
-
-            {/* Sidebar */}
-            <div className="flex flex-col gap-5">
-              <EntryHistoryCard
-                entries={historyEntries}
-                activeId="entry-1"
-                isEmpty={false}
-                onSelect={handleHistorySelect}
-              />
-
-              <FeedbackCard
-                rating={rating}
-                feedback={feedback}
-                onRatingChange={handleRatingChange}
-                onFeedbackChange={handleFeedbackChange}
-                onSubmit={handleFeedbackSubmit}
-              />
-
-              <WaitlistCTA onCtaClick={handleWaitlistClick} />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <AnalysisSection
+              analysisType={analysisType}
+              analysisData={analysisData}
+              showAnalysisMenu={showAnalysisMenu}
+              onAnalysisTypeChange={setAnalysisType}
+              onToggleAnalysisMenu={handleToggleAnalysisMenu}
+            />
           </div>
-        )}
+
+          <div className="space-y-6">
+            <EntryHistoryCard entries={historyEntries} />
+            <FeedbackCard
+              rating={rating}
+              feedback={feedback}
+              onRatingChange={handleRatingChange}
+              onFeedbackChange={handleFeedbackChange}
+              onSubmit={handleFeedbackSubmit}
+            />
+          </div>
+        </div>
       </main>
 
-      <DemoFooter />
+      {textMoveSelection && (
+        <TextMoveToolbar
+          selectedText={textMoveSelection.text}
+          isSelectingTarget={isSelectingMoveTarget}
+          onMoveClick={() => setIsSelectingMoveTarget(true)}
+          onCancel={handleCancelTextMove}
+        />
+      )}
 
-      {/* Waitlist Modal */}
       <WaitlistFlow
         state={waitlistState}
         type={waitlistType}
-        email={waitlist.email}
-        referralCode={waitlist.referralCode || ""}
-        isSubmitting={waitlist.isSubmitting}
-        error={waitlist.error}
-        onEmailChange={waitlist.setEmail}
+        email={waitlistEmail}
+        referralCode={waitlistReferralCode}
+        onEmailChange={setWaitlistEmail}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
-        onCopyCode={handleWaitlistCopyCode}
-        onCopyLink={handleWaitlistCopyLink}
-        onOpenForm={handleWaitlistOpenForm}
+        onOpenForm={() => setWaitlistState("form")}
       />
     </div>
   )

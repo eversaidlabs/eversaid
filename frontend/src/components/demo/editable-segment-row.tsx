@@ -4,19 +4,26 @@ import type React from "react"
 import { RotateCcw, Check, X, Undo2 } from "lucide-react"
 import type { SpellcheckError } from "./types"
 import { DiffSegmentDisplay } from "./diff-segment-display"
+import { filterSelectionForDiff } from "@/lib/text-selection-utils"
 
 export interface EditableSegmentRowProps {
   id: string
   speaker: number
   time: string
   text: string
-  rawText: string // Added rawText prop for diff computation
+  rawText: string
+  paragraphs?: string[]
   isActive: boolean
   isReverted: boolean
   isEditing: boolean
   editedText: string
   hasUnsavedEdits: boolean
-  showDiff: boolean // Added showDiff prop for toggle
+  showDiff: boolean
+  showSpeakerLabels?: boolean
+  showRevertButton?: boolean
+  isSelectingMoveTarget: boolean
+  isValidMoveTarget: boolean
+  isMoveSource: boolean
   spellcheckErrors: SpellcheckError[]
   activeSuggestion: {
     word: string
@@ -32,6 +39,8 @@ export interface EditableSegmentRowProps {
   onWordClick: (e: React.MouseEvent, error: SpellcheckError) => void
   onSuggestionSelect: (suggestion: string) => void
   onCloseSuggestions: () => void
+  onTextSelect: (text: string, startOffset: number, endOffset: number) => void
+  onMoveTargetClick: () => void
 }
 
 export function EditableSegmentRow({
@@ -40,12 +49,18 @@ export function EditableSegmentRow({
   time,
   text,
   rawText,
+  paragraphs,
   isActive,
   isReverted,
   isEditing,
   editedText,
   hasUnsavedEdits,
   showDiff,
+  showSpeakerLabels = true,
+  showRevertButton = true,
+  isSelectingMoveTarget,
+  isValidMoveTarget,
+  isMoveSource,
   spellcheckErrors,
   activeSuggestion,
   onRevert,
@@ -57,7 +72,29 @@ export function EditableSegmentRow({
   onWordClick,
   onSuggestionSelect,
   onCloseSuggestions,
+  onTextSelect,
+  onMoveTargetClick,
 }: EditableSegmentRowProps) {
+  const handleMouseUp = () => {
+    if (isSelectingMoveTarget || isEditing) return
+    const selection = window.getSelection()
+    if (selection && selection.toString().trim()) {
+      const selectedText = filterSelectionForDiff(selection, showDiff, isReverted)
+
+      // Only trigger selection if there's valid text remaining
+      if (selectedText) {
+        const range = selection.getRangeAt(0)
+        onTextSelect(selectedText, range.startOffset, range.endOffset)
+      }
+    }
+  }
+
+  const handleClick = () => {
+    if (isSelectingMoveTarget && isValidMoveTarget) {
+      onMoveTargetClick()
+    }
+  }
+
   const renderTextWithSpellcheck = () => {
     if (!isEditing || spellcheckErrors.length === 0) {
       return editedText
@@ -74,7 +111,7 @@ export function EditableSegmentRow({
       parts.push(
         <span
           key={`error-${idx}`}
-          className="border-b-2 border-[#FB923C] border-dashed cursor-pointer hover:bg-[#FED7AA]/20"
+          className="border-b-2 border-amber-500 border-dashed cursor-pointer hover:bg-amber-50/20"
           onClick={(e) => onWordClick(e, error)}
         >
           {error.word}
@@ -98,70 +135,96 @@ export function EditableSegmentRow({
     return text
   }
 
+  const renderParagraphs = () => {
+    if (!paragraphs || paragraphs.length === 0) {
+      return renderContent()
+    }
+    return (
+      <div className="space-y-4">
+        {paragraphs.map((paragraph, idx) => (
+          <p key={idx} className="text-[15px] leading-[1.7] text-foreground">
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <>
       <div
         data-segment-id={id}
-        className={`p-4 mb-3 rounded-xl bg-[#F8FAFC] border-l-4 transition-all cursor-pointer relative ${
-          isActive ? "shadow-[0_0_0_2px_rgba(56,189,248,0.3),0_4px_12px_rgba(0,0,0,0.05)] bg-white" : ""
-        } ${speaker === 1 ? "border-[#38BDF8]" : "border-[#A855F7]"}`}
+        className={`p-4 mb-3 rounded-xl bg-secondary border-l-4 transition-all cursor-pointer relative ${
+          isActive ? "shadow-[0_0_0_2px_rgba(var(--color-primary),0.3),0_4px_12px_rgba(0,0,0,0.05)] bg-background" : ""
+        } ${showSpeakerLabels ? (speaker === 1 ? "border-primary" : "border-purple-500") : "border-border"}`}
+        onClick={handleClick}
+        onMouseUp={handleMouseUp}
       >
         {hasUnsavedEdits && !isEditing && (
-          <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-[#FB923C] rounded-full border-2 border-white shadow-sm" />
+          <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-background shadow-sm" />
         )}
 
         <div className="flex justify-between items-center mb-2.5">
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold ${speaker === 1 ? "text-[#0284C7]" : "text-[#7C3AED]"}`}>
-              Speaker {speaker}
-            </span>
-            <span className="text-[11px] text-[#94A3B8] font-medium">{time}</span>
+            {showSpeakerLabels && (
+              <span className={`text-xs font-bold ${speaker === 1 ? "text-blue-600" : "text-purple-600"}`}>
+                Speaker {speaker}
+              </span>
+            )}
+            <span className="text-[11px] text-muted-foreground font-medium">{time}</span>
             {hasUnsavedEdits && !isEditing && (
-              <span className="text-[10px] font-semibold text-[#FB923C] bg-[#FED7AA]/20 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-semibold text-amber-700 bg-amber-50/50 px-1.5 py-0.5 rounded">
                 Edited
               </span>
             )}
-          </div>
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={onSave}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-[#DCFCE7] hover:bg-[#BBF7D0] border border-[#86EFAC] rounded-md text-[11px] font-semibold text-[#166534] transition-all"
-                >
-                  <Check className="w-3 h-3" />
-                  Save
-                </button>
-                <button
-                  onClick={onEditCancel}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#F1F5F9] border border-[#E2E8F0] rounded-md text-[11px] font-semibold text-[#64748B] transition-all"
-                >
-                  <X className="w-3 h-3" />
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                {isReverted ? (
-                  <button
-                    onClick={onUndoRevert}
-                    className="flex items-center gap-1 px-2.5 py-1 bg-[#DBEAFE] hover:bg-[#BFDBFE] border border-[#93C5FD] rounded-md text-[11px] font-semibold text-[#1E40AF] transition-all"
-                  >
-                    <Undo2 className="w-3 h-3" />
-                    Undo
-                  </button>
-                ) : (
-                  <button
-                    onClick={onRevert}
-                    className="flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-[#FEF2F2] border border-[#E2E8F0] hover:border-[#FECACA] rounded-md text-[11px] font-semibold text-[#64748B] hover:text-[#DC2626] transition-all"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    Revert
-                  </button>
-                )}
-              </>
+            {isValidMoveTarget && (
+              <span className="text-[10px] font-semibold text-blue-700 bg-blue-50/50 px-1.5 py-0.5 rounded animate-pulse">
+                Click to move here
+              </span>
             )}
           </div>
+          {showRevertButton && (
+            <div className="flex gap-2">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={onSave}
+                    className="flex items-center gap-1 px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-md text-[11px] font-semibold text-emerald-700 transition-all"
+                  >
+                    <Check className="w-3 h-3" />
+                    Save
+                  </button>
+                  <button
+                    onClick={onEditCancel}
+                    className="flex items-center gap-1 px-2.5 py-1 bg-background hover:bg-secondary border border-border rounded-md text-[11px] font-semibold text-muted-foreground transition-all"
+                  >
+                    <X className="w-3 h-3" />
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  {isReverted ? (
+                    <button
+                      onClick={onUndoRevert}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-blue-100 hover:bg-blue-200 border border-blue-300 rounded-md text-[11px] font-semibold text-blue-700 transition-all"
+                    >
+                      <Undo2 className="w-3 h-3" />
+                      Undo
+                    </button>
+                  ) : (
+                    <button
+                      onClick={onRevert}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-background hover:bg-red-50 border border-border hover:border-red-300 rounded-md text-[11px] font-semibold text-muted-foreground hover:text-red-600 transition-all"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      Revert
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {isEditing ? (
@@ -169,18 +232,18 @@ export function EditableSegmentRow({
             value={editedText}
             onChange={(e) => onTextChange(e.target.value)}
             onDoubleClick={onEditStart}
-            className="w-full text-[15px] leading-[1.7] text-[#334155] p-2 rounded border-2 border-[#38BDF8] bg-white font-inherit resize-none focus:outline-none focus:ring-0"
+            className="w-full min-h-[200px] text-[15px] leading-[1.7] text-foreground p-4 rounded-lg border-2 border-primary bg-background font-inherit resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm"
             style={{ fontFamily: "inherit" }}
           />
         ) : (
-          <div className="text-[15px] leading-[1.7] text-[#334155]" onDoubleClick={onEditStart}>
-            {renderContent()}
+          <div className="text-[15px] leading-[1.7] text-foreground select-text" onDoubleClick={onEditStart}>
+            {showDiff && !isReverted ? renderContent() : renderParagraphs()}
           </div>
         )}
 
-        {!isEditing && (
+        {!isEditing && !isSelectingMoveTarget && (
           <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
-            <div className="absolute top-2 right-2 bg-[#0F172A] text-white text-[10px] px-2 py-1 rounded font-medium">
+            <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px] px-2 py-1 rounded font-medium">
               Double-click to edit
             </div>
           </div>
@@ -192,20 +255,20 @@ export function EditableSegmentRow({
         <>
           <div className="fixed inset-0 z-40" onClick={onCloseSuggestions} />
           <div
-            className="fixed z-50 bg-white rounded-lg shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-[#E2E8F0] py-1 min-w-[180px]"
+            className="fixed z-50 bg-background rounded-lg shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-border py-1 min-w-[180px]"
             style={{
               left: `${activeSuggestion.position.x}px`,
               top: `${activeSuggestion.position.y}px`,
             }}
           >
-            <div className="px-3 py-1.5 text-[10px] font-bold text-[#64748B] uppercase tracking-wider border-b border-[#F1F5F9]">
+            <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-muted">
               Suggestions
             </div>
             {activeSuggestion.suggestions.map((suggestion, idx) => (
               <button
                 key={idx}
                 onClick={() => onSuggestionSelect(suggestion)}
-                className="w-full text-left px-3 py-2 text-sm text-[#334155] hover:bg-[#F1F5F9] transition-colors"
+                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {suggestion}
               </button>

@@ -11,6 +11,7 @@ export interface Segment {
   time: string
   rawText: string
   cleanedText: string
+  paragraphs?: string[] // Optional array of paragraphs for cleaned text
 }
 
 export interface HistoryEntry {
@@ -24,4 +25,16 @@ export interface HistoryEntry {
 export interface SegmentEditState {
   isEditing: boolean
   hasUnsavedEdits: boolean
+}
+
+export interface TextMoveSelection {
+  text: string
+  sourceSegmentId: string
+  sourceColumn: "raw" | "cleaned"
+  startOffset: number
+  endOffset: number
+}
+
+export interface TranscriptDisplayOptions {
+  showSpeakerLabels: boolean // true for multi-speaker (diarized), false for single speaker
 }

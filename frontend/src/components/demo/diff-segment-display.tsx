@@ -28,14 +28,14 @@ export function DiffSegmentDisplay({ rawText, cleanedText, showDiff }: DiffSegme
         }
         if (token.type === "deleted") {
           return (
-            <span key={idx} className="bg-[#FEE2E2] text-[#991B1B] line-through rounded px-0.5 mx-0.5">
+            <span key={idx} className="bg-red-100 text-red-900 line-through rounded">
               {token.text}
             </span>
           )
         }
         if (token.type === "inserted") {
           return (
-            <span key={idx} className="bg-[#DCFCE7] text-[#166534] rounded px-0.5 mx-0.5">
+            <span key={idx} className="bg-emerald-100 text-emerald-900 rounded">
               {token.text}
             </span>
           )
