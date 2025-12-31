@@ -11,6 +11,7 @@ from app.database import Base, engine
 from app import models  # noqa: F401 - Import models to register them with Base
 from app.rate_limit import RateLimitExceeded
 from app.routes.core import router as core_router
+from app.routes.local import router as local_router
 
 
 # =============================================================================
@@ -72,6 +73,7 @@ app = FastAPI(
 
 # Register routers
 app.include_router(core_router)
+app.include_router(local_router)
 
 # Register middleware
 app.add_middleware(RateLimitHeaderMiddleware)

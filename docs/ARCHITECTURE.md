@@ -75,17 +75,21 @@ backend/
 │   ├── session.py        # Anonymous session management
 │   ├── rate_limit.py     # Rate limiting (4-tier: session/hour, session/day, IP/day, global/day)
 │   └── routes/
-│       └── core.py       # Core API proxy endpoints
+│       ├── core.py       # Core API proxy endpoints
+│       └── local.py      # Local-only endpoints (feedback, waitlist)
 ├── tests/
 │   ├── conftest.py       # Test fixtures (respx mocking)
 │   ├── test_session.py   # Session management tests
-│   ├── test_endpoints.py # Endpoint tests
+│   ├── test_endpoints.py # Core API proxy endpoint tests
+│   ├── test_local.py     # Feedback and waitlist tests
 │   └── test_rate_limit.py # Rate limiting tests
 ├── requirements.txt      # Production dependencies
 └── requirements-dev.txt  # Test dependencies (pytest, respx)
 ```
 
 **API Endpoints:**
+
+*Core API Proxy (routes/core.py):*
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | GET | Health check |
@@ -101,6 +105,13 @@ backend/
 | `/api/cleaned-entries/{id}/analyze` | POST | Trigger analysis |
 | `/api/analyses/{id}` | GET | Get analysis result |
 | `/api/analysis-profiles` | GET | List analysis profiles |
+
+*Local-only (routes/local.py):*
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/entries/{id}/feedback` | POST | Submit feedback (upsert by type) |
+| `/api/entries/{id}/feedback` | GET | Get all feedback for entry |
+| `/api/waitlist` | POST | Join waitlist (email capture) |
 
 ### Core API (External)
 - Transcription (ElevenLabs Scribe v1)

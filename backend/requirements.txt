@@ -4,3 +4,5 @@ sqlalchemy
 httpx
 python-dotenv
 pydantic-settings
+python-multipart
+email-validator
