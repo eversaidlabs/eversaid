@@ -17,6 +17,7 @@ import { FeaturesHint } from "@/components/demo/features-hint"
 import { DemoFooter } from "@/components/demo/demo-footer"
 import { WaitlistFlow, type WaitlistFormData } from "@/components/waitlist/waitlist-flow"
 import { useWaitlist } from "@/features/transcription/useWaitlist"
+import { useVoiceRecorder } from "@/features/transcription/useVoiceRecorder"
 import type { Segment, SpellcheckError, HistoryEntry } from "@/components/demo/types"
 
 // Mock spellcheck - in production, call a Slovenian spellcheck API
@@ -201,6 +202,9 @@ export default function DemoPage() {
 
   // Waitlist hook
   const waitlist = useWaitlist({ waitlistType, sourcePage: '/demo' })
+
+  // Voice recorder hook
+  const voiceRecorder = useVoiceRecorder()
 
   const rawScrollRef = useRef<HTMLDivElement>(null)
   const cleanedScrollRef = useRef<HTMLDivElement>(null)
@@ -474,6 +478,19 @@ export default function DemoPage() {
     }
   }, [waitlist.isSubmitted, waitlistState])
 
+  // Convert recorded audio blob to File when recording stops
+  useEffect(() => {
+    if (voiceRecorder.audioBlob && !voiceRecorder.isRecording) {
+      const file = new File(
+        [voiceRecorder.audioBlob],
+        `recording-${Date.now()}.webm`,
+        { type: voiceRecorder.audioBlob.type }
+      )
+      setSelectedFile(file)
+      voiceRecorder.resetRecording()
+    }
+  }, [voiceRecorder.audioBlob, voiceRecorder.isRecording, voiceRecorder])
+
   const handleWaitlistClose = useCallback(() => {
     setWaitlistState("hidden")
     waitlist.reset()
@@ -573,6 +590,11 @@ export default function DemoPage() {
               onFileSelect={handleFileSelect}
               onSpeakerCountChange={handleSpeakerCountChange}
               onTranscribeClick={handleTranscribeClick}
+              isRecording={voiceRecorder.isRecording}
+              recordingDuration={voiceRecorder.duration}
+              recordingError={voiceRecorder.error}
+              onStartRecording={voiceRecorder.startRecording}
+              onStopRecording={voiceRecorder.stopRecording}
             />
             <div className="flex flex-col gap-5">
               <EntryHistoryCard
