@@ -192,10 +192,20 @@ describe('Session Utilities', () => {
   // ==========================================================================
 
   describe('getTimeUntilExpiry', () => {
-    it('returns correct time for future date', () => {
-      const now = new Date()
-      const future = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000 + 30 * 60 * 1000)
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
 
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('returns correct time for future date', () => {
+      const now = new Date('2025-01-15T10:00:00Z')
+      vi.setSystemTime(now)
+
+      // 2 days, 3 hours, 30 minutes from frozen "now"
+      const future = new Date('2025-01-17T13:30:00Z')
       const result = getTimeUntilExpiry(future)
 
       expect(result.days).toBe(2)
@@ -205,8 +215,10 @@ describe('Session Utilities', () => {
     })
 
     it('returns isExpired true for past date', () => {
-      const past = new Date(Date.now() - 1000)
+      const now = new Date('2025-01-15T10:00:00Z')
+      vi.setSystemTime(now)
 
+      const past = new Date('2025-01-15T09:59:59Z')
       const result = getTimeUntilExpiry(past)
 
       expect(result.isExpired).toBe(true)
@@ -216,7 +228,8 @@ describe('Session Utilities', () => {
     })
 
     it('handles edge case of exactly now', () => {
-      const now = new Date()
+      const now = new Date('2025-01-15T10:00:00Z')
+      vi.setSystemTime(now)
 
       const result = getTimeUntilExpiry(now)
 
