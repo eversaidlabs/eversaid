@@ -3,16 +3,25 @@
 import { useState } from "react"
 import { X, UserPlus, Check, Copy, Upload, Info, AlertCircle } from "lucide-react"
 
+export interface WaitlistFormData {
+  useCase: string
+  volume: string
+  source: string
+}
+
 export interface WaitlistFlowProps {
   state: "hidden" | "toast" | "form" | "success"
   type: "extended_usage" | "api_access"
   email: string
   referralCode: string
+  isSubmitting?: boolean
+  error?: string | null
   onEmailChange: (email: string) => void
-  onSubmit: () => void
+  onSubmit: (data: WaitlistFormData) => void
   onClose: () => void
   onCopyCode: () => void
   onCopyLink: () => void
+  onOpenForm?: () => void
 }
 
 export function WaitlistFlow({
@@ -20,22 +29,22 @@ export function WaitlistFlow({
   type,
   email,
   referralCode,
+  isSubmitting = false,
+  error,
   onEmailChange,
   onSubmit,
   onClose,
   onCopyCode,
   onCopyLink,
+  onOpenForm,
 }: WaitlistFlowProps) {
   const [useCase, setUseCase] = useState("")
   const [volume, setVolume] = useState("")
   const [source, setSource] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const handleSubmit = () => {
-    setIsSubmitting(true)
-    onSubmit()
-    setTimeout(() => setIsSubmitting(false), 1000)
+    onSubmit({ useCase, volume, source })
   }
 
   const handleCopyLink = () => {
@@ -77,7 +86,7 @@ export function WaitlistFlow({
             Later
           </button>
           <button
-            onClick={() => {}}
+            onClick={onOpenForm}
             className="flex-1 md:flex-none px-4 py-2.5 bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] hover:shadow-[0_4px_12px_rgba(56,189,248,0.3)] hover:-translate-y-px text-white rounded-[10px] text-[13px] font-semibold transition-all"
           >
             Join Waitlist
@@ -227,6 +236,13 @@ export function WaitlistFlow({
                     className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)] placeholder:text-[#94A3B8]"
                   />
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600">
+                    {error}
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <button

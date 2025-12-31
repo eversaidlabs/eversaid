@@ -15,7 +15,8 @@ import { WaitlistCTA } from "@/components/demo/waitlist-cta"
 import { UploadZone } from "@/components/demo/upload-zone"
 import { FeaturesHint } from "@/components/demo/features-hint"
 import { DemoFooter } from "@/components/demo/demo-footer"
-import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { WaitlistFlow, type WaitlistFormData } from "@/components/waitlist/waitlist-flow"
+import { useWaitlist } from "@/features/transcription/useWaitlist"
 import type { Segment, SpellcheckError, HistoryEntry } from "@/components/demo/types"
 
 // Mock spellcheck - in production, call a Slovenian spellcheck API
@@ -197,8 +198,9 @@ export default function DemoPage() {
   // Waitlist modal state
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
   const [waitlistType, setWaitlistType] = useState<"extended_usage" | "api_access">("extended_usage")
-  const [waitlistEmail, setWaitlistEmail] = useState("")
-  const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
+
+  // Waitlist hook
+  const waitlist = useWaitlist({ waitlistType, sourcePage: '/demo' })
 
   const rawScrollRef = useRef<HTMLDivElement>(null)
   const cleanedScrollRef = useRef<HTMLDivElement>(null)
@@ -461,33 +463,38 @@ export default function DemoPage() {
     setWaitlistState("form")
   }, [])
 
-  const handleWaitlistEmailChange = useCallback((email: string) => {
-    setWaitlistEmail(email)
-  }, [])
+  const handleWaitlistSubmit = useCallback(async (formData: WaitlistFormData) => {
+    await waitlist.submit(formData)
+  }, [waitlist])
 
-  const handleWaitlistSubmit = useCallback(() => {
-    // Simulate API call
-    console.log("Waitlist submission:", { email: waitlistEmail, type: waitlistType })
-    // Generate mock referral code
-    const mockReferralCode = `REF${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-    setWaitlistReferralCode(mockReferralCode)
-    setWaitlistState("success")
-  }, [waitlistEmail, waitlistType])
+  // Sync waitlist state with hook's isSubmitted
+  useEffect(() => {
+    if (waitlist.isSubmitted && waitlistState === "form") {
+      setWaitlistState("success")
+    }
+  }, [waitlist.isSubmitted, waitlistState])
 
   const handleWaitlistClose = useCallback(() => {
     setWaitlistState("hidden")
-    setWaitlistEmail("")
-    setWaitlistReferralCode("")
+    waitlist.reset()
+  }, [waitlist])
+
+  const handleWaitlistOpenForm = useCallback(() => {
+    setWaitlistState("form")
   }, [])
 
   const handleWaitlistCopyCode = useCallback(() => {
-    navigator.clipboard.writeText(waitlistReferralCode)
-  }, [waitlistReferralCode])
+    if (waitlist.referralCode) {
+      navigator.clipboard.writeText(waitlist.referralCode)
+    }
+  }, [waitlist.referralCode])
 
   const handleWaitlistCopyLink = useCallback(() => {
-    const referralLink = `https://eversaid.com?ref=${waitlistReferralCode}`
-    navigator.clipboard.writeText(referralLink)
-  }, [waitlistReferralCode])
+    if (waitlist.referralCode) {
+      const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
+      navigator.clipboard.writeText(referralLink)
+    }
+  }, [waitlist.referralCode])
 
   const handleHistorySelect = useCallback((id: string) => {
     console.log("Selected history entry:", id)
@@ -608,7 +615,13 @@ export default function DemoPage() {
 
                 {/* Transcript Content */}
                 <div className="grid grid-cols-2 h-[600px] bg-white">
-                  <RawSegmentList ref={rawScrollRef} segments={segments} onScroll={handleRawScroll} />
+                  <RawSegmentList
+                    ref={rawScrollRef}
+                    segments={segments}
+                    activeSegmentId={activeSegmentId}
+                    onSegmentClick={setActiveSegmentId}
+                    onScroll={handleRawScroll}
+                  />
                   <EditableSegmentList
                     ref={cleanedScrollRef}
                     segments={segments}
@@ -676,13 +689,16 @@ export default function DemoPage() {
       <WaitlistFlow
         state={waitlistState}
         type={waitlistType}
-        email={waitlistEmail}
-        referralCode={waitlistReferralCode}
-        onEmailChange={handleWaitlistEmailChange}
+        email={waitlist.email}
+        referralCode={waitlist.referralCode || ""}
+        isSubmitting={waitlist.isSubmitting}
+        error={waitlist.error}
+        onEmailChange={waitlist.setEmail}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
         onCopyCode={handleWaitlistCopyCode}
         onCopyLink={handleWaitlistCopyLink}
+        onOpenForm={handleWaitlistOpenForm}
       />
     </div>
   )
