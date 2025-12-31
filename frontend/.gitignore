@@ -54,4 +54,5 @@ storybook-static
 /blob-report/
 /playwright/.cache/
 
-docs/tmp/
+# v0 fetch script temp directory
+v0-utils/.tmp-v0-fetch/

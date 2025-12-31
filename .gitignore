@@ -43,9 +43,6 @@ htmlcov/
 .next/
 out/
 
-# Production
-build/
-
 # IDE
 .idea/
 .vscode/
@@ -85,3 +82,6 @@ data/
 *.pem
 *.key
 credentials.json
+
+docs-local/
+.claude/

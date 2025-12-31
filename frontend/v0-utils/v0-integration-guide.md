@@ -33,48 +33,15 @@ git add . && git commit -m "feat: import v0 [component-name]"
 
 ## fetch-v0.sh Script
 
-Automates v0 code fetching with git-friendly file replacement and selective syncing.
-
-### Usage
+See [fetch-v0-README.md](./fetch-v0-README.md) for full documentation.
 
 ```bash
-./v0-utils/fetch-v0.sh --v0url <url> [--filter <pattern>...] [--keep-tmp]
-```
-
-### Parameters
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `--v0url <url>` | Yes | v0.dev or v0.app chat URL |
-| `--filter <pattern>` | No | Substring filter. Repeatable for multiple files |
-| `--keep-tmp` | No | Keep temp directory after sync (for debugging) |
-
-### Examples
-
-```bash
-# Sync all files (except globals.css)
+# Preview changes (dry-run, default)
 ./v0-utils/fetch-v0.sh --v0url "https://v0.app/chat/b/abc123?token=..."
 
-# Sync only specific files
-./v0-utils/fetch-v0.sh --v0url "https://v0.app/chat/b/abc123?token=..." \
-  --filter "editable-segment-list" \
-  --filter "app/demo/page" \
-  --filter "live-transcript-preview"
-
-# Sync a directory
-./v0-utils/fetch-v0.sh --v0url "https://v0.app/chat/b/abc123?token=..." \
-  --filter "components/demo"
-
-# Debug mode - keep temp directory
-./v0-utils/fetch-v0.sh --v0url "https://v0.app/chat/b/abc123?token=..." --keep-tmp
+# Apply changes
+./v0-utils/fetch-v0.sh --v0url "https://v0.app/chat/b/abc123?token=..." --sync
 ```
-
-### Features
-
-- **Git-friendly**: Uses `cp` to overwrite files, so git sees modifications not delete+add
-- **Protected files**: `src/app/globals.css` is never overwritten
-- **Smart skipping**: Identical files are skipped automatically
-- **Multi-filter**: Use multiple `--filter` flags to sync specific files
 
 ## When to Go Back to v0
 
