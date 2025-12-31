@@ -5,12 +5,17 @@ import type { HistoryEntry } from "./types"
 
 export interface EntryHistoryCardProps {
   entries: HistoryEntry[]
-  activeId: string | null
-  isEmpty: boolean
-  onSelect: (id: string) => void
+  activeId?: string | null
+  isEmpty?: boolean
+  onSelect?: (id: string) => void
 }
 
-export function EntryHistoryCard({ entries, activeId, isEmpty, onSelect }: EntryHistoryCardProps) {
+export function EntryHistoryCard({
+  entries,
+  activeId = null,
+  isEmpty = entries.length === 0,
+  onSelect,
+}: EntryHistoryCardProps) {
   return (
     <div className="bg-background rounded-2xl border border-border overflow-hidden">
       <div className="px-5 py-4 border-b border-border flex justify-between items-center">
@@ -30,7 +35,7 @@ export function EntryHistoryCard({ entries, activeId, isEmpty, onSelect }: Entry
           {entries.map((entry) => (
             <div
               key={entry.id}
-              onClick={() => onSelect(entry.id)}
+              onClick={() => onSelect?.(entry.id)}
               className={`flex items-center gap-3 p-3 rounded-[10px] cursor-pointer transition-all ${
                 activeId === entry.id
                   ? "bg-[linear-gradient(135deg,rgba(var(--color-primary),0.1)_0%,rgba(168,85,247,0.1)_100%)]"

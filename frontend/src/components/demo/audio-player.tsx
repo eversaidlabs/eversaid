@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
 import { Play, Pause, Download } from "lucide-react"
 
 export interface AudioPlayerProps {
@@ -8,11 +9,11 @@ export interface AudioPlayerProps {
   currentTime: number
   duration: number
   playbackSpeed: number
-  showSpeedMenu: boolean
+  showSpeedMenu?: boolean
   onPlayPause: () => void
   onSeek: (time: number) => void
   onSpeedChange: (speed: number) => void
-  onToggleSpeedMenu: () => void
+  onToggleSpeedMenu?: () => void
   onDownload: () => void
 }
 
@@ -27,13 +28,18 @@ export function AudioPlayer({
   currentTime,
   duration,
   playbackSpeed,
-  showSpeedMenu,
+  showSpeedMenu: showSpeedMenuProp,
   onPlayPause,
   onSeek,
   onSpeedChange,
-  onToggleSpeedMenu,
+  onToggleSpeedMenu: onToggleSpeedMenuProp,
   onDownload,
 }: AudioPlayerProps) {
+  const [internalShowSpeedMenu, setInternalShowSpeedMenu] = useState(false)
+
+  const showSpeedMenu = showSpeedMenuProp !== undefined ? showSpeedMenuProp : internalShowSpeedMenu
+  const handleToggleSpeedMenu = onToggleSpeedMenuProp ?? (() => setInternalShowSpeedMenu(prev => !prev))
+
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
   // This creates a gentle "wave" that moves through the progress bar as audio plays
@@ -115,7 +121,7 @@ export function AudioPlayer({
       <div className="flex gap-3">
         <div className="relative">
           <button
-            onClick={onToggleSpeedMenu}
+            onClick={handleToggleSpeedMenu}
             className="w-11 h-11 bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/8 rounded-xl flex items-center justify-center transition-all duration-300 text-sm font-bold text-white/85 shadow-md hover:shadow-lg hover:scale-105 backdrop-blur-sm border border-white/10"
           >
             {playbackSpeed}x
@@ -128,7 +134,7 @@ export function AudioPlayer({
                   key={speed}
                   onClick={() => {
                     onSpeedChange(speed)
-                    onToggleSpeedMenu()
+                    handleToggleSpeedMenu()
                   }}
                   className={`block w-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 whitespace-nowrap text-left ${
                     playbackSpeed === speed

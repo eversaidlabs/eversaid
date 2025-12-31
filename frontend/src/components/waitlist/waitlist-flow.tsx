@@ -6,20 +6,20 @@ export interface WaitlistFlowProps {
   state: "hidden" | "toast" | "form" | "success"
   type: "extended_usage" | "api_access"
   email: string
-  useCase: string
-  volume: string
-  source: string
-  isSubmitting: boolean
-  copied: boolean
+  useCase?: string
+  volume?: string
+  source?: string
+  isSubmitting?: boolean
+  copied?: boolean
   referralCode: string
   onEmailChange: (email: string) => void
-  onUseCaseChange: (useCase: string) => void
-  onVolumeChange: (volume: string) => void
-  onSourceChange: (source: string) => void
+  onUseCaseChange?: (useCase: string) => void
+  onVolumeChange?: (volume: string) => void
+  onSourceChange?: (source: string) => void
   onSubmit: () => void
   onClose: () => void
-  onCopyCode: () => void
-  onCopyLink: () => void
+  onCopyCode?: () => void
+  onCopyLink?: () => void
 }
 
 export function WaitlistFlow({
@@ -168,7 +168,7 @@ export function WaitlistFlow({
                     required
                     aria-required="true"
                     value={useCase}
-                    onChange={(e) => onUseCaseChange(e.target.value)}
+                    onChange={(e) => onUseCaseChange?.(e.target.value)}
                     placeholder={
                       isApiAccess
                         ? "e.g., Voice journal app, meeting notes automation"
@@ -194,7 +194,7 @@ export function WaitlistFlow({
                     <select
                       id="waitlist-volume"
                       value={volume}
-                      onChange={(e) => onVolumeChange(e.target.value)}
+                      onChange={(e) => onVolumeChange?.(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)]"
                     >
                       <option value="">Select volume</option>
@@ -219,7 +219,7 @@ export function WaitlistFlow({
                     type="text"
                     id="waitlist-source"
                     value={source}
-                    onChange={(e) => onSourceChange(e.target.value)}
+                    onChange={(e) => onSourceChange?.(e.target.value)}
                     placeholder="e.g., Twitter, friend, search"
                     className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)] placeholder:text-[#94A3B8]"
                   />
@@ -284,7 +284,7 @@ export function WaitlistFlow({
                     className="flex-1 px-3.5 py-2.5 bg-white border border-[#E2E8F0] rounded-[10px] text-[13px] font-mono text-[#0F172A] min-w-0"
                   />
                   <button
-                    onClick={onCopyLink}
+                    onClick={() => onCopyLink?.()}
                     aria-label="Copy referral link to clipboard"
                     className="px-4 py-2.5 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
                   >

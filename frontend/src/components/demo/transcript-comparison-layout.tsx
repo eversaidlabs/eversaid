@@ -6,7 +6,7 @@ import { useRef, useEffect } from "react"
 import { RawSegmentList } from "./raw-segment-list"
 import { EditableSegmentList } from "./editable-segment-list"
 import { TranscriptHeader } from "./transcript-header"
-import type { Segment, TextMoveSelection, ActiveSuggestion } from "./types"
+import type { Segment, TextMoveSelection, ActiveSuggestion, SpellcheckError } from "./types"
 
 interface TranscriptComparisonLayoutProps {
   segments: Segment[]
@@ -14,7 +14,7 @@ interface TranscriptComparisonLayoutProps {
   editingSegmentId: string | null
   editedTexts: Map<string, string>
   revertedSegments: Map<string, string>
-  spellcheckErrors: Map<string, string[]>
+  spellcheckErrors: Map<string, SpellcheckError[]>
   showDiff: boolean
   showSpeakerLabels: boolean
   textMoveSelection: TextMoveSelection | null
@@ -24,14 +24,14 @@ interface TranscriptComparisonLayoutProps {
   onSegmentClick: (segmentId: string) => void
   onRevert: (segmentId: string) => void
   onUndoRevert: (segmentId: string) => void
-  onSave: (segmentId: string, newText: string) => void
+  onSave: (segmentId: string) => void
   onEditStart: (segmentId: string) => void
   onEditCancel: (segmentId: string) => void
   onTextChange: (segmentId: string, text: string) => void
-  onWordClick: (segmentId: string, word: string, errors: string[]) => void
+  onWordClick: (segmentId: string, e: React.MouseEvent, error: SpellcheckError) => void
   onSuggestionSelect: (suggestion: string) => void
   onCloseSuggestions: () => void
-  onUpdateAll: (oldWord: string, newWord: string) => void
+  onUpdateAll: () => void
   onToggleDiff: () => void
   onRawTextSelect: (segmentId: string, text: string, startOffset: number, endOffset: number) => void
   onCleanedTextSelect: (segmentId: string, text: string, startOffset: number, endOffset: number) => void

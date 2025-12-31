@@ -38,3 +38,10 @@ export interface TextMoveSelection {
 export interface TranscriptDisplayOptions {
   showSpeakerLabels: boolean // true for multi-speaker (diarized), false for single speaker
 }
+
+export interface ActiveSuggestion {
+  segmentId: string
+  word: string
+  position: { x: number; y: number }
+  suggestions: string[]
+}

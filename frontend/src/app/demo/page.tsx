@@ -745,7 +745,6 @@ export default function DemoPage() {
         onEmailChange={setWaitlistEmail}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
-        onOpenForm={() => setWaitlistState("form")}
       />
     </div>
   )

@@ -398,7 +398,7 @@ export function useTranscription(
       return new Promise((resolve, reject) => {
         const poll = async () => {
           try {
-            const transcriptionStatus =
+            const { data: transcriptionStatus } =
               await getTranscriptionStatus(transcriptionId)
 
             if (transcriptionStatus.status === "completed") {
@@ -411,7 +411,7 @@ export function useTranscription(
               setStatus("cleaning")
 
               // Fetch cleaned entry
-              const cleanedEntry = await getCleanedEntry(cleanupIdVal)
+              const { data: cleanedEntry } = await getCleanedEntry(cleanupIdVal)
 
               if (
                 cleanedEntry.status === "completed" &&
@@ -514,7 +514,7 @@ export function useTranscription(
         // Start upload (progress is simulated for now since fetch doesn't support progress)
         setUploadProgress(50)
 
-        const response = await uploadAndTranscribe(file, {
+        const { data: response } = await uploadAndTranscribe(file, {
           speakerCount,
           enableDiarization: speakerCount > 1,
           enableAnalysis: true,

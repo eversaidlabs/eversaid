@@ -96,7 +96,6 @@ export default function ApiDocsPage() {
         onClose={() => setWaitlistState("hidden")}
         onEmailChange={setWaitlistEmail}
         onSubmit={handleWaitlistSubmit}
-        onToastAction={() => setWaitlistState("form")}
       />
 
       {/* Navigation */}

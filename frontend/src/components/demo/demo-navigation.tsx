@@ -2,10 +2,10 @@ import Link from "next/link"
 import { Upload, ChevronDown } from "lucide-react"
 
 export interface DemoNavigationProps {
-  currentPage: "demo" | "features" | "api"
+  currentPage?: "demo" | "features" | "api"
 }
 
-export function DemoNavigation({ currentPage }: DemoNavigationProps) {
+export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
   return (
     <nav className="sticky top-0 z-[100] flex justify-between items-center px-8 md:px-12 py-4 bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_50%,#0F172A_100%)]">
       <Link href="/" className="flex items-center gap-2.5">
