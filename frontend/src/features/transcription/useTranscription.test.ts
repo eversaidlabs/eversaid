@@ -331,33 +331,42 @@ describe('useTranscription', () => {
 
   describe('uploadAudio (API mode)', () => {
     it('uploads and polls for completion', async () => {
-      // Mock successful API responses
+      // Mock successful API responses - wrapped in { data, rateLimitInfo } format
       vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
-        entry_id: 'entry-123',
-        transcription_id: 'trans-123',
-        cleanup_id: 'cleanup-123',
-        transcription_status: 'processing',
-        cleanup_status: 'pending',
+        data: {
+          entry_id: 'entry-123',
+          transcription_id: 'trans-123',
+          cleanup_id: 'cleanup-123',
+          transcription_status: 'processing',
+          cleanup_status: 'pending',
+        },
+        rateLimitInfo: null,
       })
 
       vi.mocked(api.getTranscriptionStatus).mockResolvedValue({
-        id: 'trans-123',
-        status: 'completed',
-        text: 'Hello world',
-        segments: [
-          { id: 'seg-1', start: 0, end: 5, text: 'Hello world', speaker_id: 0 },
-        ],
+        data: {
+          id: 'trans-123',
+          status: 'completed',
+          text: 'Hello world',
+          segments: [
+            { id: 'seg-1', start: 0, end: 5, text: 'Hello world', speaker_id: 0 },
+          ],
+        },
+        rateLimitInfo: null,
       })
 
       vi.mocked(api.getCleanedEntry).mockResolvedValue({
-        id: 'cleanup-123',
-        entry_id: 'entry-123',
-        cleaned_text: 'Hello world.',
-        user_edited_text: null,
-        status: 'completed',
-        segments: [
-          { id: 'clean-1', start: 0, end: 5, text: 'Hello world.', speaker_id: 0 },
-        ],
+        data: {
+          id: 'cleanup-123',
+          entry_id: 'entry-123',
+          cleaned_text: 'Hello world.',
+          user_edited_text: null,
+          status: 'completed',
+          segments: [
+            { id: 'clean-1', start: 0, end: 5, text: 'Hello world.', speaker_id: 0 },
+          ],
+        },
+        rateLimitInfo: null,
       })
 
       const { result } = renderHook(() => useTranscription({ mockMode: false }))
@@ -414,17 +423,23 @@ describe('useTranscription', () => {
 
     it('handles transcription failure', async () => {
       vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
-        entry_id: 'entry-123',
-        transcription_id: 'trans-123',
-        cleanup_id: 'cleanup-123',
-        transcription_status: 'processing',
-        cleanup_status: 'pending',
+        data: {
+          entry_id: 'entry-123',
+          transcription_id: 'trans-123',
+          cleanup_id: 'cleanup-123',
+          transcription_status: 'processing',
+          cleanup_status: 'pending',
+        },
+        rateLimitInfo: null,
       })
 
       vi.mocked(api.getTranscriptionStatus).mockResolvedValue({
-        id: 'trans-123',
-        status: 'failed',
-        error: 'Audio too short',
+        data: {
+          id: 'trans-123',
+          status: 'failed',
+          error: 'Audio too short',
+        },
+        rateLimitInfo: null,
       })
 
       const { result } = renderHook(() => useTranscription({ mockMode: false }))
@@ -441,26 +456,35 @@ describe('useTranscription', () => {
 
     it('caches entry in localStorage', async () => {
       vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
-        entry_id: 'entry-123',
-        transcription_id: 'trans-123',
-        cleanup_id: 'cleanup-123',
-        transcription_status: 'processing',
-        cleanup_status: 'pending',
+        data: {
+          entry_id: 'entry-123',
+          transcription_id: 'trans-123',
+          cleanup_id: 'cleanup-123',
+          transcription_status: 'processing',
+          cleanup_status: 'pending',
+        },
+        rateLimitInfo: null,
       })
 
       vi.mocked(api.getTranscriptionStatus).mockResolvedValue({
-        id: 'trans-123',
-        status: 'completed',
-        segments: [],
+        data: {
+          id: 'trans-123',
+          status: 'completed',
+          segments: [],
+        },
+        rateLimitInfo: null,
       })
 
       vi.mocked(api.getCleanedEntry).mockResolvedValue({
-        id: 'cleanup-123',
-        entry_id: 'entry-123',
-        cleaned_text: '',
-        user_edited_text: null,
-        status: 'completed',
-        segments: [],
+        data: {
+          id: 'cleanup-123',
+          entry_id: 'entry-123',
+          cleaned_text: '',
+          user_edited_text: null,
+          status: 'completed',
+          segments: [],
+        },
+        rateLimitInfo: null,
       })
 
       const { result } = renderHook(() => useTranscription({ mockMode: false }))
@@ -488,12 +512,15 @@ describe('useTranscription', () => {
   describe('segment editing (API mode)', () => {
     it('calls saveUserEdit API when updating segment', async () => {
       vi.mocked(api.saveUserEdit).mockResolvedValue({
-        id: 'cleanup-123',
-        entry_id: 'entry-123',
-        cleaned_text: 'Updated text',
-        user_edited_text: 'Updated text',
-        status: 'completed',
-        segments: [],
+        data: {
+          id: 'cleanup-123',
+          entry_id: 'entry-123',
+          cleaned_text: 'Updated text',
+          user_edited_text: 'Updated text',
+          status: 'completed',
+          segments: [],
+        },
+        rateLimitInfo: null,
       })
 
       const customSegments: Segment[] = [
@@ -508,24 +535,33 @@ describe('useTranscription', () => {
       await act(async () => {
         // Simulate having a cleanup ID by uploading
         vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
-          entry_id: 'entry-123',
-          transcription_id: 'trans-123',
-          cleanup_id: 'cleanup-123',
-          transcription_status: 'completed',
-          cleanup_status: 'completed',
+          data: {
+            entry_id: 'entry-123',
+            transcription_id: 'trans-123',
+            cleanup_id: 'cleanup-123',
+            transcription_status: 'completed',
+            cleanup_status: 'completed',
+          },
+          rateLimitInfo: null,
         })
         vi.mocked(api.getTranscriptionStatus).mockResolvedValue({
-          id: 'trans-123',
-          status: 'completed',
-          segments: [{ id: 'seg-1', start: 0, end: 10, text: 'raw' }],
+          data: {
+            id: 'trans-123',
+            status: 'completed',
+            segments: [{ id: 'seg-1', start: 0, end: 10, text: 'raw' }],
+          },
+          rateLimitInfo: null,
         })
         vi.mocked(api.getCleanedEntry).mockResolvedValue({
-          id: 'cleanup-123',
-          entry_id: 'entry-123',
-          cleaned_text: 'clean',
-          user_edited_text: null,
-          status: 'completed',
-          segments: [{ id: 'clean-1', start: 0, end: 10, text: 'clean' }],
+          data: {
+            id: 'cleanup-123',
+            entry_id: 'entry-123',
+            cleaned_text: 'clean',
+            user_edited_text: null,
+            status: 'completed',
+            segments: [{ id: 'clean-1', start: 0, end: 10, text: 'clean' }],
+          },
+          rateLimitInfo: null,
         })
 
         await result.current.uploadAudio(new File(['test'], 'test.mp3'), 1)
@@ -540,12 +576,15 @@ describe('useTranscription', () => {
 
     it('calls revertUserEdit API when reverting segment', async () => {
       vi.mocked(api.revertUserEdit).mockResolvedValue({
-        id: 'cleanup-123',
-        entry_id: 'entry-123',
-        cleaned_text: 'original clean',
-        user_edited_text: null,
-        status: 'completed',
-        segments: [],
+        data: {
+          id: 'cleanup-123',
+          entry_id: 'entry-123',
+          cleaned_text: 'original clean',
+          user_edited_text: null,
+          status: 'completed',
+          segments: [],
+        },
+        rateLimitInfo: null,
       })
 
       const { result } = renderHook(() => useTranscription({ mockMode: false }))
@@ -553,24 +592,33 @@ describe('useTranscription', () => {
       // Setup with upload
       await act(async () => {
         vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
-          entry_id: 'entry-123',
-          transcription_id: 'trans-123',
-          cleanup_id: 'cleanup-123',
-          transcription_status: 'completed',
-          cleanup_status: 'completed',
+          data: {
+            entry_id: 'entry-123',
+            transcription_id: 'trans-123',
+            cleanup_id: 'cleanup-123',
+            transcription_status: 'completed',
+            cleanup_status: 'completed',
+          },
+          rateLimitInfo: null,
         })
         vi.mocked(api.getTranscriptionStatus).mockResolvedValue({
-          id: 'trans-123',
-          status: 'completed',
-          segments: [{ id: 'seg-1', start: 0, end: 10, text: 'raw text' }],
+          data: {
+            id: 'trans-123',
+            status: 'completed',
+            segments: [{ id: 'seg-1', start: 0, end: 10, text: 'raw text' }],
+          },
+          rateLimitInfo: null,
         })
         vi.mocked(api.getCleanedEntry).mockResolvedValue({
-          id: 'cleanup-123',
-          entry_id: 'entry-123',
-          cleaned_text: 'clean text',
-          user_edited_text: null,
-          status: 'completed',
-          segments: [{ id: 'clean-1', start: 0, end: 10, text: 'clean text' }],
+          data: {
+            id: 'cleanup-123',
+            entry_id: 'entry-123',
+            cleaned_text: 'clean text',
+            user_edited_text: null,
+            status: 'completed',
+            segments: [{ id: 'clean-1', start: 0, end: 10, text: 'clean text' }],
+          },
+          rateLimitInfo: null,
         })
 
         await result.current.uploadAudio(new File(['test'], 'test.mp3'), 1)
