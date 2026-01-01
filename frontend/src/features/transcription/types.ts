@@ -131,15 +131,40 @@ export interface CleanedEntry {
 }
 
 /**
- * Entry summary for list view
+ * Transcription summary in entry list
+ */
+export interface TranscriptionSummary {
+  id: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  language_code: string
+  error_message: string | null
+  created_at: string
+}
+
+/**
+ * Cleaned entry summary in entry list
+ */
+export interface CleanedEntrySummary {
+  id: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  cleaned_text_preview: string | null
+  error_message: string | null
+  created_at: string
+  user_edited_text_preview: string | null
+}
+
+/**
+ * Entry summary for list view (matches actual API response)
  */
 export interface EntrySummary {
   id: string
-  filename: string
-  duration: number
-  created_at: string
-  transcription_status: 'pending' | 'processing' | 'completed' | 'failed'
-  cleanup_status: 'pending' | 'processing' | 'completed' | 'failed'
+  original_filename: string
+  saved_filename: string
+  entry_type: string
+  duration_seconds: number
+  uploaded_at: string
+  primary_transcription: TranscriptionSummary | null
+  latest_cleaned_entry: CleanedEntrySummary | null
 }
 
 /**

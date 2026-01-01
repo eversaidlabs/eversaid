@@ -37,8 +37,8 @@ export interface UseEntriesReturn {
  * Derive UI status from API statuses
  */
 function deriveEntryStatus(
-  transcriptionStatus: EntrySummary["transcription_status"],
-  cleanupStatus: EntrySummary["cleanup_status"]
+  transcriptionStatus: string | undefined,
+  cleanupStatus: string | undefined
 ): HistoryEntry["status"] {
   // If either failed, show error
   if (transcriptionStatus === "failed" || cleanupStatus === "failed") {
@@ -58,10 +58,13 @@ function deriveEntryStatus(
 function transformEntry(entry: EntrySummary): HistoryEntry {
   return {
     id: entry.id,
-    filename: entry.filename,
-    duration: formatDuration(entry.duration),
-    status: deriveEntryStatus(entry.transcription_status, entry.cleanup_status),
-    timestamp: entry.created_at,
+    filename: entry.original_filename,
+    duration: formatDuration(entry.duration_seconds),
+    status: deriveEntryStatus(
+      entry.primary_transcription?.status,
+      entry.latest_cleaned_entry?.status
+    ),
+    timestamp: entry.uploaded_at,
   }
 }
 
