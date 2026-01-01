@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -73,8 +74,24 @@ app = FastAPI(
 app.include_router(core_router)
 app.include_router(local_router)
 
-# Register middleware
+# Register middleware (order matters: CORS should be outermost)
 app.add_middleware(RateLimitHeaderMiddleware)
+
+# CORS configuration for frontend access
+cors_settings = get_settings()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_settings.cors_origins_list,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=[
+        "X-RateLimit-Limit-Day",
+        "X-RateLimit-Remaining-Day",
+        "X-RateLimit-Reset",
+        "Retry-After",
+    ],
+)
 
 
 # Exception handlers

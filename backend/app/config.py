@@ -20,7 +20,15 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite:///./data/demo.db"
 
+    # CORS origins (comma-separated list)
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+
     model_config = SettingsConfigDict(env_file=".env")
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse CORS_ORIGINS into a list."""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
 @lru_cache
