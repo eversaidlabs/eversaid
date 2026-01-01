@@ -63,7 +63,7 @@ test.describe("Landing Page", () => {
   })
 
   test("footer contains expected links", async ({ page }) => {
-    await expect(page.getByText("© 2025 eversaid")).toBeVisible()
+    await expect(page.getByText(/© \d{4} eversaid/)).toBeVisible()
     await expect(page.getByRole("link", { name: "Privacy Policy" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Terms" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Contact" })).toBeVisible()
