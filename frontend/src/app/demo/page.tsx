@@ -11,7 +11,12 @@ import { TranscriptComparisonLayout } from "@/components/demo/transcript-compari
 import { AudioPlayer } from "@/components/demo/audio-player"
 import type { Segment, SpellcheckError, TextMoveSelection } from "@/components/demo/types"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { OfflineBanner } from "@/components/ui/offline-banner"
+import { ErrorDisplay } from "@/components/demo/error-display"
+import { RateLimitModal } from "@/components/demo/rate-limit-modal"
 import { useTranscription } from "@/features/transcription/useTranscription"
+import { useRateLimits } from "@/features/transcription/useRateLimits"
+import { ApiError } from "@/features/transcription/types"
 import { useFeedback } from "@/features/transcription/useFeedback"
 import { useEntries } from "@/features/transcription/useEntries"
 import { useAudioPlayer } from "@/features/transcription/useAudioPlayer"
@@ -107,6 +112,10 @@ export default function DemoPage() {
   const [waitlistType, setWaitlistType] = useState<"extended_usage" | "api_access">("extended_usage")
   const [waitlistEmail, setWaitlistEmail] = useState("")
   const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
+
+  // Rate limit modal state
+  const [showRateLimitModal, setShowRateLimitModal] = useState(false)
+  const rateLimits = useRateLimits()
 
   const rawScrollRef = useRef<HTMLDivElement>(null)
   const cleanedScrollRef = useRef<HTMLDivElement>(null)
@@ -376,10 +385,15 @@ export default function DemoPage() {
     try {
       await transcription.uploadAudio(selectedFile, selectedSpeakerCount)
     } catch (err) {
-      // Error is captured in transcription.error
+      // Check if this is a rate limit error
+      if (err instanceof ApiError && err.isRateLimited) {
+        rateLimits.updateFromError(err)
+        setShowRateLimitModal(true)
+      }
+      // Other errors are captured in transcription.error
       console.error('Upload failed:', err)
     }
-  }, [selectedFile, selectedSpeakerCount, transcription])
+  }, [selectedFile, selectedSpeakerCount, transcription, rateLimits])
 
   // Auto-submit feedback for ratings >= 4
   useEffect(() => {
@@ -430,6 +444,24 @@ export default function DemoPage() {
     setWaitlistState("hidden")
     setWaitlistEmail("")
   }, [])
+
+  // Rate limit modal handlers
+  const handleRateLimitModalClose = useCallback(() => {
+    setShowRateLimitModal(false)
+  }, [])
+
+  const handleRateLimitJoinWaitlist = useCallback(() => {
+    setShowRateLimitModal(false)
+    handleOpenWaitlist("extended_usage")
+  }, [handleOpenWaitlist])
+
+  // Retry handler for error display
+  const handleRetryUpload = useCallback(() => {
+    transcription.reset()
+    if (selectedFile) {
+      handleTranscribeClick()
+    }
+  }, [transcription, selectedFile, handleTranscribeClick])
 
   const handleSegmentClick = useCallback((id: string) => {
     setActiveSegmentId(id)
@@ -482,6 +514,7 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      <OfflineBanner />
       <DemoNavigation />
 
       <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">
@@ -503,6 +536,17 @@ export default function DemoPage() {
             </div>
           </div>
         </div>
+
+        {/* Error display for upload/transcription errors */}
+        {transcription.error && transcription.status === 'error' && (
+          <div className="mb-6">
+            <ErrorDisplay
+              error={transcription.error}
+              onRetry={handleRetryUpload}
+              retryLabel="Try Again"
+            />
+          </div>
+        )}
       </div>
 
       <main className="mx-auto px-6 max-w-[1400px]">
@@ -610,6 +654,13 @@ export default function DemoPage() {
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
         onOpenForm={() => setWaitlistState("form")}
+      />
+
+      <RateLimitModal
+        isOpen={showRateLimitModal}
+        retryAfter={rateLimits.retryAfter}
+        onClose={handleRateLimitModalClose}
+        onJoinWaitlist={handleRateLimitJoinWaitlist}
       />
     </div>
   )

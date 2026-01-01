@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from "react"
+import { toast } from "sonner"
 import type { Segment } from "@/components/demo/types"
 import type {
   SegmentWithTime,
@@ -596,6 +597,7 @@ export function useTranscription(
         setError(errorMessage)
         setStatus("error")
         setUploadProgress(0)
+        toast.error(errorMessage)
       }
     },
     [mockMode, pollTranscriptionStatus]

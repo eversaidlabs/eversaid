@@ -5,6 +5,7 @@
  */
 
 import { useState, useCallback, useEffect } from "react"
+import { toast } from "sonner"
 import { getEntries } from "./api"
 import type { EntrySummary } from "./types"
 import type { HistoryEntry } from "@/components/demo/types"
@@ -98,6 +99,7 @@ export function useEntries(options: UseEntriesOptions = {}): UseEntriesReturn {
       const message =
         err instanceof Error ? err.message : "Failed to load entries"
       setError(message)
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

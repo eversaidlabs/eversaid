@@ -18,6 +18,7 @@ import type {
   WaitlistPayload,
 } from './types'
 import { ApiError } from './types'
+import { clearSession } from '@/lib/session'
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
 
@@ -131,6 +132,32 @@ async function request<T>(
         rateLimitError?.limits || rateLimitInfo || undefined,
         rateLimitError
       )
+    }
+
+    // Handle session expired (401) - retry once after clearing session
+    if (response.status === 401) {
+      // Clear local session data
+      clearSession()
+
+      // Retry the request once - server will create a new session via cookie
+      try {
+        const retryResponse = await fetch(url, fetchOptions)
+        if (retryResponse.ok) {
+          const retryRateLimitInfo = parseRateLimitHeaders(retryResponse)
+          const contentType = retryResponse.headers.get('Content-Type')
+          let retryData: T
+          if (contentType?.includes('application/json')) {
+            retryData = await retryResponse.json()
+          } else {
+            retryData = {} as T
+          }
+          return { data: retryData, rateLimitInfo: retryRateLimitInfo }
+        }
+      } catch {
+        // If retry also fails, throw the original 401 error
+      }
+
+      throw new ApiError(401, 'Session expired. Please refresh the page.', rateLimitInfo || undefined)
     }
 
     // Handle other errors
