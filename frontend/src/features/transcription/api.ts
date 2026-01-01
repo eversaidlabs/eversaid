@@ -209,7 +209,7 @@ export async function uploadAndTranscribe(
   formData.append('enable_diarization', String(options.enableDiarization ?? true))
   formData.append('speaker_count', String(options.speakerCount ?? 2))
   formData.append('enable_analysis', String(options.enableAnalysis ?? true))
-  formData.append('analysis_profile', options.analysisProfile ?? 'generic-conversation-summary')
+  formData.append('analysis_profile', options.analysisProfile ?? 'generic-summary')
 
   return request<TranscribeResponse>('/api/transcribe', {
     method: 'POST',
@@ -332,7 +332,7 @@ export async function getAnalysisProfiles(): Promise<{
  */
 export async function triggerAnalysis(
   cleanupId: string,
-  profileId: string = 'generic-conversation-summary'
+  profileId: string = 'generic-summary'
 ): Promise<{ data: AnalysisJob; rateLimitInfo: RateLimitInfo | null }> {
   return request<AnalysisJob>(`/api/cleaned-entries/${cleanupId}/analyze`, {
     method: 'POST',

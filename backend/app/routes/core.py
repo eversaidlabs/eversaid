@@ -28,7 +28,7 @@ class UserEditRequest(BaseModel):
 class AnalyzeRequest(BaseModel):
     """Request body for triggering analysis."""
 
-    profile_id: str = "generic-conversation-summary"
+    profile_id: str = "generic-summary"
 
 
 # =============================================================================
@@ -44,7 +44,7 @@ async def transcribe(
     enable_diarization: bool = Form(True),
     speaker_count: int = Form(2),
     enable_analysis: bool = Form(True),
-    analysis_profile: str = Form("generic-conversation-summary"),
+    analysis_profile: str = Form("generic-summary"),
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
     _rate_limit: RateLimitResult = Depends(require_rate_limit("transcribe")),

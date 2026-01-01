@@ -105,7 +105,7 @@ export default function DemoPage() {
   // Analysis hook
   const analysisHook = useAnalysis({
     cleanupId: transcription.cleanupId,
-    autoTrigger: true,
+    analysisId: transcription.analysisId,
   })
 
   // Waitlist modal state

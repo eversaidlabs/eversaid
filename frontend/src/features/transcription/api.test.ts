@@ -394,7 +394,7 @@ describe('API Client', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          body: JSON.stringify({ profile_id: 'generic-conversation-summary' }),
+          body: JSON.stringify({ profile_id: 'generic-summary' }),
         })
       )
     })

@@ -146,6 +146,8 @@ export interface UseTranscriptionReturn {
   entryId: string | null
   /** Current cleanup ID (needed for editing) */
   cleanupId: string | null
+  /** Current analysis ID (for polling analysis results) */
+  analysisId: string | null
   /** Current rate limit info */
   rateLimits: RateLimitInfo | null
 
@@ -299,6 +301,7 @@ export function useTranscription(
     segments.length > 0 ? "mock-entry-1" : null
   )
   const [cleanupId, setCleanupId] = useState<string | null>(null)
+  const [analysisId, setAnalysisId] = useState<string | null>(null)
   const [rateLimits, setRateLimits] = useState<RateLimitInfo | null>(null)
 
   // Track reverted segments for undo functionality
@@ -548,6 +551,7 @@ export function useTranscription(
         setUploadProgress(100)
         setEntryId(response.entry_id)
         setCleanupId(response.cleanup_id)
+        setAnalysisId(response.analysis_id ?? null)
 
         // Cache entry in localStorage
         addEntryId(response.entry_id)
@@ -684,6 +688,9 @@ export function useTranscription(
         setSegments(transformedSegments)
         setEntryId(entryIdToLoad)
         setCleanupId(entryDetails.cleanup.id)
+        // Set analysisId from most recent analysis if available
+        const latestAnalysis = entryDetails.analyses?.[0]
+        setAnalysisId(latestAnalysis?.id ?? null)
         setStatus("complete")
       } catch (err) {
         const errorMessage =
@@ -711,6 +718,7 @@ export function useTranscription(
     setUploadProgress(0)
     setEntryId(initialSegments?.length || mockMode ? "mock-entry-1" : null)
     setCleanupId(null)
+    setAnalysisId(null)
     setRateLimits(null)
     setRevertedSegments(new Map())
   }, [initialSegments, mockMode])
@@ -722,6 +730,7 @@ export function useTranscription(
     uploadProgress,
     entryId,
     cleanupId,
+    analysisId,
     rateLimits,
     updateSegmentCleanedText,
     revertSegmentToRaw,

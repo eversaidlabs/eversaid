@@ -19,9 +19,9 @@ export interface ParsedAnalysisData {
 export interface UseAnalysisOptions {
   /** Entry cleanup ID to analyze */
   cleanupId: string | null
-  /** Auto-trigger analysis when cleanup completes */
-  autoTrigger?: boolean
-  /** Default profile to use */
+  /** Analysis ID from transcribe response - if provided, polls for existing results */
+  analysisId?: string | null
+  /** Default profile to use for manual re-analysis */
   defaultProfile?: string
 }
 
@@ -58,7 +58,7 @@ function parseAnalysisResult(result: Record<string, unknown> | undefined): Parse
   if (!result) return null
 
   // The API returns different fields based on profile
-  // For generic-conversation-summary, we expect: summary, topics, key_points
+  // For generic-summary, we expect: summary, topics, key_points
   const summary = typeof result.summary === 'string' ? result.summary : ''
   const topics = Array.isArray(result.topics)
     ? result.topics.filter((t): t is string => typeof t === 'string')
@@ -90,22 +90,23 @@ function parseAnalysisResult(result: Record<string, unknown> | undefined): Parse
  *
  * @example
  * ```tsx
+ * // analysisId comes from the transcribe response - backend already triggered analysis
  * const { data, isLoading, analyze, profiles } = useAnalysis({
- *   cleanupId: 'cleanup-123',
- *   autoTrigger: true
+ *   cleanupId: transcription.cleanupId,
+ *   analysisId: transcription.analysisId,  // Auto-polls for results
  * })
  *
  * return (
  *   <div>
  *     {isLoading && <Spinner />}
  *     {data && <AnalysisSection data={data} profiles={profiles} />}
- *     <button onClick={() => analyze('custom-profile')}>Re-analyze</button>
+ *     <button onClick={() => analyze('action-items')}>Re-analyze with different profile</button>
  *   </div>
  * )
  * ```
  */
 export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
-  const { cleanupId, autoTrigger = false, defaultProfile = 'generic-conversation-summary' } = options
+  const { cleanupId, analysisId: initialAnalysisId, defaultProfile = 'generic-summary' } = options
 
   const [data, setData] = useState<ParsedAnalysisData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -252,14 +253,17 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
   }, [clearPolling])
 
   /**
-   * Auto-trigger analysis when cleanup ID becomes available
+   * Auto-fetch existing analysis when analysisId is provided
+   * (Backend already triggered analysis during transcribe, we just poll for results)
    */
   useEffect(() => {
-    if (autoTrigger && cleanupId && !hasAutoTriggeredRef.current && !isLoading && !data) {
+    if (initialAnalysisId && !hasAutoTriggeredRef.current && !isLoading && !data) {
       hasAutoTriggeredRef.current = true
-      analyze()
+      setAnalysisId(initialAnalysisId)
+      setIsLoading(true)
+      startPolling(initialAnalysisId)
     }
-  }, [autoTrigger, cleanupId, isLoading, data, analyze])
+  }, [initialAnalysisId, isLoading, data, startPolling])
 
   /**
    * Cleanup polling on unmount
@@ -271,13 +275,13 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
   }, [clearPolling])
 
   /**
-   * Reset when cleanup ID changes
+   * Reset when cleanup ID or analysis ID changes
    */
   useEffect(() => {
-    if (cleanupId !== null) {
+    if (cleanupId !== null || initialAnalysisId !== null) {
       reset()
     }
-  }, [cleanupId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cleanupId, initialAnalysisId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     data,
