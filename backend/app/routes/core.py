@@ -150,21 +150,21 @@ async def get_entry(
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
 ):
-    """Get entry details with transcription and cleanup.
+    """Get entry details with transcription segments and cleanup.
 
     WORKAROUND: The core API's GET /entries/{id} endpoint returns entry metadata
-    and transcription, but NOT cleanup data. The cleanup_id is only available in
-    the entries list response (latest_cleaned_entry.id).
+    and transcription summary, but NOT segments or cleanup data.
 
     This wrapper composes a full response by:
-    1. Fetching entry details (includes primary_transcription)
-    2. Fetching entries list to find this entry's cleanup_id
-    3. Fetching cleanup details if available
+    1. Fetching entry details (includes primary_transcription summary)
+    2. Fetching full transcription with segments
+    3. Fetching entries list to find this entry's cleanup_id
+    4. Fetching cleanup details if available
 
-    TODO: This should be fixed in the core API to return cleanup data directly,
+    TODO: This should be fixed in the core API to return all data directly,
     eliminating the need for multiple round-trips.
     """
-    # 1. Fetch entry details (includes primary_transcription)
+    # 1. Fetch entry details (includes primary_transcription summary)
     entry_response = await core_api.request(
         "GET",
         f"/api/v1/entries/{entry_id}",
@@ -179,7 +179,21 @@ async def get_entry(
 
     entry_data = entry_response.json()
 
-    # 2. Find cleanup_id from entries list (workaround for core API limitation)
+    # 2. Fetch full transcription with segments if we have a transcription_id
+    primary_transcription = entry_data.get("primary_transcription")
+    if primary_transcription and primary_transcription.get("id"):
+        transcription_id = primary_transcription["id"]
+        transcription_response = await core_api.request(
+            "GET",
+            f"/api/v1/transcriptions/{transcription_id}",
+            session.access_token,
+        )
+        if transcription_response.status_code == 200:
+            full_transcription = transcription_response.json()
+            # Merge segments into primary_transcription
+            entry_data["primary_transcription"] = full_transcription
+
+    # 3. Find cleanup_id from entries list (workaround for core API limitation)
     # The entries list includes latest_cleaned_entry.id which we need
     list_response = await core_api.request(
         "GET",
@@ -200,7 +214,7 @@ async def get_entry(
                     cleanup_id = latest_cleaned.get("id")
                 break
 
-    # 3. Fetch cleanup details if we found a cleanup_id
+    # 4. Fetch cleanup details if we found a cleanup_id
     if cleanup_id:
         cleanup_response = await core_api.request(
             "GET",
@@ -210,7 +224,7 @@ async def get_entry(
         if cleanup_response.status_code == 200:
             cleanup_data = cleanup_response.json()
 
-    # 4. Compose response with cleanup data included
+    # 5. Compose response with cleanup data included
     entry_data["cleanup"] = cleanup_data
 
     return entry_data
