@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/")
+    await page.goto("/en")
   })
 
   test("complete waitlist signup flow from landing page", async ({ page }) => {
@@ -114,7 +114,7 @@ test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
 
 test.describe("Waitlist Flow - API Access", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/api-docs")
+    await page.goto("/en/api-docs")
   })
 
   test("complete API waitlist signup flow", async ({ page }) => {

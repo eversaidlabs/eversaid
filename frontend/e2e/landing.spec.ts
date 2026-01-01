@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Landing Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/")
+    await page.goto("/en")
   })
 
   test("displays hero section with main CTA", async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe("Landing Page", () => {
     const demoButton = page.getByRole("link", { name: "Try Free Demo" }).first()
     await demoButton.click()
 
-    await expect(page).toHaveURL("/demo")
+    await expect(page).toHaveURL("/en/demo")
     await expect(page.getByRole("heading", { name: "Try eversaid" })).toBeVisible()
   })
 
@@ -36,7 +36,7 @@ test.describe("Landing Page", () => {
   test("API Docs link navigates to api-docs page", async ({ page }) => {
     await page.getByRole("link", { name: "API Docs" }).click()
 
-    await expect(page).toHaveURL("/api-docs")
+    await expect(page).toHaveURL("/en/api-docs")
     await expect(page.getByRole("heading", { name: "API Documentation" })).toBeVisible()
   })
 

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Demo Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/demo")
+    await page.goto("/en/demo")
   })
 
   test("loads with transcript visible", async ({ page }) => {
@@ -14,7 +14,7 @@ test.describe("Demo Page", () => {
 
     // Transcript sections visible
     await expect(page.getByText("Raw Transcription")).toBeVisible()
-    await expect(page.getByText("Cleaned Transcript")).toBeVisible()
+    await expect(page.getByText("AI Cleaned")).toBeVisible()
 
     // At least one segment visible
     await expect(page.getByText("Speaker 1").first()).toBeVisible()

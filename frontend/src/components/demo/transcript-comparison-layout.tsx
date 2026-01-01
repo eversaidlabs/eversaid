@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useRef, useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { RawSegmentList } from "./raw-segment-list"
 import { EditableSegmentList } from "./editable-segment-list"
 import { TranscriptHeader } from "./transcript-header"
@@ -75,6 +76,7 @@ export function TranscriptComparisonLayout({
   showCopyButton = true,
   variant = "demo",
 }: TranscriptComparisonLayoutProps) {
+  const t = useTranslations('demo.transcript')
   const rawScrollRef = useRef<HTMLDivElement>(null)
   const cleanedScrollRef = useRef<HTMLDivElement>(null)
   const isSyncingScrollRef = useRef(false)
@@ -145,13 +147,13 @@ export function TranscriptComparisonLayout({
     <div>
       <div className="grid grid-cols-2 border-b border-border">
         <TranscriptHeader
-          title="Raw Transcription"
+          title={t('rawTitle')}
           segments={segments}
           textKey="rawText"
           showCopyButton={showCopyButton}
         />
         <TranscriptHeader
-          title="Cleaned Transcript"
+          title={t('cleanedTitle')}
           segments={segments}
           textKey="cleanedText"
           showDiffToggle

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Feedback Rating on Demo Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/demo")
+    await page.goto("/en/demo")
   })
 
   test("feedback card is visible with star rating", async ({ page }) => {

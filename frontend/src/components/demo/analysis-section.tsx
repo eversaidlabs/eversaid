@@ -1,6 +1,7 @@
 "use client"
 
 import { Check, ChevronDown, Loader2, AlertCircle, RefreshCw } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export interface AnalysisProfile {
   id: string
@@ -37,10 +38,11 @@ export function AnalysisSection({
   onToggleAnalysisMenu,
   onRerunAnalysis,
 }: AnalysisSectionProps) {
+  const t = useTranslations('demo.analysis')
   const analysisLabels = {
-    summary: "Conversation Summary",
-    "action-items": "Action Items",
-    sentiment: "Sentiment Analysis",
+    summary: t('types.summary'),
+    "action-items": t('types.actionItems'),
+    sentiment: t('types.sentiment'),
   }
 
   // Show loading state
@@ -48,16 +50,16 @@ export function AnalysisSection({
     return (
       <div className="bg-[linear-gradient(135deg,rgba(var(--color-primary),0.05)_0%,rgba(168,85,247,0.05)_100%)] border border-[rgba(var(--color-primary),0.2)] rounded-[20px] p-7">
         <div className="flex items-center gap-3 mb-5">
-          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">AI Analysis</div>
+          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">{t('label')}</div>
           <div className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
-            Analyzing...
+            {t('analyzing')}
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Analyzing your conversation...</p>
+            <p className="text-sm text-muted-foreground">{t('analyzingText')}</p>
           </div>
         </div>
       </div>
@@ -69,10 +71,10 @@ export function AnalysisSection({
     return (
       <div className="bg-[linear-gradient(135deg,rgba(var(--color-primary),0.05)_0%,rgba(168,85,247,0.05)_100%)] border border-[rgba(var(--color-primary),0.2)] rounded-[20px] p-7">
         <div className="flex items-center gap-3 mb-5">
-          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">AI Analysis</div>
+          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">{t('label')}</div>
           <div className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
             <AlertCircle className="w-4 h-4" />
-            Error
+            {t('error')}
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -85,7 +87,7 @@ export function AnalysisSection({
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
-                Retry Analysis
+                {t('retryAnalysis')}
               </button>
             )}
           </div>
@@ -99,18 +101,18 @@ export function AnalysisSection({
     return (
       <div className="bg-[linear-gradient(135deg,rgba(var(--color-primary),0.05)_0%,rgba(168,85,247,0.05)_100%)] border border-[rgba(var(--color-primary),0.2)] rounded-[20px] p-7">
         <div className="flex items-center gap-3 mb-5">
-          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">AI Analysis</div>
+          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">{t('label')}</div>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">No analysis data available yet</p>
+            <p className="text-sm text-muted-foreground mb-4">{t('noData')}</p>
             {onRerunAnalysis && profiles.length > 0 && (
               <button
                 onClick={() => onRerunAnalysis(profiles[0].id)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
-                Run Analysis
+                {t('runAnalysis')}
               </button>
             )}
           </div>
@@ -123,7 +125,7 @@ export function AnalysisSection({
     <div className="bg-[linear-gradient(135deg,rgba(var(--color-primary),0.05)_0%,rgba(168,85,247,0.05)_100%)] border border-[rgba(var(--color-primary),0.2)] rounded-[20px] p-7">
       <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-3">
-          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">AI Analysis</div>
+          <div className="text-[11px] font-bold text-primary uppercase tracking-[1px]">{t('label')}</div>
           <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
             <Check className="w-4 h-4 text-emerald-500" />
             {analysisLabels[analysisType]}
@@ -134,7 +136,7 @@ export function AnalysisSection({
             onClick={onToggleAnalysisMenu}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-background hover:bg-secondary border border-border hover:border-muted-foreground rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-all"
           >
-            {onRerunAnalysis && profiles.length > 0 ? "Re-analyze" : "Change"}
+            {onRerunAnalysis && profiles.length > 0 ? t('reanalyze') : t('change')}
             <ChevronDown className="w-4 h-4" />
           </button>
           {showAnalysisMenu && (
@@ -178,11 +180,11 @@ export function AnalysisSection({
         </div>
       </div>
 
-      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">Summary</h4>
+      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">{t('summary')}</h4>
       <p className="text-[15px] text-foreground leading-[1.7] mb-4">{analysisData.summary}</p>
 
       <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">
-        Topics Discussed
+        {t('topicsDiscussed')}
       </h4>
       <div className="flex flex-wrap gap-2 mb-4">
         {analysisData.topics.map((topic) => (
@@ -195,7 +197,7 @@ export function AnalysisSection({
         ))}
       </div>
 
-      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">Key Points</h4>
+      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">{t('keyPoints')}</h4>
       <ul className="space-y-2">
         {analysisData.keyPoints.map((point, i) => (
           <li key={i} className="relative pl-5 text-sm text-foreground leading-[1.6]">

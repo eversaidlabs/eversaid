@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("API Docs Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/api-docs")
+    await page.goto("/en/api-docs")
   })
 
   test("displays page header and hero", async ({ page }) => {
@@ -20,12 +20,13 @@ test.describe("API Docs Page", () => {
 
   test("Home link navigates to landing page", async ({ page }) => {
     await page.getByRole("link", { name: "Home" }).click()
-    await expect(page).toHaveURL("/")
+    await expect(page).toHaveURL("/en")
   })
 
   test("Demo link navigates to demo page", async ({ page }) => {
-    await page.getByRole("link", { name: "Demo" }).click()
-    await expect(page).toHaveURL("/demo")
+    // Use first() to handle multiple Demo links on the page
+    await page.getByRole("link", { name: "Demo" }).first().click()
+    await expect(page).toHaveURL("/en/demo")
   })
 
   test("Join Waitlist button opens API waitlist modal", async ({ page }) => {

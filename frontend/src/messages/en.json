@@ -175,13 +175,13 @@
     "player": {
       "download": "Download",
       "speed": {
-        "0.5x": "0.5x",
-        "0.75x": "0.75x",
-        "1x": "1x",
-        "1.25x": "1.25x",
-        "1.5x": "1.5x",
-        "1.75x": "1.75x",
-        "2x": "2x"
+        "speed05x": "0.5x",
+        "speed075x": "0.75x",
+        "speed1x": "1x",
+        "speed125x": "1.25x",
+        "speed15x": "1.5x",
+        "speed175x": "1.75x",
+        "speed2x": "2x"
       }
     },
     "transcript": {
