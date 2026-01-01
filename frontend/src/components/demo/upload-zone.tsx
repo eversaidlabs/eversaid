@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { FileAudio, X } from "lucide-react"
 import { useTranslations } from 'next-intl'
 
 export interface UploadZoneProps {
@@ -8,9 +9,18 @@ export interface UploadZoneProps {
   isUploading: boolean
   uploadProgress: number
   hasFile: boolean
+  selectedFile: File | null
   onFileSelect: (file: File) => void
+  onRemoveFile: () => void
   onSpeakerCountChange: (count: number) => void
   onTranscribeClick: () => void
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export function UploadZone({
@@ -18,7 +28,9 @@ export function UploadZone({
   isUploading,
   uploadProgress,
   hasFile,
+  selectedFile,
   onFileSelect,
+  onRemoveFile,
   onSpeakerCountChange,
   onTranscribeClick,
 }: UploadZoneProps) {
@@ -70,6 +82,29 @@ export function UploadZone({
           {t('record')}
         </button>
       </div>
+
+      {selectedFile && (
+        <div className="px-6 pb-6">
+          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-[#E2E8F0]">
+              <FileAudio className="w-6 h-6 text-[#38BDF8]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[15px] font-semibold text-[#0F172A] truncate mb-0.5">{selectedFile.name}</div>
+              <div className="text-[13px] text-[#64748B]">
+                {formatFileSize(selectedFile.size)} · {selectedFile.type || t('audioFile')}
+              </div>
+            </div>
+            <button
+              onClick={onRemoveFile}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#FEE2E2] text-[#64748B] hover:text-[#EF4444] transition-all flex-shrink-0"
+              aria-label="Remove file"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="px-6 pb-6">
         <div className="text-[13px] font-semibold text-[#64748B] mb-3">{t('speakerCount')}</div>

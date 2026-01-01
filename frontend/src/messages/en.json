@@ -179,7 +179,8 @@
       "fivePlus": "5+",
       "transcribeNow": "Transcribe Now",
       "selectFile": "Select a file to transcribe",
-      "uploading": "Uploading... {progress}%"
+      "uploading": "Uploading... {progress}%",
+      "audioFile": "Audio file"
     },
     "recording": {
       "start": "Start recording",

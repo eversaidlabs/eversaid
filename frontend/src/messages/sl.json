@@ -179,7 +179,8 @@
       "fivePlus": "5+",
       "transcribeNow": "Prepiši zdaj",
       "selectFile": "Izberite datoteko za prepis",
-      "uploading": "Nalaganje... {progress}%"
+      "uploading": "Nalaganje... {progress}%",
+      "audioFile": "Zvočna datoteka"
     },
     "recording": {
       "start": "Začni snemanje",

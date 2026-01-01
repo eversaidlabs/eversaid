@@ -9,6 +9,7 @@ import { FeedbackCard } from "@/components/demo/feedback-card"
 import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
 import { AudioPlayer } from "@/components/demo/audio-player"
+import { UploadZone } from "@/components/demo/upload-zone"
 import type { Segment, SpellcheckError, TextMoveSelection } from "@/components/demo/types"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 import { OfflineBanner } from "@/components/ui/offline-banner"
@@ -374,6 +375,10 @@ export default function DemoPage() {
     setSelectedFile(file)
   }, [])
 
+  const handleRemoveFile = useCallback(() => {
+    setSelectedFile(null)
+  }, [])
+
   const handleSpeakerCountChange = useCallback((count: number) => {
     setSelectedSpeakerCount(count)
     // Speaker count will be used on next upload
@@ -550,90 +555,120 @@ export default function DemoPage() {
       </div>
 
       <main className="mx-auto px-6 max-w-[1400px]">
-        <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden mb-8">
-          {audioUrl && (
-            <audio src={audioUrl} {...audioPlayer.audioProps} preload="metadata" className="hidden" />
-          )}
-          <div className="bg-gradient-to-b from-muted/30 to-transparent border-b border-border/50 rounded-t-lg">
-            <AudioPlayer
-              isPlaying={audioPlayer.isPlaying}
-              currentTime={audioPlayer.currentTime}
-              duration={audioPlayer.duration}
-              playbackSpeed={audioPlayer.playbackSpeed}
-              onPlayPause={handlePlayPause}
-              onSeek={handleSeek}
-              onSpeedChange={handleSpeedChange}
-              onDownload={handleDownload}
-            />
+        {transcription.segments.length === 0 ? (
+          /* Upload Mode */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <UploadZone
+                selectedSpeakerCount={selectedSpeakerCount}
+                isUploading={transcription.status === 'uploading' || transcription.status === 'transcribing'}
+                uploadProgress={transcription.uploadProgress}
+                hasFile={!!selectedFile}
+                selectedFile={selectedFile}
+                onFileSelect={handleFileSelect}
+                onRemoveFile={handleRemoveFile}
+                onSpeakerCountChange={handleSpeakerCountChange}
+                onTranscribeClick={handleTranscribeClick}
+              />
+            </div>
+            <div>
+              <EntryHistoryCard
+                entries={entriesHook.entries}
+                activeId={transcription.entryId}
+                onSelect={handleEntrySelect}
+                isEmpty={entriesHook.entries.length === 0 && !entriesHook.isLoading}
+              />
+            </div>
           </div>
+        ) : (
+          /* Transcript Mode */
+          <>
+            <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden mb-8">
+              {audioUrl && (
+                <audio src={audioUrl} {...audioPlayer.audioProps} preload="metadata" className="hidden" />
+              )}
+              <div className="bg-gradient-to-b from-muted/30 to-transparent border-b border-border/50 rounded-t-lg">
+                <AudioPlayer
+                  isPlaying={audioPlayer.isPlaying}
+                  currentTime={audioPlayer.currentTime}
+                  duration={audioPlayer.duration}
+                  playbackSpeed={audioPlayer.playbackSpeed}
+                  onPlayPause={handlePlayPause}
+                  onSeek={handleSeek}
+                  onSpeedChange={handleSpeedChange}
+                  onDownload={handleDownload}
+                />
+              </div>
 
-          {/* Transcript comparison directly below */}
-          <TranscriptComparisonLayout
-            segments={transcription.segments}
-            activeSegmentId={activeSegmentId}
-            editingSegmentId={editingSegmentId}
-            editedTexts={editedTexts}
-            revertedSegments={revertedSegments}
-            spellcheckErrors={spellcheckErrors}
-            showDiff={showDiff}
-            showSpeakerLabels={showSpeakerLabels}
-            textMoveSelection={textMoveSelection}
-            isSelectingMoveTarget={isSelectingMoveTarget}
-            activeSuggestion={activeSuggestion}
-            editingCount={editingCount}
-            onSegmentClick={handleSegmentClick}
-            onRevert={handleRevertSegment}
-            onUndoRevert={handleUndoRevert}
-            onSave={handleSaveSegment}
-            onEditStart={handleSegmentEditStart}
-            onEditCancel={handleSegmentEditCancel}
-            onTextChange={handleTextChange}
-            onWordClick={handleWordClick}
-            onSuggestionSelect={handleSuggestionSelect}
-            onCloseSuggestions={handleCloseSuggestions}
-            onUpdateAll={handleUpdateAllSegments}
-            onToggleDiff={handleToggleDiff}
-            onRawTextSelect={handleRawTextSelect}
-            onCleanedTextSelect={handleCleanedTextSelect}
-            onRawMoveTargetClick={handleRawMoveTargetClick}
-            onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
-          />
-        </div>
+              {/* Transcript comparison directly below */}
+              <TranscriptComparisonLayout
+                segments={transcription.segments}
+                activeSegmentId={activeSegmentId}
+                editingSegmentId={editingSegmentId}
+                editedTexts={editedTexts}
+                revertedSegments={revertedSegments}
+                spellcheckErrors={spellcheckErrors}
+                showDiff={showDiff}
+                showSpeakerLabels={showSpeakerLabels}
+                textMoveSelection={textMoveSelection}
+                isSelectingMoveTarget={isSelectingMoveTarget}
+                activeSuggestion={activeSuggestion}
+                editingCount={editingCount}
+                onSegmentClick={handleSegmentClick}
+                onRevert={handleRevertSegment}
+                onUndoRevert={handleUndoRevert}
+                onSave={handleSaveSegment}
+                onEditStart={handleSegmentEditStart}
+                onEditCancel={handleSegmentEditCancel}
+                onTextChange={handleTextChange}
+                onWordClick={handleWordClick}
+                onSuggestionSelect={handleSuggestionSelect}
+                onCloseSuggestions={handleCloseSuggestions}
+                onUpdateAll={handleUpdateAllSegments}
+                onToggleDiff={handleToggleDiff}
+                onRawTextSelect={handleRawTextSelect}
+                onCleanedTextSelect={handleCleanedTextSelect}
+                onRawMoveTargetClick={handleRawMoveTargetClick}
+                onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <AnalysisSection
-              analysisType={analysisType}
-              analysisData={analysisHook.data}
-              showAnalysisMenu={showAnalysisMenu}
-              isLoading={analysisHook.isLoading}
-              error={analysisHook.error}
-              profiles={analysisHook.profiles}
-              onAnalysisTypeChange={setAnalysisType}
-              onToggleAnalysisMenu={handleToggleAnalysisMenu}
-              onRerunAnalysis={handleRerunAnalysis}
-            />
-          </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AnalysisSection
+                  analysisType={analysisType}
+                  analysisData={analysisHook.data}
+                  showAnalysisMenu={showAnalysisMenu}
+                  isLoading={analysisHook.isLoading}
+                  error={analysisHook.error}
+                  profiles={analysisHook.profiles}
+                  onAnalysisTypeChange={setAnalysisType}
+                  onToggleAnalysisMenu={handleToggleAnalysisMenu}
+                  onRerunAnalysis={handleRerunAnalysis}
+                />
+              </div>
 
-          <div className="space-y-6">
-            <EntryHistoryCard
-              entries={entriesHook.entries}
-              activeId={transcription.entryId}
-              onSelect={handleEntrySelect}
-              isEmpty={entriesHook.entries.length === 0 && !entriesHook.isLoading}
-            />
-            <FeedbackCard
-              rating={feedbackHook.rating}
-              feedback={feedbackHook.feedbackText}
-              onRatingChange={feedbackHook.setRating}
-              onFeedbackChange={feedbackHook.setFeedbackText}
-              onSubmit={feedbackHook.submit}
-              isSubmitting={feedbackHook.isSubmitting}
-              isSubmitted={feedbackHook.isSubmitted}
-              disabled={!transcription.entryId}
-            />
-          </div>
-        </div>
+              <div className="space-y-6">
+                <EntryHistoryCard
+                  entries={entriesHook.entries}
+                  activeId={transcription.entryId}
+                  onSelect={handleEntrySelect}
+                  isEmpty={entriesHook.entries.length === 0 && !entriesHook.isLoading}
+                />
+                <FeedbackCard
+                  rating={feedbackHook.rating}
+                  feedback={feedbackHook.feedbackText}
+                  onRatingChange={feedbackHook.setRating}
+                  onFeedbackChange={feedbackHook.setFeedbackText}
+                  onSubmit={feedbackHook.submit}
+                  isSubmitting={feedbackHook.isSubmitting}
+                  isSubmitted={feedbackHook.isSubmitted}
+                  disabled={!transcription.entryId}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       {textMoveSelection && (
