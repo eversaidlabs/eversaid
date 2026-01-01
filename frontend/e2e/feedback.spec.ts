@@ -2,7 +2,8 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Feedback Rating on Demo Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/en/demo")
+    // Use ?mock parameter to load demo with mock transcript data for E2E testing
+    await page.goto("/en/demo?mock")
   })
 
   test("feedback card is visible with star rating", async ({ page }) => {
