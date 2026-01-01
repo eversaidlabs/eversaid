@@ -1,6 +1,7 @@
 "use client"
 
 import { Upload, Check } from "lucide-react"
+import { useTranslations } from 'next-intl'
 import type { HistoryEntry } from "./types"
 
 export interface EntryHistoryCardProps {
@@ -16,10 +17,12 @@ export function EntryHistoryCard({
   isEmpty = entries.length === 0,
   onSelect,
 }: EntryHistoryCardProps) {
+  const t = useTranslations('demo.history')
+
   return (
     <div className="bg-background rounded-2xl border border-border overflow-hidden">
       <div className="px-5 py-4 border-b border-border flex justify-between items-center">
-        <span className="text-sm font-bold text-foreground">Your Transcriptions</span>
+        <span className="text-sm font-bold text-foreground">{t('title')}</span>
       </div>
 
       {isEmpty ? (
@@ -27,8 +30,8 @@ export function EntryHistoryCard({
           <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Upload className="w-7 h-7 stroke-muted-foreground" />
           </div>
-          <h4 className="text-sm font-semibold text-muted-foreground mb-1.5">No transcriptions yet</h4>
-          <p className="text-[13px] text-muted-foreground">Upload audio to get started</p>
+          <h4 className="text-sm font-semibold text-muted-foreground mb-1.5">{t('empty')}</h4>
+          <p className="text-[13px] text-muted-foreground">{t('emptySubtitle')}</p>
         </div>
       ) : (
         <div className="p-2">
@@ -64,7 +67,7 @@ export function EntryHistoryCard({
       )}
 
       <div className="px-4 py-3 border-t border-border text-[11px] text-muted-foreground text-center">
-        Transcriptions kept for 7 days
+        {t('retention')}
       </div>
     </div>
   )

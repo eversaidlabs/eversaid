@@ -1,6 +1,7 @@
 "use client"
 
 import { Sparkles } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
 export interface FeedbackCardProps {
   rating: number
@@ -14,11 +15,12 @@ export interface FeedbackCardProps {
 }
 
 export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChange, onSubmit, isSubmitting, isSubmitted, disabled }: FeedbackCardProps) {
+  const t = useTranslations('demo.feedback')
   const isDisabled = disabled || isSubmitted
 
   return (
     <div className="bg-background rounded-2xl border border-border p-5">
-      <h3 className="text-sm font-semibold text-foreground mb-3">How was the quality?</h3>
+      <h3 className="text-sm font-semibold text-foreground mb-3">{t('title')}</h3>
       <div className="flex gap-1 mb-3">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -34,12 +36,12 @@ export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChang
         ))}
       </div>
       {isSubmitted && (
-        <p className="text-sm text-green-600 font-medium">Thank you for your feedback!</p>
+        <p className="text-sm text-green-600 font-medium">{t('thanks')}</p>
       )}
       {!isSubmitted && rating > 0 && rating <= 3 && (
         <>
           <textarea
-            placeholder="What went wrong? Your feedback helps us improve."
+            placeholder={t('placeholder')}
             value={feedback}
             onChange={(e) => onFeedbackChange(e.target.value)}
             disabled={isDisabled}
@@ -51,7 +53,7 @@ export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChang
             disabled={isSubmitting || isDisabled}
             className="w-full py-2.5 bg-primary hover:bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Submitting..." : "Submit Feedback"}
+            {isSubmitting ? t('submitting') : t('submit')}
           </button>
         </>
       )}

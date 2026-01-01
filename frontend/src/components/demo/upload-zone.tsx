@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useTranslations } from 'next-intl'
 
 export interface UploadZoneProps {
   selectedSpeakerCount: number
@@ -21,6 +22,9 @@ export function UploadZone({
   onSpeakerCountChange,
   onTranscribeClick,
 }: UploadZoneProps) {
+  const t = useTranslations('demo.upload')
+  const tCommon = useTranslations('common')
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
@@ -46,29 +50,29 @@ export function UploadZone({
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
         </div>
-        <h3 className="text-[20px] font-bold text-[#0F172A] mb-2">Drop your audio file here</h3>
-        <p className="text-[15px] text-[#64748B] mb-5">MP3, WAV, M4A, FLAC · Max 50MB · Max 5 minutes</p>
+        <h3 className="text-[20px] font-bold text-[#0F172A] mb-2">{t('dropTitle')}</h3>
+        <p className="text-[15px] text-[#64748B] mb-5">{t('formats')}</p>
         <label className="px-6 py-3 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] text-sm font-semibold rounded-[10px] transition-colors cursor-pointer inline-block">
-          Browse Files
+          {t('browse')}
           <input type="file" accept="audio/*" onChange={handleFileInput} className="hidden" />
         </label>
       </div>
 
       <div className="flex items-center gap-4 px-6 text-[13px] font-medium text-[#94A3B8]">
         <div className="flex-1 h-px bg-[#E2E8F0]" />
-        or
+        {tCommon('or')}
         <div className="flex-1 h-px bg-[#E2E8F0]" />
       </div>
 
       <div className="p-6 flex items-center justify-center">
         <button className="flex items-center gap-2.5 px-7 py-3.5 bg-white hover:bg-[#FEF2F2] border-2 border-[#E2E8F0] hover:border-[#EF4444] rounded-xl text-[15px] font-semibold text-[#0F172A] transition-all">
           <div className="w-3 h-3 bg-[#EF4444] rounded-full" />
-          Record Audio
+          {t('record')}
         </button>
       </div>
 
       <div className="px-6 pb-6">
-        <div className="text-[13px] font-semibold text-[#64748B] mb-3">Number of speakers</div>
+        <div className="text-[13px] font-semibold text-[#64748B] mb-3">{t('speakerCount')}</div>
         <div className="flex gap-2 mb-4">
           {[1, 2, 3, 4, 5].map((num) => (
             <button
@@ -80,7 +84,7 @@ export function UploadZone({
                   : "bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]"
               }`}
             >
-              {num === 5 ? "5+" : num}
+              {num === 5 ? t('fivePlus') : num}
             </button>
           ))}
         </div>
@@ -93,7 +97,9 @@ export function UploadZone({
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
-            <p className="text-[13px] text-[#64748B] text-center mt-2">Uploading... {uploadProgress}%</p>
+            <p className="text-[13px] text-[#64748B] text-center mt-2">
+              {t('uploading', { progress: uploadProgress })}
+            </p>
           </div>
         ) : (
           <button
@@ -103,7 +109,7 @@ export function UploadZone({
               !hasFile ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
             }`}
           >
-            {hasFile ? "Transcribe Now" : "Select a file to transcribe"}
+            {hasFile ? t('transcribeNow') : t('selectFile')}
           </button>
         )}
       </div>

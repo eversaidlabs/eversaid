@@ -7,47 +7,482 @@
     "save": "Shrani",
     "delete": "Izbriši",
     "copy": "Kopiraj",
-    "download": "Prenesi"
+    "download": "Prenesi",
+    "or": "ali",
+    "daily": "dnevno",
+    "close": "Zapri",
+    "done": "Končano",
+    "copied": "Kopirano!",
+    "submitting": "Pošiljanje..."
+  },
+  "navigation": {
+    "home": "Domov",
+    "demo": "Demo",
+    "features": "Funkcije",
+    "useCases": "Primeri uporabe",
+    "howItWorks": "Kako deluje",
+    "apiDocs": "API dokumentacija",
+    "joinWaitlist": "Pridruži se čakalni listi"
   },
   "landing": {
-    "title": "Eversaid",
-    "subtitle": "Slovenska transkripcija z AI",
-    "cta": "Poskusi demo"
+    "hero": {
+      "title": "Pametna transkripcija.",
+      "titleAccent": "AI posluša. Vi odločate.",
+      "subtitle": "AI čiščenje, ki ga lahko pregledate, izboljšate in mu zaupate. Vsaka sprememba vidna. Vsaka beseda preverljiva.",
+      "cta": "Preizkusi brezplačni demo",
+      "noSignup": "Brez registracije · Brezplačni demo na voljo"
+    },
+    "proofVisual": {
+      "sectionLabel": "Poglejte razliko",
+      "title": "Vsaka sprememba vidna. Vsaka beseda preverljiva."
+    },
+    "insights": {
+      "sectionLabel": "Analiza",
+      "title": "AI vpogledi",
+      "subtitle": "Pridobite več kot le besedilo. Izberite analizo, ki ustreza vašemu načinu dela.",
+      "summary": {
+        "title": "Povzetek pogovora",
+        "description": "Teme, ključne točke in jedrnat pregled celotnega pogovora."
+      },
+      "actionItems": {
+        "title": "Naloge in odločitve",
+        "description": "Naloge za izvedbo, sprejete odločitve in nadaljnji koraki, samodejno izvlečeni."
+      },
+      "reflection": {
+        "title": "Refleksija in vpogledi",
+        "description": "Teme, osnovna vprašanja in spodbude za globlji razmislek."
+      },
+      "comingSoon": "Kmalu: Profili analize po meri, prilagojeni vašim potrebam"
+    },
+    "features": {
+      "sectionLabel": "Funkcije",
+      "title": "Zakaj izbrati eversaid?",
+      "subtitle": "Narejeno za strokovnjake, ki potrebujejo natančnost in odgovornost",
+      "verifyEveryWord": "Preverite vsako besedo",
+      "dataProtected": "Vaši podatki, zaščiteni",
+      "sideBySide": {
+        "title": "Drug ob drugem",
+        "description": "Poglejte, kaj je AI spremenil."
+      },
+      "speakerLabels": {
+        "title": "Oznake govorcev",
+        "description": "Barvno označeni govorci."
+      },
+      "audioLinked": {
+        "title": "Povezano z zvokom",
+        "description": "Kliknite za skok na zvok."
+      },
+      "editRevert": {
+        "title": "Urejanje in povrnitev",
+        "description": "Uredite besedilo s črkovalcem."
+      },
+      "gdpr": {
+        "title": "GDPR",
+        "description": "Evropski standardi zasebnosti."
+      },
+      "encrypted": {
+        "title": "Šifrirano",
+        "description": "Med prenosom in v mirovanju."
+      },
+      "isolated": {
+        "title": "Izolirano",
+        "description": "Vaši podatki ostanejo zasebni."
+      },
+      "noTraining": {
+        "title": "Brez učenja",
+        "description": "Nikoli uporabljeno za učenje AI."
+      },
+      "disclaimerDemo": "Brezplačni demo uporablja varno povezavo. Polno šifriranje in GDPR skladnost sta vključena z računi.",
+      "spellcheck": "Slovenski črkovalec vključen. Več jezikov kmalu."
+    },
+    "useCases": {
+      "sectionLabel": "Primeri uporabe",
+      "title": "Za koga je namenjeno",
+      "subtitle": "Strokovnjaki, ki potrebujejo natančne, preverljive prepise",
+      "therapists": {
+        "title": "Terapevti in coachi",
+        "description": "Dokumentirajte seje z označenimi govorci."
+      },
+      "journalists": {
+        "title": "Novinarji",
+        "description": "Prepišite intervjuje s preverljivimi citati."
+      },
+      "meetings": {
+        "title": "Zapiski sestankov",
+        "description": "Pretvorite posnetke v uporabne zapiske."
+      },
+      "accessibility": {
+        "title": "Dostopnost",
+        "description": "Naredite zvočne vsebine dostopne kot besedilo."
+      }
+    },
+    "howItWorks": {
+      "sectionLabel": "Postopek",
+      "title": "Kako deluje",
+      "subtitle": "Od zvoka do preverjenega prepisa v minutah",
+      "step1": {
+        "title": "Naložite ali posnemite",
+        "description": "Povlecite zvočno datoteko ali posnemite neposredno v brskalniku."
+      },
+      "step2": {
+        "title": "Izberite govorce",
+        "description": "Izberite število govorcev za natančno ločevanje."
+      },
+      "step3": {
+        "title": "Primerjajte in uredite",
+        "description": "Preglejte drug ob drugem. Uredite, povrnite, preverite z zvokom."
+      },
+      "step4": {
+        "title": "Analizirajte",
+        "description": "Preizkusite različne profile vpogledov na vašem prepisu."
+      }
+    },
+    "finalCta": {
+      "title": "Pripravljeni na pametnejšo transkripcijo?",
+      "subtitle": "Brez registracije. Poglejte razliko sami.",
+      "cta": "Preizkusi brezplačni demo",
+      "waitlistPrompt": "Želite polno šifriranje in višje omejitve?",
+      "waitlistCta": "Pridružite se čakalni listi →",
+      "referralNote": "Povabite prijatelje, prislužite si brezplačne kredite ob njihovi registraciji."
+    },
+    "footer": {
+      "copyright": "© {year} eversaid",
+      "builtIn": "Narejeno v Sloveniji · Neodvisno & zagnano",
+      "privacy": "Politika zasebnosti",
+      "terms": "Pogoji",
+      "contact": "Kontakt"
+    }
   },
   "demo": {
-    "title": "Demo",
+    "title": "Preizkusi eversaid",
+    "subtitle": "Naložite zvok ali posnemite neposredno. Poglejte razliko AI čiščenja v sekundah.",
     "upload": {
-      "title": "Naloži zvočno datoteko",
-      "dragDrop": "Povleci in spusti ali klikni za izbiro",
-      "supported": "Podprto: MP3, WAV, M4A • Max 50MB • Max 5 minut"
+      "dropTitle": "Spustite zvočno datoteko tukaj",
+      "formats": "MP3, WAV, M4A, FLAC · Največ 50MB · Največ 5 minut",
+      "browse": "Prebrskaj datoteke",
+      "record": "Posnemi zvok",
+      "speakerCount": "Število govorcev",
+      "fivePlus": "5+",
+      "transcribeNow": "Prepiši zdaj",
+      "selectFile": "Izberite datoteko za prepis",
+      "uploading": "Nalaganje... {progress}%"
     },
-    "record": {
+    "recording": {
       "start": "Začni snemanje",
       "stop": "Ustavi snemanje",
       "recording": "Snemanje..."
     },
+    "player": {
+      "download": "Prenesi",
+      "speed": {
+        "0.5x": "0,5x",
+        "0.75x": "0,75x",
+        "1x": "1x",
+        "1.25x": "1,25x",
+        "1.5x": "1,5x",
+        "1.75x": "1,75x",
+        "2x": "2x"
+      }
+    },
+    "transcript": {
+      "rawTitle": "Surova transkripcija",
+      "cleanedTitle": "AI očiščeno",
+      "diffOn": "Razlike vklj.",
+      "diffOff": "Razlike izklj.",
+      "copy": "Kopiraj",
+      "edit": "Uredi",
+      "revert": "Povrni",
+      "undoRevert": "Razveljavi",
+      "save": "Shrani",
+      "cancelEdit": "Prekliči",
+      "updateAll": "Posodobi vse segmente ({count})",
+      "speaker": "Govorec {number}",
+      "edited": "Urejeno",
+      "clickToMoveHere": "Kliknite za premik sem",
+      "doubleClickToEdit": "Dvokliknite za urejanje",
+      "suggestions": "Predlogi"
+    },
     "speakers": {
       "label": "Število govorcev",
-      "one": "1 govorec",
-      "two": "2 govorca",
+      "one": "{count} govorec",
+      "two": "{count} govorca",
       "few": "{count} govorci",
       "other": "{count} govorcev"
     },
-    "processing": "Obdelava...",
-    "results": {
-      "raw": "Surova transkripcija",
-      "cleaned": "Očiščeno besedilo",
-      "analysis": "AI analiza"
-    }
-  },
-  "feedback": {
-    "title": "Oceni kakovost",
-    "placeholder": "Kaj bi lahko izboljšali?"
+    "analysis": {
+      "label": "AI analiza",
+      "analyzing": "Analiziranje...",
+      "analyzingText": "Analiziranje vašega pogovora...",
+      "error": "Napaka",
+      "noData": "Podatki analize še niso na voljo",
+      "runAnalysis": "Zaženi analizo",
+      "retryAnalysis": "Ponovi analizo",
+      "reanalyze": "Ponovno analiziraj",
+      "change": "Spremeni",
+      "summary": "Povzetek",
+      "topicsDiscussed": "Obravnavane teme",
+      "keyPoints": "Ključne točke",
+      "types": {
+        "summary": "Povzetek pogovora",
+        "actionItems": "Naloge",
+        "sentiment": "Analiza razpoloženja"
+      }
+    },
+    "history": {
+      "title": "Vaše transkripcije",
+      "empty": "Še ni transkripcij",
+      "emptySubtitle": "Naložite zvok za začetek",
+      "retention": "Transkripcije se hranijo 7 dni"
+    },
+    "feedback": {
+      "title": "Kakšna je bila kakovost?",
+      "placeholder": "Kaj je šlo narobe? Vaše povratne informacije nam pomagajo izboljšati.",
+      "submit": "Pošlji povratno informacijo",
+      "submitting": "Pošiljanje...",
+      "thanks": "Hvala za vašo povratno informacijo!"
+    },
+    "textMove": {
+      "instruction": "Kliknite segment za premik besedila tja",
+      "cancel": "Prekliči",
+      "moveTo": "Premakni na..."
+    },
+    "processing": "Obdelava..."
   },
   "waitlist": {
-    "title": "Pridruži se čakalni listi",
-    "email": "E-pošta",
-    "useCase": "Opišite vašo uporabo",
-    "submit": "Pridruži se"
+    "toast": {
+      "rateLimitTitle": "Dosežena omejitev",
+      "rateLimitSubtitle": "Pridružite se čakalni listi za neomejene transkripcije",
+      "apiAccessTitle": "Potreben dostop do API",
+      "apiAccessSubtitle": "Pridružite se čakalni listi za dostop do našega API",
+      "later": "Pozneje",
+      "joinWaitlist": "Pridruži se čakalni listi"
+    },
+    "modal": {
+      "titleApi": "Pridruži se API čakalni listi",
+      "titleExtended": "Pridruži se čakalni listi",
+      "subtitleApi": "Pridobite zgodnji dostop za integracijo eversaid v vašo aplikacijo",
+      "subtitleExtended": "Pridobite polno šifriranje, višje omejitve in ekskluziven zgodnji dostop",
+      "emailLabel": "E-poštni naslov",
+      "emailPlaceholder": "vi@primer.com",
+      "useCaseLabelApi": "Kaj boste zgradili?",
+      "useCaseLabelExtended": "Kako boste uporabljali eversaid?",
+      "useCasePlaceholderApi": "npr. Glasovni dnevnik, avtomatizacija zapiskov sestankov",
+      "useCasePlaceholderExtended": "npr. Terapevtski zapiski, transkripcija intervjujev",
+      "useCaseHelpApi": "Pomagajte nam razumeti vaše integracijske potrebe",
+      "useCaseHelpExtended": "To nam pomaga prioritizirati funkcije",
+      "volumeLabel": "Pričakovani mesečni obseg",
+      "volumeOptional": "(neobvezno)",
+      "volumePlaceholder": "Izberite obseg",
+      "volumeOptions": {
+        "0-100": "0-100 ur",
+        "100-500": "100-500 ur",
+        "500-2000": "500-2.000 ur",
+        "2000+": "2.000+ ur"
+      },
+      "sourceLabel": "Kako ste izvedeli za nas?",
+      "sourcePlaceholder": "npr. Twitter, prijatelj, iskanje",
+      "submit": "Pridruži se čakalni listi",
+      "submitting": "Pridruževanje...",
+      "privacyNote": "Z oddajo se strinjate z našo",
+      "privacyLink": "Politiko zasebnosti"
+    },
+    "success": {
+      "title": "Na seznamu ste!",
+      "subtitle": "Poslali vam bomo e-pošto, ko bo vaše mesto pripravljeno. Napredujte s povabilom prijateljev.",
+      "earnCredits": "Prislužite si brezplačne kredite",
+      "shareLink": "Delite svojo povabilno povezavo",
+      "referralExplain": "Za vsakega prijatelja, ki se registrira, oba napredujeta na čakalni listi in dobita brezplačne ure transkripcije.",
+      "copyLink": "Kopiraj povezavo",
+      "copied": "Kopirano!",
+      "creditsNote": "Krediti so podeljeni, ko povabljenci zaključijo registracijo. Spremljajte napredek po e-pošti.",
+      "done": "Končano"
+    }
+  },
+  "rateLimit": {
+    "title": "Dosežena omejitev",
+    "subtitle": "Dosegli ste dnevno omejitev transkripcij",
+    "tryAgainIn": "Poskusite znova čez",
+    "unlimitedCta": "Želite neomejene transkripcije?",
+    "joinWaitlistBtn": "Pridruži se čakalni listi za več",
+    "waitItOut": "Počakajte"
+  },
+  "offline": {
+    "message": "Ste brez povezave. Nekatere funkcije morda ne bodo delovale."
+  },
+  "errors": {
+    "tryAgain": "Poskusi znova",
+    "somethingWentWrong": "Nekaj je šlo narobe",
+    "networkError": "Napaka omrežja. Preverite svojo povezavo."
+  },
+  "apiDocs": {
+    "coreApi": "Core API",
+    "title": "API dokumentacija",
+    "subtitle": "Integrirajte eversaid transkripcijo, čiščenje in analizo v vašo aplikacijo. RESTful API z JSON odgovori.",
+    "sidebar": {
+      "gettingStarted": "Začetek",
+      "quickStart": "Hitri začetek",
+      "authentication": "Avtentikacija",
+      "publicEndpoints": "Javne končne točke",
+      "options": "Možnosti",
+      "languages": "Jeziki",
+      "analysisProfiles": "Profili analize",
+      "coreApi": "Core API",
+      "upload": "Nalaganje",
+      "entries": "Vnosi",
+      "transcription": "Transkripcija",
+      "cleanup": "Čiščenje",
+      "analysis": "Analiza",
+      "examples": "Primeri",
+      "completeWorkflow": "Celoten postopek",
+      "pollingPattern": "Vzorec poizvedovanja"
+    },
+    "quickStart": {
+      "title": "Hitri začetek",
+      "description": "Eversaid API zagotavlja govor-v-besedilo transkripcijo z AI čiščenjem in analizo. Vsi odgovori so JSON.",
+      "baseUrl": "Osnovni URL",
+      "apiVersioning": "Verzioniranje API",
+      "versioningNote": "Vse končne točke imajo predpono",
+      "versioningDescription": "Uporabljamo semantično verzioniranje in bomo ohranili združljivost znotraj glavnih verzij.",
+      "responseFormat": "Format odgovorov",
+      "responseDescription": "Vsi odgovori vrnejo JSON z ustreznimi HTTP statusnimi kodami:",
+      "tryPublicEndpoints": "Preizkusite javne končne točke",
+      "publicEndpointsNote": "Tri končne točke ne zahtevajo avtentikacije. Uporabite jih za raziskovanje razpoložljivih modelov, jezikov in profilov analize pred registracijo."
+    },
+    "auth": {
+      "title": "Avtentikacija",
+      "description": "API uporablja JWT (JSON Web Token) avtentikacijo. Registrirajte račun, prijavite se za prejemanje žetonov in vključite dostopni žeton v vse avtenticirane zahteve.",
+      "steps": {
+        "register": "Registracija",
+        "registerDesc": "Ustvarite račun z e-pošto + geslom",
+        "login": "Prijava",
+        "loginDesc": "Prejmite dostopni + osvežilni žeton",
+        "useApi": "Uporabi API",
+        "useApiDesc": "Vključite žeton v Authorization glavo",
+        "refresh": "Osveži",
+        "refreshDesc": "Pridobite nove žetone ob poteku"
+      },
+      "step1": "Korak 1: Registracija",
+      "step2": "Korak 2: Prijava",
+      "step3": "Korak 3: Uporaba žetona",
+      "tokenHeader": "Authorization glava",
+      "tokenSecurity": "Varnost žetonov",
+      "tokenSecurityNote": "Žetone shranjujte varno. Nikoli jih ne izpostavljajte v odjemalski kodi ali nadzoru verzij. Dostopni žetoni potečejo po 30 minutah; osvežilni žetoni potečejo po 7 dneh."
+    },
+    "endpoints": {
+      "noAuth": "Brez avtentikacije",
+      "authRequired": "Avtentikacija potrebna",
+      "public": "Javno",
+      "required": "OBVEZNO",
+      "optional": "Neobvezno",
+      "parameter": "Parameter",
+      "type": "Tip",
+      "description": "Opis",
+      "response": "Odgovor",
+      "responseCodes": "Statusne kode"
+    },
+    "options": {
+      "title": "Možnosti",
+      "description": "Pridobite razpoložljive možnosti transkripcije in LLM, vključno s ponudniki, modeli in omejitvami parametrov. Uporabite to za gradnjo dinamičnih konfiguracijskih vmesnikov.",
+      "noAuthNote": "Ta končna točka je javno dostopna. Preizkusite jo zdaj za ogled razpoložljivih modelov in ponudnikov.",
+      "returns": "Vrne združene možnosti za storitve transkripcije in LLM, vključno z razpoložljivimi ponudniki, modeli in parametri z njihovimi omejitvami."
+    },
+    "languages": {
+      "title": "Jeziki",
+      "description": "Seznam podprtih jezikov transkripcije z ravnmi natančnosti. ElevenLabs Scribe V1 podpira 99+ jezikov s podatki o stopnji napak besed (WER).",
+      "returns": "Vrne seznam podprtih jezikov z BCP-47 kodami in informacijami o natančnosti."
+    },
+    "analysisProfiles": {
+      "title": "Profili analize",
+      "description": "Pridobite razpoložljive profile analize (povzetek, naloge, refleksija itd.). Vsak profil izvleče različne vpoglede iz očiščenih prepisov.",
+      "returns": "Vrne razpoložljive profile analize z njihovimi ID-ji, imeni in tem, kar izvlečejo."
+    },
+    "upload": {
+      "title": "Nalaganje",
+      "description": "Naložite zvočne datoteke za transkripcijo. Ponujamo tri končne točke glede na količino obdelave, ki jo želite v eni zahtevi.",
+      "recommended": "Priporočeno: Celoten postopek",
+      "recommendedDesc": "Naložite, prepišite in očistite v eni zahtevi. To je priporočen pristop za večino primerov uporabe.",
+      "completeDesc": "Naložite zvok, prepišite z ločevanjem govorcev in očistite z LLM v eni zahtevi. Po želji sprožite analizo.",
+      "alternativeEndpoints": "Alternativne končne točke",
+      "uploadOnly": "Naložite samo zvočno datoteko. Uporabite to, ko želite ročno sprožiti transkripcijo pozneje.",
+      "uploadAndTranscribe": "Naložite in začnite transkripcijo. Uporabite to, ko želite ročno sprožiti čiščenje pozneje."
+    },
+    "entries": {
+      "title": "Vnosi",
+      "description": "Upravljajte glasovne vnose (naložene zvočne datoteke). Vsak vnos ima lahko več transkripcij in očiščenih verzij.",
+      "listEntries": "Seznam vnosov",
+      "listDesc": "Prikažite vse glasovne vnose za avtenticiranega uporabnika, razvrščene od najnovejšega.",
+      "getEntry": "Pridobi vnos",
+      "getDesc": "Pridobite podrobne metapodatke za določen glasovni vnos, vključno s primarno transkripcijo.",
+      "getAudio": "Pridobi zvok",
+      "getAudioDesc": "Prenesite zvočno datoteko za glasovni vnos. Vrne predobdelan WAV format.",
+      "deleteEntry": "Izbriši vnos",
+      "deleteDesc": "Trajno izbrišite glasovni vnos in vse povezane podatke (transkripcije, očiščene vnose, zvočno datoteko)."
+    },
+    "transcription": {
+      "title": "Transkripcija",
+      "description": "Upravljajte transkripcije z ločevanjem govorcev. Poizvedujte status transkripcije do zaključka, nato pridobite besedilo in segmente.",
+      "startTranscription": "Začni transkripcijo",
+      "startDesc": "Začnite transkripcijo v ozadju za naloženo zvočno datoteko. Podpira ločevanje govorcev (1-10 govorcev).",
+      "getStatus": "Pridobi status transkripcije",
+      "getStatusDesc": "Pridobite status in rezultat transkripcije. Poizvedujte to končno točko, dokler status ni \"completed\" ali \"failed\".",
+      "responseWithDiarization": "Odgovor z ločevanjem govorcev",
+      "listTranscriptions": "Seznam transkripcij",
+      "listDesc": "Prikažite vse poskuse transkripcije za vnos. Uporabno pri ponovni transkripciji z drugačnimi nastavitvami.",
+      "setPrimary": "Nastavi primarno transkripcijo",
+      "setPrimaryDesc": "Označite transkripcijo kot primarno za prikaz pri njenem vnosu."
+    },
+    "cleanup": {
+      "title": "Čiščenje",
+      "description": "LLM čiščenje odstrani polnilne besede, popravi slovnico in formatira transkripcije. Podpira uporabniška urejanja z možnostjo povrnitve.",
+      "startCleanup": "Začni čiščenje",
+      "startDesc": "Začnite LLM čiščenje na zaključeni transkripciji. Takoj vrne ID čiščenja.",
+      "getStatus": "Pridobi status čiščenja",
+      "getStatusDesc": "Pridobite podrobnosti očiščenega vnosa, vključno z LLM obdelanim besedilom in morebitnimi uporabniškimi urejanji.",
+      "userEdits": "Uporabniška urejanja",
+      "userEditsDesc": "Uporabniki lahko uredijo očiščeno besedilo, medtem ko se prvotni AI rezultat ohrani za povrnitev.",
+      "saveEdit": "Shranite uporabniško urejeno besedilo. Prvotno AI generirano besedilo je ohranjeno za povrnitev.",
+      "revertEdit": "Povrnite na AI generirano čiščenje z brisanjem uporabniških urejanj."
+    },
+    "analysis": {
+      "title": "Analiza",
+      "description": "Zaženite AI analizo na očiščenih prepisih z uporabo različnih profilov (povzetek, naloge, refleksija).",
+      "startAnalysis": "Začnite analizo na očiščenem vnosu z uporabo določenega profila. Obdeluje v ozadju.",
+      "getAnalysis": "Pridobite rezultate analize. Poizvedujte, dokler status ni \"completed\" ali \"failed\"."
+    },
+    "workflow": {
+      "title": "Celoten postopek",
+      "description": "Ta primer prikazuje celoten tok: nalaganje, poizvedovanje do zaključka in pridobivanje rezultatov."
+    },
+    "polling": {
+      "title": "Vzorec poizvedovanja",
+      "description": "Transkripcija, čiščenje in analiza tečejo asinhrono. Poizvedujte statusne končne točke, dokler se obdelava ne zaključi.",
+      "recommendedInterval": "Priporočen interval poizvedovanja",
+      "intervalNote": "Poizvedujte vsake 2-3 sekunde. Večina transkripcij se zaključi v 30 sekundah. Čiščenje in analiza se zaključita v 10 sekundah vsak.",
+      "statusValues": "Vrednosti statusa",
+      "status": "Status",
+      "meaning": "Pomen",
+      "action": "Akcija",
+      "pending": "V čakalni vrsti, še ni začeto",
+      "processing": "Trenutno se obdeluje",
+      "completed": "Uspešno zaključeno",
+      "failed": "Prišlo je do napake",
+      "keepPolling": "Nadaljujte poizvedovanje",
+      "fetchResults": "Pridobite rezultate",
+      "checkError": "Preverite error_message"
+    },
+    "readyToIntegrate": {
+      "title": "Pripravljeni na integracijo?",
+      "subtitle": "Pridružite se čakalni listi za dostop do API in začnite graditi.",
+      "cta": "Pridruži se čakalni listi"
+    },
+    "codeExamples": {
+      "curl": "cURL",
+      "python": "Python",
+      "javascript": "JavaScript"
+    }
+  },
+  "metadata": {
+    "title": "eversaid | Pametna transkripcija. AI posluša. Vi odločate.",
+    "description": "AI čiščenje, ki ga lahko pregledate, izboljšate in mu zaupate. Vsaka sprememba vidna. Vsaka beseda preverljiva."
   }
 }

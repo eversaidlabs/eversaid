@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertCircle, RefreshCw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export interface ErrorDisplayProps {
   error: string | null
@@ -12,7 +13,9 @@ export interface ErrorDisplayProps {
  * Error display component with optional retry button.
  * Shows a red-tinted alert with error message and action button.
  */
-export function ErrorDisplay({ error, onRetry, retryLabel = 'Try Again' }: ErrorDisplayProps) {
+export function ErrorDisplay({ error, onRetry, retryLabel }: ErrorDisplayProps) {
+  const t = useTranslations('errors')
+
   if (!error) {
     return null
   }
@@ -30,7 +33,7 @@ export function ErrorDisplay({ error, onRetry, retryLabel = 'Try Again' }: Error
           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
         >
           <RefreshCw className="h-4 w-4" />
-          {retryLabel}
+          {retryLabel ?? t('tryAgain')}
         </button>
       )}
     </div>

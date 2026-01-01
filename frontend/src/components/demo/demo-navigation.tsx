@@ -1,11 +1,16 @@
-import Link from "next/link"
-import { Upload, ChevronDown } from "lucide-react"
+'use client'
+
+import { Link } from "@/i18n/routing"
+import { useTranslations } from 'next-intl'
+import { LanguageSwitcher } from "@/components/ui/language-switcher"
 
 export interface DemoNavigationProps {
   currentPage?: "demo" | "features" | "api"
 }
 
 export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
+  const t = useTranslations('navigation')
+
   return (
     <nav className="sticky top-0 z-[100] flex justify-between items-center px-8 md:px-12 py-4 bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_50%,#0F172A_100%)]">
       <Link href="/" className="flex items-center gap-2.5">
@@ -42,15 +47,15 @@ export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
               : "text-white/70 hover:text-white"
           }`}
         >
-          Demo
+          {t('demo')}
         </Link>
         <Link
-          href="#features"
+          href="/#features"
           className={`text-sm font-medium transition-colors ${
             currentPage === "features" ? "text-white" : "text-white/70 hover:text-white"
           }`}
         >
-          Features
+          {t('features')}
         </Link>
         <Link
           href="/api-docs"
@@ -58,16 +63,12 @@ export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
             currentPage === "api" ? "text-white" : "text-white/70 hover:text-white"
           }`}
         >
-          API Docs
+          {t('apiDocs')}
         </Link>
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="flex items-center gap-1.5 text-white/70 hover:text-white hover:bg-white/10 text-[13px] font-medium px-3 py-1.5 rounded-lg transition-all">
-          <Upload className="w-4 h-4" />
-          EN
-          <ChevronDown className="w-3 h-3" />
-        </button>
+        <LanguageSwitcher />
       </div>
     </nav>
   )

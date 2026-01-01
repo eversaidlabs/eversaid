@@ -7,47 +7,482 @@
     "save": "Save",
     "delete": "Delete",
     "copy": "Copy",
-    "download": "Download"
+    "download": "Download",
+    "or": "or",
+    "daily": "daily",
+    "close": "Close",
+    "done": "Done",
+    "copied": "Copied!",
+    "submitting": "Submitting..."
+  },
+  "navigation": {
+    "home": "Home",
+    "demo": "Demo",
+    "features": "Features",
+    "useCases": "Use Cases",
+    "howItWorks": "How It Works",
+    "apiDocs": "API Docs",
+    "joinWaitlist": "Join Waitlist"
   },
   "landing": {
-    "title": "Eversaid",
-    "subtitle": "Slovenian transcription with AI",
-    "cta": "Try the Demo"
+    "hero": {
+      "title": "Smart transcription.",
+      "titleAccent": "AI listens. You decide.",
+      "subtitle": "AI-powered cleanup you can review, refine, and trust. See every edit. Verify against the original audio.",
+      "cta": "Try Free Demo",
+      "noSignup": "No sign-up required · Free demo available"
+    },
+    "proofVisual": {
+      "sectionLabel": "See the Difference",
+      "title": "Every edit visible. Every word verifiable."
+    },
+    "insights": {
+      "sectionLabel": "Analysis",
+      "title": "AI-Powered Insights",
+      "subtitle": "Get more than just text. Choose the analysis that fits your workflow.",
+      "summary": {
+        "title": "Conversation Summary",
+        "description": "Topics, key points, and a concise overview of the entire conversation."
+      },
+      "actionItems": {
+        "title": "Action Items & Decisions",
+        "description": "Tasks to complete, decisions made, and follow-ups extracted automatically."
+      },
+      "reflection": {
+        "title": "Reflection & Insights",
+        "description": "Themes, underlying questions, and prompts for deeper self-reflection."
+      },
+      "comingSoon": "Coming soon: Custom analysis profiles tailored to your specific needs"
+    },
+    "features": {
+      "sectionLabel": "Features",
+      "title": "Why Choose eversaid?",
+      "subtitle": "Built for professionals who need accuracy and accountability",
+      "verifyEveryWord": "Verify Every Word",
+      "dataProtected": "Your Data, Protected",
+      "sideBySide": {
+        "title": "Side-by-Side",
+        "description": "See exactly what AI changed."
+      },
+      "speakerLabels": {
+        "title": "Speaker Labels",
+        "description": "Color-coded speaker attribution."
+      },
+      "audioLinked": {
+        "title": "Audio-Linked",
+        "description": "Click to jump to audio."
+      },
+      "editRevert": {
+        "title": "Edit & Revert",
+        "description": "Edit text with spellcheck."
+      },
+      "gdpr": {
+        "title": "GDPR",
+        "description": "European privacy standards."
+      },
+      "encrypted": {
+        "title": "Encrypted",
+        "description": "In transit and at rest."
+      },
+      "isolated": {
+        "title": "Isolated",
+        "description": "Your data stays private."
+      },
+      "noTraining": {
+        "title": "No Training",
+        "description": "Never used for AI training."
+      },
+      "disclaimerDemo": "Free demo uses secure connection. Full encryption & GDPR compliance included with accounts.",
+      "spellcheck": "Slovenian spellcheck included. More languages coming soon."
+    },
+    "useCases": {
+      "sectionLabel": "Use Cases",
+      "title": "Who It's For",
+      "subtitle": "Professionals who need accurate, verifiable transcripts",
+      "therapists": {
+        "title": "Therapists & Coaches",
+        "description": "Document sessions with speaker attribution."
+      },
+      "journalists": {
+        "title": "Journalists",
+        "description": "Transcribe interviews with verifiable quotes."
+      },
+      "meetings": {
+        "title": "Meeting Notes",
+        "description": "Turn recordings into actionable notes."
+      },
+      "accessibility": {
+        "title": "Accessibility",
+        "description": "Make audio content accessible as text."
+      }
+    },
+    "howItWorks": {
+      "sectionLabel": "Process",
+      "title": "How It Works",
+      "subtitle": "From audio to verified transcript in minutes",
+      "step1": {
+        "title": "Upload or Record",
+        "description": "Drag-drop an audio file or record directly in browser."
+      },
+      "step2": {
+        "title": "Choose Speakers",
+        "description": "Select speaker count for accurate diarization."
+      },
+      "step3": {
+        "title": "Compare & Edit",
+        "description": "Review side-by-side. Edit, revert, verify against audio."
+      },
+      "step4": {
+        "title": "Analyze",
+        "description": "Try different insight profiles on your transcript."
+      }
+    },
+    "finalCta": {
+      "title": "Ready to try smarter transcription?",
+      "subtitle": "No sign-up required. See the difference for yourself.",
+      "cta": "Try Free Demo",
+      "waitlistPrompt": "Want full encryption and higher limits?",
+      "waitlistCta": "Join the waitlist →",
+      "referralNote": "Refer friends, earn free credits when they sign up."
+    },
+    "footer": {
+      "copyright": "© {year} eversaid",
+      "builtIn": "Built in Slovenia · Independent & bootstrapped",
+      "privacy": "Privacy Policy",
+      "terms": "Terms",
+      "contact": "Contact"
+    }
   },
   "demo": {
-    "title": "Demo",
+    "title": "Try eversaid",
+    "subtitle": "Upload audio or record directly. See the AI cleanup difference in seconds.",
     "upload": {
-      "title": "Upload audio file",
-      "dragDrop": "Drag and drop or click to browse",
-      "supported": "Supported: MP3, WAV, M4A • Max 50MB • Max 5 minutes"
+      "dropTitle": "Drop your audio file here",
+      "formats": "MP3, WAV, M4A, FLAC · Max 50MB · Max 5 minutes",
+      "browse": "Browse Files",
+      "record": "Record Audio",
+      "speakerCount": "Number of speakers",
+      "fivePlus": "5+",
+      "transcribeNow": "Transcribe Now",
+      "selectFile": "Select a file to transcribe",
+      "uploading": "Uploading... {progress}%"
     },
-    "record": {
+    "recording": {
       "start": "Start recording",
       "stop": "Stop recording",
       "recording": "Recording..."
     },
+    "player": {
+      "download": "Download",
+      "speed": {
+        "0.5x": "0.5x",
+        "0.75x": "0.75x",
+        "1x": "1x",
+        "1.25x": "1.25x",
+        "1.5x": "1.5x",
+        "1.75x": "1.75x",
+        "2x": "2x"
+      }
+    },
+    "transcript": {
+      "rawTitle": "Raw Transcription",
+      "cleanedTitle": "AI Cleaned",
+      "diffOn": "Diff On",
+      "diffOff": "Diff Off",
+      "copy": "Copy",
+      "edit": "Edit",
+      "revert": "Revert",
+      "undoRevert": "Undo",
+      "save": "Save",
+      "cancelEdit": "Cancel",
+      "updateAll": "Update all segments ({count})",
+      "speaker": "Speaker {number}",
+      "edited": "Edited",
+      "clickToMoveHere": "Click to move here",
+      "doubleClickToEdit": "Double-click to edit",
+      "suggestions": "Suggestions"
+    },
     "speakers": {
       "label": "Number of speakers",
-      "one": "1 speaker",
-      "two": "2 speakers",
+      "one": "{count} speaker",
+      "two": "{count} speakers",
       "few": "{count} speakers",
       "other": "{count} speakers"
     },
-    "processing": "Processing...",
-    "results": {
-      "raw": "Raw transcription",
-      "cleaned": "Cleaned text",
-      "analysis": "AI analysis"
-    }
-  },
-  "feedback": {
-    "title": "Rate quality",
-    "placeholder": "What could be improved?"
+    "analysis": {
+      "label": "AI Analysis",
+      "analyzing": "Analyzing...",
+      "analyzingText": "Analyzing your conversation...",
+      "error": "Error",
+      "noData": "No analysis data available yet",
+      "runAnalysis": "Run Analysis",
+      "retryAnalysis": "Retry Analysis",
+      "reanalyze": "Re-analyze",
+      "change": "Change",
+      "summary": "Summary",
+      "topicsDiscussed": "Topics Discussed",
+      "keyPoints": "Key Points",
+      "types": {
+        "summary": "Conversation Summary",
+        "actionItems": "Action Items",
+        "sentiment": "Sentiment Analysis"
+      }
+    },
+    "history": {
+      "title": "Your Transcriptions",
+      "empty": "No transcriptions yet",
+      "emptySubtitle": "Upload audio to get started",
+      "retention": "Transcriptions kept for 7 days"
+    },
+    "feedback": {
+      "title": "How was the quality?",
+      "placeholder": "What went wrong? Your feedback helps us improve.",
+      "submit": "Submit Feedback",
+      "submitting": "Submitting...",
+      "thanks": "Thank you for your feedback!"
+    },
+    "textMove": {
+      "instruction": "Click a segment to move text there",
+      "cancel": "Cancel",
+      "moveTo": "Move to..."
+    },
+    "processing": "Processing..."
   },
   "waitlist": {
-    "title": "Join the waitlist",
-    "email": "Email",
-    "useCase": "Describe your use case",
-    "submit": "Join"
+    "toast": {
+      "rateLimitTitle": "Rate limit reached",
+      "rateLimitSubtitle": "Join the waitlist for unlimited transcriptions",
+      "apiAccessTitle": "API access required",
+      "apiAccessSubtitle": "Join the waitlist to access our API",
+      "later": "Later",
+      "joinWaitlist": "Join Waitlist"
+    },
+    "modal": {
+      "titleApi": "Join API Waitlist",
+      "titleExtended": "Join the Waitlist",
+      "subtitleApi": "Get early access to integrate eversaid into your application",
+      "subtitleExtended": "Get full encryption, higher limits, and exclusive early access",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "useCaseLabelApi": "What will you build?",
+      "useCaseLabelExtended": "How will you use eversaid?",
+      "useCasePlaceholderApi": "e.g., Voice journal app, meeting notes automation",
+      "useCasePlaceholderExtended": "e.g., Therapy notes, interview transcription",
+      "useCaseHelpApi": "Help us understand your integration needs",
+      "useCaseHelpExtended": "This helps us prioritize features",
+      "volumeLabel": "Expected monthly volume",
+      "volumeOptional": "(optional)",
+      "volumePlaceholder": "Select volume",
+      "volumeOptions": {
+        "0-100": "0-100 hours",
+        "100-500": "100-500 hours",
+        "500-2000": "500-2,000 hours",
+        "2000+": "2,000+ hours"
+      },
+      "sourceLabel": "How did you hear about us?",
+      "sourcePlaceholder": "e.g., Twitter, friend, search",
+      "submit": "Join Waitlist",
+      "submitting": "Joining...",
+      "privacyNote": "By submitting, you agree to our",
+      "privacyLink": "Privacy Policy"
+    },
+    "success": {
+      "title": "You're on the list!",
+      "subtitle": "We'll email you when your spot is ready. Move up by referring friends.",
+      "earnCredits": "Earn Free Credits",
+      "shareLink": "Share your referral link",
+      "referralExplain": "For every friend who signs up, you both move up the waitlist and get free transcription hours.",
+      "copyLink": "Copy Link",
+      "copied": "Copied!",
+      "creditsNote": "Credits are awarded when referrals complete signup. Track your progress via email.",
+      "done": "Done"
+    }
+  },
+  "rateLimit": {
+    "title": "Rate Limit Reached",
+    "subtitle": "You've hit the daily transcription limit",
+    "tryAgainIn": "Try again in",
+    "unlimitedCta": "Want unlimited transcriptions?",
+    "joinWaitlistBtn": "Join Waitlist for More",
+    "waitItOut": "Wait it out"
+  },
+  "offline": {
+    "message": "You're offline. Some features may not work."
+  },
+  "errors": {
+    "tryAgain": "Try Again",
+    "somethingWentWrong": "Something went wrong",
+    "networkError": "Network error. Please check your connection."
+  },
+  "apiDocs": {
+    "coreApi": "Core API",
+    "title": "API Documentation",
+    "subtitle": "Integrate eversaid's transcription, cleanup, and analysis capabilities into your application. RESTful API with JSON responses.",
+    "sidebar": {
+      "gettingStarted": "Getting Started",
+      "quickStart": "Quick Start",
+      "authentication": "Authentication",
+      "publicEndpoints": "Public Endpoints",
+      "options": "Options",
+      "languages": "Languages",
+      "analysisProfiles": "Analysis Profiles",
+      "coreApi": "Core API",
+      "upload": "Upload",
+      "entries": "Entries",
+      "transcription": "Transcription",
+      "cleanup": "Cleanup",
+      "analysis": "Analysis",
+      "examples": "Examples",
+      "completeWorkflow": "Complete Workflow",
+      "pollingPattern": "Polling Pattern"
+    },
+    "quickStart": {
+      "title": "Quick Start",
+      "description": "The eversaid API provides speech-to-text transcription with AI-powered cleanup and analysis. All responses are JSON.",
+      "baseUrl": "Base URL",
+      "apiVersioning": "API Versioning",
+      "versioningNote": "All endpoints are prefixed with",
+      "versioningDescription": "We use semantic versioning and will maintain backward compatibility within major versions.",
+      "responseFormat": "Response Format",
+      "responseDescription": "All responses return JSON with appropriate HTTP status codes:",
+      "tryPublicEndpoints": "Try the Public Endpoints",
+      "publicEndpointsNote": "Three endpoints require no authentication. Use them to explore available models, languages, and analysis profiles before signing up."
+    },
+    "auth": {
+      "title": "Authentication",
+      "description": "The API uses JWT (JSON Web Token) bearer authentication. You must register an account, login to receive tokens, and include the access token in all authenticated requests.",
+      "steps": {
+        "register": "Register",
+        "registerDesc": "Create account with email + password",
+        "login": "Login",
+        "loginDesc": "Receive access + refresh tokens",
+        "useApi": "Use API",
+        "useApiDesc": "Include token in Authorization header",
+        "refresh": "Refresh",
+        "refreshDesc": "Get new tokens when expired"
+      },
+      "step1": "Step 1: Register",
+      "step2": "Step 2: Login",
+      "step3": "Step 3: Using the Token",
+      "tokenHeader": "Authorization Header",
+      "tokenSecurity": "Token Security",
+      "tokenSecurityNote": "Store tokens securely. Never expose them in client-side code or version control. Access tokens expire after 30 minutes; refresh tokens expire after 7 days."
+    },
+    "endpoints": {
+      "noAuth": "No Auth",
+      "authRequired": "Auth Required",
+      "public": "Public",
+      "required": "REQUIRED",
+      "optional": "Optional",
+      "parameter": "Parameter",
+      "type": "Type",
+      "description": "Description",
+      "response": "Response",
+      "responseCodes": "Response Codes"
+    },
+    "options": {
+      "title": "Options",
+      "description": "Get available transcription and LLM options including providers, models, and parameter constraints. Use this to build dynamic configuration UIs.",
+      "noAuthNote": "This endpoint is publicly accessible. Try it now to see available models and providers.",
+      "returns": "Returns unified options for both transcription and LLM services, including available providers, models, and parameters with their constraints."
+    },
+    "languages": {
+      "title": "Languages",
+      "description": "List supported transcription languages with accuracy tiers. ElevenLabs Scribe V1 supports 99+ languages with Word Error Rate (WER) data.",
+      "returns": "Returns list of supported languages with BCP-47 codes and accuracy information."
+    },
+    "analysisProfiles": {
+      "title": "Analysis Profiles",
+      "description": "Get available analysis profiles (summary, action items, reflection, etc.). Each profile extracts different insights from cleaned transcripts.",
+      "returns": "Returns available analysis profiles with their IDs, names, and what they extract."
+    },
+    "upload": {
+      "title": "Upload",
+      "description": "Upload audio files for transcription. We offer three endpoints depending on how much processing you want in a single request.",
+      "recommended": "Recommended: Complete Workflow",
+      "recommendedDesc": "Upload, transcribe, and cleanup in one request. This is the recommended approach for most use cases.",
+      "completeDesc": "Upload audio, transcribe with speaker diarization, and clean with LLM in a single request. Optionally trigger analysis.",
+      "alternativeEndpoints": "Alternative Endpoints",
+      "uploadOnly": "Upload audio file only. Use this when you want to manually trigger transcription later.",
+      "uploadAndTranscribe": "Upload and start transcription. Use this when you want to manually trigger cleanup later."
+    },
+    "entries": {
+      "title": "Entries",
+      "description": "Manage voice entries (uploaded audio files). Each entry can have multiple transcriptions and cleaned versions.",
+      "listEntries": "List Entries",
+      "listDesc": "List all voice entries for the authenticated user, ordered by newest first.",
+      "getEntry": "Get Entry",
+      "getDesc": "GET detailed metadata for a specific voice entry including primary transcription.",
+      "getAudio": "Get Audio",
+      "getAudioDesc": "Download the audio file for a voice entry. Returns preprocessed WAV format.",
+      "deleteEntry": "Delete Entry",
+      "deleteDesc": "Permanently delete a voice entry and all associated data (transcriptions, cleaned entries, audio file)."
+    },
+    "transcription": {
+      "title": "Transcription",
+      "description": "Manage transcriptions with speaker diarization. Poll transcription status until complete, then retrieve the text and segments.",
+      "startTranscription": "Start Transcription",
+      "startDesc": "Start background transcription for an uploaded audio file. Supports speaker diarization (1-10 speakers).",
+      "getStatus": "Get Transcription Status",
+      "getStatusDesc": "Get transcription status and result. Poll this endpoint until status is \"completed\" or \"failed\".",
+      "responseWithDiarization": "Response with Speaker Diarization",
+      "listTranscriptions": "List Transcriptions",
+      "listDesc": "List all transcription attempts for an entry. Useful when re-transcribing with different settings.",
+      "setPrimary": "Set Primary Transcription",
+      "setPrimaryDesc": "Mark a transcription as the primary one to display for its entry."
+    },
+    "cleanup": {
+      "title": "Cleanup",
+      "description": "LLM-powered text cleanup removes filler words, fixes grammar, and formats transcriptions. Supports user edits with revert capability.",
+      "startCleanup": "Start Cleanup",
+      "startDesc": "Start LLM cleanup on a completed transcription. Returns immediately with cleanup ID.",
+      "getStatus": "Get Cleanup Status",
+      "getStatusDesc": "Get cleaned entry details including the LLM-processed text and any user edits.",
+      "userEdits": "User Edits",
+      "userEditsDesc": "Users can edit the cleaned text while preserving the original AI output for revert.",
+      "saveEdit": "Save user-edited text. The original AI-generated text is preserved for revert.",
+      "revertEdit": "Revert to AI-generated cleanup by clearing user edits."
+    },
+    "analysis": {
+      "title": "Analysis",
+      "description": "Run AI analysis on cleaned transcripts using different profiles (summary, action items, reflection).",
+      "startAnalysis": "Start analysis on a cleaned entry using the specified profile. Processes in background.",
+      "getAnalysis": "Get analysis results. Poll until status is \"completed\" or \"failed\"."
+    },
+    "workflow": {
+      "title": "Complete Workflow",
+      "description": "This example shows the full flow: upload, poll for completion, and retrieve results."
+    },
+    "polling": {
+      "title": "Polling Pattern",
+      "description": "Transcription, cleanup, and analysis run asynchronously. Poll the status endpoints until processing completes.",
+      "recommendedInterval": "Recommended Polling Interval",
+      "intervalNote": "Poll every 2-3 seconds. Most transcriptions complete within 30 seconds. Cleanup and analysis complete within 10 seconds each.",
+      "statusValues": "Status Values",
+      "status": "Status",
+      "meaning": "Meaning",
+      "action": "Action",
+      "pending": "Queued, not started yet",
+      "processing": "Currently being processed",
+      "completed": "Successfully finished",
+      "failed": "Error occurred",
+      "keepPolling": "Keep polling",
+      "fetchResults": "Fetch results",
+      "checkError": "Check error_message"
+    },
+    "readyToIntegrate": {
+      "title": "Ready to integrate?",
+      "subtitle": "Join the waitlist to get API access and start building.",
+      "cta": "Join Waitlist"
+    },
+    "codeExamples": {
+      "curl": "cURL",
+      "python": "Python",
+      "javascript": "JavaScript"
+    }
+  },
+  "metadata": {
+    "title": "eversaid | Smart transcription. AI listens. You decide.",
+    "description": "AI-powered cleanup you can review, refine, and trust. See every edit. Verify against the original audio."
   }
 }

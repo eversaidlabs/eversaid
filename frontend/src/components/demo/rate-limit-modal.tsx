@@ -2,6 +2,7 @@
 
 import { X, Clock, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 export interface RateLimitModalProps {
   isOpen: boolean
@@ -29,6 +30,8 @@ export function RateLimitModal({
   onClose,
   onJoinWaitlist,
 }: RateLimitModalProps) {
+  const t = useTranslations('rateLimit')
+  const tCommon = useTranslations('common')
   const [countdown, setCountdown] = useState<number>(retryAfter ?? 0)
 
   // Sync countdown with retryAfter prop
@@ -75,7 +78,7 @@ export function RateLimitModal({
         <div className="bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_100%)] px-6 pt-8 pb-7 text-center relative">
           <button
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={tCommon('close')}
             className="absolute top-4 right-4 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all"
           >
             <X className="w-[18px] h-[18px] stroke-white/70" strokeWidth={2} />
@@ -86,10 +89,10 @@ export function RateLimitModal({
           </div>
 
           <h2 id="rate-limit-title" className="text-2xl font-extrabold text-white mb-2">
-            Rate Limit Reached
+            {t('title')}
           </h2>
           <p className="text-[15px] text-white/70 leading-relaxed">
-            You&apos;ve hit the daily transcription limit
+            {t('subtitle')}
           </p>
         </div>
 
@@ -97,7 +100,7 @@ export function RateLimitModal({
         <div className="px-6 pt-7 pb-8">
           {/* Countdown */}
           <div className="text-center mb-6">
-            <div className="text-sm text-gray-500 mb-2">Try again in</div>
+            <div className="text-sm text-gray-500 mb-2">{t('tryAgainIn')}</div>
             <div className="text-5xl font-mono font-bold text-gray-900 tracking-wider">
               {formatCountdown(countdown)}
             </div>
@@ -106,7 +109,7 @@ export function RateLimitModal({
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">or</span>
+            <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">{tCommon('or')}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
@@ -114,13 +117,13 @@ export function RateLimitModal({
           <div className="text-center mb-4">
             <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-4">
               <Sparkles className="w-4 h-4 text-purple-500" />
-              <span>Want unlimited transcriptions?</span>
+              <span>{t('unlimitedCta')}</span>
             </div>
             <button
               onClick={onJoinWaitlist}
               className="w-full py-3.5 bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] hover:shadow-[0_8px_24px_rgba(56,189,248,0.4)] hover:-translate-y-0.5 text-white text-base font-bold rounded-xl transition-all shadow-[0_4px_16px_rgba(56,189,248,0.3)]"
             >
-              Join Waitlist for More
+              {t('joinWaitlistBtn')}
             </button>
           </div>
 
@@ -129,7 +132,7 @@ export function RateLimitModal({
             onClick={onClose}
             className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-all"
           >
-            Wait it out
+            {t('waitItOut')}
           </button>
         </div>
       </div>
