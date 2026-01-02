@@ -263,6 +263,9 @@
       "emptySubtitle": "Naložite zvok za začetek",
       "retention": "Transkripcije se hranijo 7 dni"
     },
+    "rateLimit": {
+      "remaining": "{count, plural, one {# preostane} two {# preostaneta} few {# preostanejo} other {# preostane}}"
+    },
     "feedback": {
       "title": "Kakšna je bila kakovost?",
       "placeholder": "Kaj je šlo narobe? Vaše povratne informacije nam pomagajo izboljšati.",

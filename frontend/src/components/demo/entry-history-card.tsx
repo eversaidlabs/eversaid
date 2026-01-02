@@ -34,7 +34,7 @@ export function EntryHistoryCard({
           <p className="text-[13px] text-muted-foreground">{t('emptySubtitle')}</p>
         </div>
       ) : (
-        <div className="p-2">
+        <div className="p-2 max-h-[300px] overflow-y-auto">
           {entries.map((entry) => (
             <div
               key={entry.id}

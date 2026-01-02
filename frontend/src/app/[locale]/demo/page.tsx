@@ -550,24 +550,26 @@ export default function DemoPage() {
       <DemoNavigation />
 
       <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-4xl font-bold text-[#1E293B] mb-2">Try eversaid</h1>
-            <p className="text-[#64748B] text-lg">
-              Upload audio or record directly. See the AI cleanup difference in seconds.
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <div className="px-4 py-2 bg-white rounded-lg border border-[#E2E8F0] shadow-sm">
-              <span className="text-sm font-semibold text-[#64748B]">
-                {transcription.rateLimits?.day
-                  ? `${transcription.rateLimits.day.remaining}/${transcription.rateLimits.day.limit}`
-                  : '--/--'}
-              </span>
-              <span className="text-xs text-[#94A3B8] ml-1">daily</span>
+        {transcription.segments.length === 0 && (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-[#1E293B] mb-2">Try eversaid</h1>
+              <p className="text-[#64748B] text-lg">
+                Upload audio or record directly. See the AI cleanup difference in seconds.
+              </p>
             </div>
+            {transcription.rateLimits?.day &&
+             transcription.rateLimits.day.remaining <= Number(process.env.NEXT_PUBLIC_RATE_LIMIT_WARNING_THRESHOLD || 2) && (
+              <div className="flex gap-4">
+                <div className="px-4 py-2 bg-amber-50 rounded-lg border border-amber-200 shadow-sm">
+                  <span className="text-sm font-semibold text-amber-700">
+                    {t('demo.rateLimit.remaining', { count: transcription.rateLimits.day.remaining })}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Error display for upload/transcription errors */}
         {transcription.error && transcription.status === 'error' && (

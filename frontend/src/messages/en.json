@@ -263,6 +263,9 @@
       "emptySubtitle": "Upload audio to get started",
       "retention": "Transcriptions kept for 7 days"
     },
+    "rateLimit": {
+      "remaining": "{count} remaining"
+    },
     "feedback": {
       "title": "How was the quality?",
       "placeholder": "What went wrong? Your feedback helps us improve.",
