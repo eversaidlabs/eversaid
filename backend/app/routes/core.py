@@ -224,8 +224,8 @@ async def get_entry(
         if cleanup_response.status_code == 200:
             cleanup_data = cleanup_response.json()
 
-    # 5. Fetch analyses for this cleaned entry to get the latest analysis
-    latest_analysis = None
+    # 5. Fetch ALL analyses for this cleaned entry
+    analyses = []
     if cleanup_id:
         analyses_response = await core_api.request(
             "GET",
@@ -234,14 +234,11 @@ async def get_entry(
         )
         if analyses_response.status_code == 200:
             analyses_data = analyses_response.json()
-            # Get the most recent analysis (first in list, assuming sorted by date desc)
-            analyses_list = analyses_data.get("analyses", [])
-            if analyses_list:
-                latest_analysis = analyses_list[0]
+            analyses = analyses_data.get("analyses", [])
 
     # 6. Compose response with cleanup and analysis data included
     entry_data["cleanup"] = cleanup_data
-    entry_data["latest_analysis"] = latest_analysis
+    entry_data["analyses"] = analyses  # All analyses for client-side caching
 
     return entry_data
 
@@ -456,6 +453,28 @@ async def trigger_analysis(
     # Commit rate limit entry only after successful Core API call.
     # This ensures users aren't locked out due to failed requests.
     request.state.rate_limit_db.commit()
+
+    return response.json()
+
+
+@router.get("/api/cleaned-entries/{cleanup_id}/analyses")
+async def list_analyses(
+    cleanup_id: str,
+    session: SessionModel = Depends(get_session),
+    core_api: CoreAPIClient = Depends(get_core_api),
+):
+    """List all analyses for a cleaned entry."""
+    response = await core_api.request(
+        "GET",
+        f"/api/v1/cleaned-entries/{cleanup_id}/analyses",
+        session.access_token,
+    )
+
+    if response.status_code >= 400:
+        raise CoreAPIError(
+            status_code=response.status_code,
+            detail=response.text,
+        )
 
     return response.json()
 

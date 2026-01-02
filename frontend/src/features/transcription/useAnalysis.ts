@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { toast } from 'sonner'
-import { getAnalysis, triggerAnalysis, getAnalysisProfiles } from './api'
+import { getAnalysis, getAnalyses, triggerAnalysis, getAnalysisProfiles } from './api'
 import type { AnalysisProfile, AnalysisResult } from './types'
 import { ApiError } from './types'
 
@@ -43,10 +43,18 @@ export interface UseAnalysisReturn {
   isLoadingProfiles: boolean
   /** Current analysis job ID */
   analysisId: string | null
-  /** Trigger analysis with a specific profile */
+  /** Currently selected profile ID */
+  currentProfileId: string | null
+  /** Label of currently selected profile (for dropdown button text) */
+  currentProfileLabel: string | null
+  /** Select a profile - checks cache, then API, then triggers LLM if needed */
+  selectProfile: (profileId: string) => Promise<void>
+  /** Trigger analysis with a specific profile (always triggers new LLM call) */
   analyze: (profileId?: string) => Promise<void>
   /** Load profiles */
   loadProfiles: () => Promise<void>
+  /** Populate cache from initial analyses (called when loading entry) */
+  populateCache: (analyses: AnalysisResult[]) => void
   /** Reset analysis state */
   reset: () => void
 }
@@ -116,6 +124,18 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(false)
   const [analysisId, setAnalysisId] = useState<string | null>(null)
 
+  // Cache of analyses by profile_id
+  const [analysisCache, setAnalysisCache] = useState<Map<string, AnalysisResult>>(new Map())
+  // Currently selected profile ID
+  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null)
+
+  // Computed current profile label for dropdown button text
+  const currentProfileLabel = useMemo(() => {
+    if (!currentProfileId) return null
+    const profile = profiles.find(p => p.id === currentProfileId)
+    return profile?.label ?? null
+  }, [currentProfileId, profiles])
+
   // Polling interval ref
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -140,6 +160,11 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
         clearPolling()
         setIsPolling(false)
         setIsLoading(false)
+
+        // Add to cache by profile_id
+        if (result.profile_id) {
+          setAnalysisCache(prev => new Map(prev).set(result.profile_id, result))
+        }
 
         const parsed = parseAnalysisResult(result.result)
         if (parsed) {
@@ -186,7 +211,7 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
   }, [pollAnalysis])
 
   /**
-   * Trigger analysis
+   * Trigger analysis (always triggers new LLM call)
    */
   const analyze = useCallback(async (profileId: string = defaultProfile) => {
     if (!cleanupId) {
@@ -196,6 +221,7 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
 
     setIsLoading(true)
     setError(null)
+    setCurrentProfileId(profileId)
 
     try {
       const { data: job } = await triggerAnalysis(cleanupId, profileId)
@@ -223,6 +249,112 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
   }, [cleanupId, defaultProfile, startPolling])
 
   /**
+   * Initialize from analyses list (called when loading entry)
+   * Note: List endpoint doesn't include `result`, so we fetch individually if needed
+   * Always prioritizes showing "generic-summary" profile by default
+   */
+  const populateCache = useCallback((analyses: AnalysisResult[]) => {
+    // Clear cache - list doesn't have results, cache only stores individual fetches
+    setAnalysisCache(new Map())
+
+    if (analyses.length === 0) return
+
+    // Prioritize generic-summary, fall back to first (most recent) analysis
+    const defaultAnalysis = analyses.find(a => a.profile_id === defaultProfile) || analyses[0]
+
+    setCurrentProfileId(defaultAnalysis.profile_id)
+    setAnalysisId(defaultAnalysis.id)
+
+    // If completed, fetch individual analysis to get the result
+    if (defaultAnalysis.status === 'completed') {
+      setIsLoading(true)
+      getAnalysis(defaultAnalysis.id).then(({ data: fullAnalysis }) => {
+        // Add to cache
+        if (fullAnalysis.profile_id) {
+          setAnalysisCache(prev => new Map(prev).set(fullAnalysis.profile_id, fullAnalysis))
+        }
+        const parsed = parseAnalysisResult(fullAnalysis.result)
+        if (parsed) {
+          setData(parsed)
+          setError(null)
+        }
+        setIsLoading(false)
+      }).catch(err => {
+        console.error('Failed to fetch analysis:', err)
+        setIsLoading(false)
+      })
+    } else if (defaultAnalysis.status === 'pending' || defaultAnalysis.status === 'processing') {
+      // Still processing - start polling
+      startPolling(defaultAnalysis.id)
+    }
+  }, [defaultProfile, startPolling])
+
+  /**
+   * Select a profile - checks cache, then API, then triggers LLM if needed
+   */
+  const selectProfile = useCallback(async (profileId: string) => {
+    // 1. Check memory cache first (cache has full results from individual fetches)
+    const cached = analysisCache.get(profileId)
+    if (cached && cached.status === 'completed') {
+      setCurrentProfileId(profileId)
+      setAnalysisId(cached.id)
+      const parsed = parseAnalysisResult(cached.result)
+      if (parsed) {
+        setData(parsed)
+        setError(null)
+      }
+      return
+    }
+
+    // 2. Cache miss - fetch analyses list to check if analysis EXISTS for this profile
+    if (cleanupId) {
+      setIsLoading(true)
+      try {
+        const { data: analyses } = await getAnalyses(cleanupId)
+
+        // Check if analysis exists for the requested profile
+        const existing = analyses.find(a => a.profile_id === profileId)
+
+        if (existing?.status === 'completed') {
+          // Found completed analysis - fetch individual to get full result (no LLM call!)
+          setCurrentProfileId(profileId)
+          setAnalysisId(existing.id)
+
+          const { data: fullAnalysis } = await getAnalysis(existing.id)
+
+          // Add to cache
+          if (fullAnalysis.profile_id) {
+            setAnalysisCache(prev => new Map(prev).set(fullAnalysis.profile_id, fullAnalysis))
+          }
+
+          const parsed = parseAnalysisResult(fullAnalysis.result)
+          if (parsed) {
+            setData(parsed)
+            setError(null)
+          }
+          setIsLoading(false)
+          return
+        }
+
+        if (existing?.status === 'pending' || existing?.status === 'processing') {
+          // Analysis in progress - poll it
+          setCurrentProfileId(profileId)
+          setAnalysisId(existing.id)
+          startPolling(existing.id)
+          return
+        }
+      } catch (err) {
+        console.error('Failed to fetch analyses:', err)
+      }
+      setIsLoading(false)
+    }
+
+    // 3. Not found in API - trigger new LLM analysis
+    setCurrentProfileId(profileId)
+    await analyze(profileId)
+  }, [analysisCache, cleanupId, analyze, startPolling])
+
+  /**
    * Load available profiles
    */
   const loadProfiles = useCallback(async () => {
@@ -247,6 +379,8 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     setIsPolling(false)
     setError(null)
     setAnalysisId(null)
+    setAnalysisCache(new Map())
+    setCurrentProfileId(null)
     clearPolling()
   }, [clearPolling])
 
@@ -299,8 +433,12 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     profiles,
     isLoadingProfiles,
     analysisId,
+    currentProfileId,
+    currentProfileLabel,
+    selectProfile,
     analyze,
     loadProfiles,
+    populateCache,
     reset,
   }
 }

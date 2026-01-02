@@ -14,6 +14,7 @@ import type {
   ApiSegment,
   CleanedSegment,
   RateLimitInfo,
+  AnalysisResult,
 } from "./types"
 import { ApiError } from "./types"
 import { parseAllSegmentTimes, findSegmentAtTime } from "@/lib/time-utils"
@@ -148,6 +149,8 @@ export interface UseTranscriptionReturn {
   cleanupId: string | null
   /** Current analysis ID (for polling analysis results) */
   analysisId: string | null
+  /** All analyses for this entry (for client-side caching by profile) */
+  analyses: AnalysisResult[]
   /** Current rate limit info */
   rateLimits: RateLimitInfo | null
   /** Audio duration in seconds (from API, used as fallback for audio player) */
@@ -310,6 +313,7 @@ export function useTranscription(
   )
   const [cleanupId, setCleanupId] = useState<string | null>(null)
   const [analysisId, setAnalysisId] = useState<string | null>(null)
+  const [analyses, setAnalyses] = useState<AnalysisResult[]>([])
   const [rateLimits, setRateLimits] = useState<RateLimitInfo | null>(null)
   const [durationSeconds, setDurationSeconds] = useState<number>(0)
 
@@ -753,10 +757,13 @@ export function useTranscription(
         setSegments(transformedSegments)
         setEntryId(entryIdToLoad)
         setCleanupId(cleanupData.id)
-        // Set analysis ID from latest analysis if available (for previously processed entries)
-        const latestAnalysisId = entryDetails.latest_analysis?.id ?? null
+        // Set all analyses for client-side caching by profile
+        const allAnalyses = entryDetails.analyses || []
+        setAnalyses(allAnalyses)
+        // Set analysis ID from first (latest) analysis if available
+        const latestAnalysisId = allAnalyses.length > 0 ? allAnalyses[0].id : null
         setAnalysisId(latestAnalysisId)
-        console.log("[loadEntry] Latest analysis ID:", latestAnalysisId)
+        console.log("[loadEntry] Loaded analyses count:", allAnalyses.length, "Latest ID:", latestAnalysisId)
         // Set duration from API response (used as fallback when audio element can't determine duration)
         setDurationSeconds(entryDetails.duration_seconds || 0)
         setStatus("complete")
@@ -789,6 +796,7 @@ export function useTranscription(
     setEntryId(initialSegments?.length || mockMode ? "mock-entry-1" : null)
     setCleanupId(null)
     setAnalysisId(null)
+    setAnalyses([])
     setRateLimits(null)
     setDurationSeconds(0)
     setRevertedSegments(new Map())
@@ -819,6 +827,7 @@ export function useTranscription(
     entryId,
     cleanupId,
     analysisId,
+    analyses,
     rateLimits,
     durationSeconds,
     updateSegmentCleanedText,

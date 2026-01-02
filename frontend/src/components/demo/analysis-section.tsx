@@ -22,8 +22,15 @@ export interface AnalysisSectionProps {
   isLoading?: boolean
   error?: string | null
   profiles?: AnalysisProfile[]
+  /** Currently selected profile ID */
+  currentProfileId?: string | null
+  /** Label of currently selected profile (for dropdown button text) */
+  currentProfileLabel?: string | null
   onAnalysisTypeChange: (type: "summary" | "action-items" | "sentiment") => void
   onToggleAnalysisMenu: () => void
+  /** Select a profile - checks cache first, only triggers LLM if needed */
+  onSelectProfile?: (profileId: string) => void
+  /** @deprecated Use onSelectProfile instead */
   onRerunAnalysis?: (profileId: string) => void
 }
 
@@ -34,10 +41,15 @@ export function AnalysisSection({
   isLoading = false,
   error = null,
   profiles = [],
+  currentProfileId,
+  currentProfileLabel,
   onAnalysisTypeChange,
   onToggleAnalysisMenu,
+  onSelectProfile,
   onRerunAnalysis,
 }: AnalysisSectionProps) {
+  // Use onSelectProfile if available, fall back to onRerunAnalysis for backward compatibility
+  const handleProfileSelect = onSelectProfile || onRerunAnalysis
   const t = useTranslations('demo.analysis')
   const analysisLabels = {
     summary: t('types.summary'),
@@ -81,9 +93,9 @@ export function AnalysisSection({
           <div className="text-center">
             <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            {onRerunAnalysis && profiles.length > 0 && (
+            {handleProfileSelect && profiles.length > 0 && (
               <button
-                onClick={() => onRerunAnalysis(profiles[0].id)}
+                onClick={() => handleProfileSelect(profiles[0].id)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -106,9 +118,9 @@ export function AnalysisSection({
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <p className="text-sm text-muted-foreground mb-4">{t('noData')}</p>
-            {onRerunAnalysis && profiles.length > 0 && (
+            {handleProfileSelect && profiles.length > 0 && (
               <button
-                onClick={() => onRerunAnalysis(profiles[0].id)}
+                onClick={() => handleProfileSelect(profiles[0].id)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -136,24 +148,34 @@ export function AnalysisSection({
             onClick={onToggleAnalysisMenu}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-background hover:bg-secondary border border-border hover:border-muted-foreground rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-all"
           >
-            {onRerunAnalysis && profiles.length > 0 ? t('reanalyze') : t('change')}
+            {/* Show current profile label or fallback to translation */}
+            {currentProfileLabel || (handleProfileSelect && profiles.length > 0 ? t('reanalyze') : t('change'))}
             <ChevronDown className="w-4 h-4" />
           </button>
           {showAnalysisMenu && (
             <div className="absolute right-0 top-full mt-2 bg-background border border-border rounded-lg overflow-hidden z-10 shadow-lg min-w-[220px]">
-              {onRerunAnalysis && profiles.length > 0 ? (
-                // Show profile options when re-analyze is available
+              {handleProfileSelect && profiles.length > 0 ? (
+                // Show profile options with current profile highlighted
                 profiles.map((profile) => (
                   <button
                     key={profile.id}
                     onClick={() => {
-                      onRerunAnalysis(profile.id)
+                      handleProfileSelect(profile.id)
                       onToggleAnalysisMenu()
                     }}
-                    className="block w-full px-4 py-2.5 text-left transition-colors hover:bg-muted"
+                    className={`block w-full px-4 py-2.5 text-left transition-colors hover:bg-muted ${
+                      currentProfileId === profile.id ? 'bg-secondary' : ''
+                    }`}
                   >
-                    <div className="text-[13px] font-medium text-foreground">{profile.label}</div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">{profile.intent}</div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-[13px] font-medium text-foreground">{profile.label}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">{profile.intent}</div>
+                      </div>
+                      {currentProfileId === profile.id && (
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                    </div>
                   </button>
                 ))
               ) : (

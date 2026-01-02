@@ -429,6 +429,14 @@ export default function DemoPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Populate analysis cache when analyses are loaded from entry
+  useEffect(() => {
+    if (transcription.analyses && transcription.analyses.length > 0) {
+      analysisHook.populateCache(transcription.analyses)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcription.analyses])
+
   // Fetch rate limits on mount
   useEffect(() => {
     transcription.fetchRateLimits()
@@ -517,8 +525,9 @@ export default function DemoPage() {
     // Note: analysisHook auto-resets when transcription.analysisId changes via its useEffect
   }, [transcription, feedbackHook])
 
-  const handleRerunAnalysis = useCallback((profileId: string) => {
-    analysisHook.analyze(profileId)
+  // Handle profile selection - checks cache, then API, then triggers LLM if needed
+  const handleSelectProfile = useCallback((profileId: string) => {
+    analysisHook.selectProfile(profileId)
   }, [analysisHook])
 
   const editingCount = Array.from(editedTexts.entries()).filter(([id, text]) => {
@@ -656,9 +665,11 @@ export default function DemoPage() {
                   isLoading={analysisHook.isLoading}
                   error={analysisHook.error}
                   profiles={analysisHook.profiles}
+                  currentProfileId={analysisHook.currentProfileId}
+                  currentProfileLabel={analysisHook.currentProfileLabel}
                   onAnalysisTypeChange={setAnalysisType}
                   onToggleAnalysisMenu={handleToggleAnalysisMenu}
-                  onRerunAnalysis={handleRerunAnalysis}
+                  onSelectProfile={handleSelectProfile}
                 />
               </div>
 

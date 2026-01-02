@@ -374,6 +374,21 @@ export async function getAnalysis(
   return request<AnalysisResult>(`/api/analyses/${analysisId}`)
 }
 
+/**
+ * List all analyses for a cleaned entry
+ */
+export async function getAnalyses(
+  cleanupId: string
+): Promise<{ data: AnalysisResult[]; rateLimitInfo: RateLimitInfo | null }> {
+  const result = await request<{ analyses: AnalysisResult[] }>(
+    `/api/cleaned-entries/${cleanupId}/analyses`
+  )
+  return {
+    data: result.data.analyses,
+    rateLimitInfo: result.rateLimitInfo,
+  }
+}
+
 // =============================================================================
 // Feedback Endpoints
 // =============================================================================
