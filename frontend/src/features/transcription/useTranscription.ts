@@ -457,15 +457,15 @@ export function useTranscription(
 
                 // Fallback: Create single segment from full text when no diarization
                 // This happens with providers like Groq that don't support diarization
-                if (transformedSegments.length === 0 && transcriptionStatus.text) {
+                if (transformedSegments.length === 0 && transcriptionStatus.transcribed_text) {
                   transformedSegments = [
                     {
                       id: `fallback-${transcriptionId}`,
                       speaker: 0,
-                      time: "0:00 – 0:00", // Duration not available in polling context
-                      rawText: transcriptionStatus.text.trim(),
-                      cleanedText: cleanedEntry.cleaned_text?.trim() || transcriptionStatus.text.trim(),
-                      originalRawText: transcriptionStatus.text.trim(),
+                      time: "",
+                      rawText: transcriptionStatus.transcribed_text.trim(),
+                      cleanedText: cleanedEntry.cleaned_text?.trim() || transcriptionStatus.transcribed_text.trim(),
+                      originalRawText: transcriptionStatus.transcribed_text.trim(),
                     },
                   ]
                 }
