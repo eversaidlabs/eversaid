@@ -7,17 +7,52 @@ they do NOT proxy to the Core API (except for entry verification).
 from datetime import datetime
 from typing import List, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy.orm import Session as DBSession
 
+from app.config import Settings, get_settings
 from app.core_client import CoreAPIClient, CoreAPIError, get_core_api
 from app.database import get_db
 from app.models import EntryFeedback, Session as SessionModel, Waitlist
+from app.rate_limit import get_rate_limit_status
 from app.session import get_session
 
 
 router = APIRouter(tags=["local"])
+
+
+# =============================================================================
+# Rate Limit Endpoint
+# =============================================================================
+
+
+@router.get("/api/rate-limits")
+async def get_rate_limits(
+    request: Request,
+    session: SessionModel = Depends(get_session),
+    db: DBSession = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+):
+    """Get current rate limit status without consuming a request.
+
+    Returns rate limit info via headers (reuses middleware).
+    Call this on page load to display current limits.
+    """
+    # Get transcribe limits (primary action users care about)
+    result = get_rate_limit_status(
+        session_id=session.session_id,
+        ip_address=session.ip_address or request.client.host,
+        db=db,
+        action="transcribe",
+        settings=settings,
+    )
+
+    # Store in request state so middleware adds headers
+    request.state.rate_limit_result = result
+
+    # Return empty response - headers contain the data
+    return {}
 
 
 # =============================================================================

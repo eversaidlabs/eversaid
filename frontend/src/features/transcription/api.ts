@@ -193,6 +193,31 @@ async function request<T>(
 }
 
 // =============================================================================
+// Rate Limit Endpoints
+// =============================================================================
+
+/**
+ * Get current rate limit status without consuming a request.
+ * Call this on page load to display current limits.
+ */
+export async function getRateLimits(): Promise<RateLimitInfo | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/rate-limits`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    return parseRateLimitHeaders(response)
+  } catch {
+    return null
+  }
+}
+
+// =============================================================================
 // Transcription Endpoints
 // =============================================================================
 

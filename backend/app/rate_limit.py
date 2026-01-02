@@ -244,6 +244,90 @@ class RateLimitTracker:
 
 
 # =============================================================================
+# Rate Limit Status (Read-Only)
+# =============================================================================
+
+
+def get_rate_limit_status(
+    session_id: str,
+    ip_address: str,
+    db: DBSession,
+    action: str,
+    settings: Settings,
+) -> RateLimitResult:
+    """Get current rate limit status without consuming a request.
+
+    This is used by GET /api/rate-limits to return limits on page load.
+    Unlike check_and_increment, this does NOT add a new entry.
+    """
+    now = datetime.utcnow()
+    day_ago = now - timedelta(days=1)
+
+    # Get limits for the action type
+    if action == "analyze":
+        day_limit = settings.RATE_LIMIT_LLM_DAY
+        ip_day_limit = settings.RATE_LIMIT_LLM_IP_DAY
+        global_day_limit = settings.RATE_LIMIT_LLM_GLOBAL_DAY
+    else:
+        day_limit = settings.RATE_LIMIT_DAY
+        ip_day_limit = settings.RATE_LIMIT_IP_DAY
+        global_day_limit = settings.RATE_LIMIT_GLOBAL_DAY
+
+    # Count current usage
+    day_count = (
+        db.query(func.count(RateLimitEntry.id))
+        .filter(
+            RateLimitEntry.action == action,
+            RateLimitEntry.created_at >= day_ago,
+            RateLimitEntry.session_id == session_id,
+        )
+        .scalar()
+        or 0
+    )
+    ip_day_count = (
+        db.query(func.count(RateLimitEntry.id))
+        .filter(
+            RateLimitEntry.action == action,
+            RateLimitEntry.created_at >= day_ago,
+            RateLimitEntry.ip_address == ip_address,
+        )
+        .scalar()
+        or 0
+    )
+    global_day_count = (
+        db.query(func.count(RateLimitEntry.id))
+        .filter(
+            RateLimitEntry.action == action,
+            RateLimitEntry.created_at >= day_ago,
+        )
+        .scalar()
+        or 0
+    )
+
+    # Calculate reset time
+    day_reset = int((now + timedelta(days=1)).timestamp())
+
+    return RateLimitResult(
+        allowed=True,  # Read-only check doesn't determine allowed
+        day=LimitInfo(
+            limit=day_limit,
+            remaining=max(0, day_limit - day_count),
+            reset=day_reset,
+        ),
+        ip_day=LimitInfo(
+            limit=ip_day_limit,
+            remaining=max(0, ip_day_limit - ip_day_count),
+            reset=day_reset,
+        ),
+        global_day=LimitInfo(
+            limit=global_day_limit,
+            remaining=max(0, global_day_limit - global_day_count),
+            reset=day_reset,
+        ),
+    )
+
+
+# =============================================================================
 # Dependency Factory
 # =============================================================================
 

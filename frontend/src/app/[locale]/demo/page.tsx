@@ -427,6 +427,12 @@ export default function DemoPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Fetch rate limits on mount
+  useEffect(() => {
+    transcription.fetchRateLimits()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Auto-scroll to active segment during playback
   useEffect(() => {
     if (audioPlayer.isPlaying && audioPlayer.activeSegmentId) {

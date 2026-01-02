@@ -312,7 +312,7 @@ export default function HomePage() {
               <p className="text-sm text-[#64748B] leading-relaxed">{t('features.noTraining.description')}</p>
             </div>
           </div>
-          <p className="text-center text-[13px] text-[#94A3B8] mt-5 italic">
+          <p className="text-center text-[13px] text-[#1D3557] mt-5 italic">
             {t('features.disclaimerDemo')}
           </p>
         </div>

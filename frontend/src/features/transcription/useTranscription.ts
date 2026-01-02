@@ -24,7 +24,7 @@ import {
   getEntry,
   saveUserEdit,
   revertUserEdit,
-  parseRateLimitHeaders,
+  getRateLimits,
 } from "./api"
 import { addEntryId, cacheEntry } from "@/lib/storage"
 
@@ -208,6 +208,12 @@ export interface UseTranscriptionReturn {
    * Reset to initial state
    */
   reset: () => void
+
+  /**
+   * Fetch current rate limits from API
+   * Call on page mount to display initial rate limit info
+   */
+  fetchRateLimits: () => Promise<void>
 }
 
 /**
@@ -782,6 +788,23 @@ export function useTranscription(
     setRevertedSegments(new Map())
   }, [initialSegments, mockMode])
 
+  /**
+   * Fetch current rate limits from API
+   */
+  const fetchRateLimits = useCallback(async (): Promise<void> => {
+    if (mockMode) return
+
+    try {
+      const limits = await getRateLimits()
+      if (limits) {
+        setRateLimits(limits)
+      }
+    } catch (err) {
+      // Silently fail - rate limits are not critical
+      console.error("Failed to fetch rate limits:", err)
+    }
+  }, [mockMode])
+
   return {
     segments: segmentsWithTime,
     status,
@@ -800,6 +823,7 @@ export function useTranscription(
     getSegmentById,
     getSegmentAtTime,
     reset,
+    fetchRateLimits,
   }
 }
 
