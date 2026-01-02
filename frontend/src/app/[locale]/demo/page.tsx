@@ -22,6 +22,7 @@ import { ApiError } from "@/features/transcription/types"
 import { useFeedback } from "@/features/transcription/useFeedback"
 import { useEntries } from "@/features/transcription/useEntries"
 import { useAudioPlayer } from "@/features/transcription/useAudioPlayer"
+import { useWordHighlight } from "@/features/transcription/useWordHighlight"
 import { useAnalysis } from "@/features/transcription/useAnalysis"
 import { getEntryAudioUrl } from "@/features/transcription/api"
 
@@ -112,6 +113,14 @@ export default function DemoPage() {
     audioUrl,
     onSegmentChange: (segmentId) => setActiveSegmentId(segmentId),
     fallbackDuration: transcription.durationSeconds,
+  })
+
+  // Word highlighting hook for playback
+  const wordHighlight = useWordHighlight({
+    segments: transcription.segments,
+    currentTime: audioPlayer.currentTime,
+    isPlaying: audioPlayer.isPlaying,
+    activeSegmentId,
   })
 
   // Analysis hook
@@ -659,6 +668,8 @@ export default function DemoPage() {
                 onCleanedTextSelect={handleCleanedTextSelect}
                 onRawMoveTargetClick={handleRawMoveTargetClick}
                 onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
+                activeWordIndex={wordHighlight.activeWordIndex}
+                isPlaying={audioPlayer.isPlaying}
               />
             </div>
 

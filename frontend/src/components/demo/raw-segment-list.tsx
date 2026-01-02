@@ -3,6 +3,8 @@
 import type React from "react"
 
 import { forwardRef } from "react"
+import type { TranscriptionWord } from "@/features/transcription/types"
+import { HighlightedText } from "./highlighted-text"
 
 export interface RawSegmentListProps {
   segments: Array<{
@@ -10,11 +12,15 @@ export interface RawSegmentListProps {
     speaker: number
     time: string
     rawText: string
+    words?: TranscriptionWord[]
   }>
   activeSegmentId: string | null
   showSpeakerLabels?: boolean // Added prop for single-speaker support
   isSelectingMoveTarget: boolean
   moveSourceSegmentId: string | null
+  /** Index of the currently active word within the active segment */
+  activeWordIndex?: number
+  isPlaying?: boolean
   onSegmentClick: (id: string) => void
   onTextSelect: (segmentId: string, text: string, startOffset: number, endOffset: number) => void
   onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
@@ -28,6 +34,8 @@ export const RawSegmentList = forwardRef<HTMLDivElement, RawSegmentListProps>(
       showSpeakerLabels = true,
       isSelectingMoveTarget,
       moveSourceSegmentId,
+      activeWordIndex = -1,
+      isPlaying = false,
       onSegmentClick,
       onTextSelect,
       onScroll,
@@ -53,11 +61,11 @@ export const RawSegmentList = forwardRef<HTMLDivElement, RawSegmentListProps>(
             <div
               key={seg.id}
               data-segment-id={seg.id}
-              className={`p-4 mb-3 rounded-xl bg-secondary border-l-4 transition-all cursor-pointer ${
+              className={`p-4 mb-3 rounded-xl border-l-4 transition-all cursor-pointer ${
                 seg.id === activeSegmentId
-                  ? "shadow-[0_0_0_2px_rgba(var(--color-primary),0.3),0_4px_12px_rgba(0,0,0,0.05)] bg-background"
-                  : ""
-              } ${showSpeakerLabels ? (seg.speaker === 1 ? "border-primary" : "border-purple-500") : "border-border"} ${
+                  ? "bg-blue-50/50 border-l-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.2),0_4px_12px_rgba(0,0,0,0.05)]"
+                  : "bg-secondary"
+              } ${showSpeakerLabels && seg.id !== activeSegmentId ? (seg.speaker === 1 ? "border-primary" : "border-purple-500") : seg.id !== activeSegmentId ? "border-border" : ""} ${
                 isValidTarget ? "ring-2 ring-primary ring-offset-2 hover:bg-blue-50/50 cursor-pointer" : ""
               } ${isSource ? "opacity-60" : ""}`}
               onClick={() => onSegmentClick(seg.id)}
@@ -78,7 +86,18 @@ export const RawSegmentList = forwardRef<HTMLDivElement, RawSegmentListProps>(
                   )}
                 </div>
               </div>
-              <div className="text-[15px] leading-[1.7] text-foreground select-text">{seg.rawText}</div>
+              <div className="text-[15px] leading-[1.7] text-foreground select-text">
+                {seg.id === activeSegmentId && seg.words?.length ? (
+                  <HighlightedText
+                    text={seg.rawText}
+                    words={seg.words}
+                    activeWordIndex={activeWordIndex}
+                    isPlaying={isPlaying}
+                  />
+                ) : (
+                  seg.rawText
+                )}
+              </div>
             </div>
           )
         })}

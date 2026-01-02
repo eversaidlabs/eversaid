@@ -45,6 +45,7 @@ export interface EditableSegmentListProps {
   onToggleDiff: () => void
   onTextSelect: (segmentId: string, text: string, startOffset: number, endOffset: number) => void
   onMoveTargetClick: (targetSegmentId: string) => void
+  onSegmentClick?: (segmentId: string) => void
   editingCount: number
   onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
 }
@@ -77,6 +78,7 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
       onToggleDiff,
       onTextSelect,
       onMoveTargetClick,
+      onSegmentClick,
       editingCount,
       onScroll,
     },
@@ -150,6 +152,7 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
                 onCloseSuggestions={onCloseSuggestions}
                 onTextSelect={(text, start, end) => onTextSelect(seg.id, text, start, end)}
                 onMoveTargetClick={() => onMoveTargetClick(seg.id)}
+                onSegmentClick={onSegmentClick ? () => onSegmentClick(seg.id) : undefined}
               />
             )
           })}

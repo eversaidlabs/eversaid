@@ -22,6 +22,10 @@ interface TranscriptComparisonLayoutProps {
   isSelectingMoveTarget: boolean
   activeSuggestion: ActiveSuggestion | null
   editingCount: number
+  /** Index of the currently active word within the active segment */
+  activeWordIndex?: number
+  /** Whether audio is currently playing */
+  isPlaying?: boolean
   onSegmentClick: (segmentId: string) => void
   onRevert: (segmentId: string) => void
   onUndoRevert: (segmentId: string) => void
@@ -56,6 +60,8 @@ export function TranscriptComparisonLayout({
   isSelectingMoveTarget,
   activeSuggestion,
   editingCount,
+  activeWordIndex = -1,
+  isPlaying = false,
   onSegmentClick,
   onRevert,
   onUndoRevert,
@@ -171,6 +177,8 @@ export function TranscriptComparisonLayout({
           showSpeakerLabels={showSpeakerLabels}
           isSelectingMoveTarget={isSelectingMoveTarget && textMoveSelection?.sourceColumn === "raw"}
           moveSourceSegmentId={textMoveSelection?.sourceColumn === "raw" ? textMoveSelection.sourceSegmentId : null}
+          activeWordIndex={activeWordIndex}
+          isPlaying={isPlaying}
           onSegmentClick={
             isSelectingMoveTarget && textMoveSelection?.sourceColumn === "raw" ? onRawMoveTargetClick : onSegmentClick
           }
@@ -203,6 +211,7 @@ export function TranscriptComparisonLayout({
           onToggleDiff={onToggleDiff}
           onTextSelect={onCleanedTextSelect}
           onMoveTargetClick={onCleanedMoveTargetClick}
+          onSegmentClick={onSegmentClick}
           editingCount={editingCount}
           onScroll={handleCleanedScroll}
           showRevertButton={showRevertButton}

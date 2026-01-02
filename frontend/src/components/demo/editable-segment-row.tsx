@@ -42,6 +42,7 @@ export interface EditableSegmentRowProps {
   onCloseSuggestions: () => void
   onTextSelect: (text: string, startOffset: number, endOffset: number) => void
   onMoveTargetClick: () => void
+  onSegmentClick?: () => void
 }
 
 export function EditableSegmentRow({
@@ -76,6 +77,7 @@ export function EditableSegmentRow({
   onCloseSuggestions,
   onTextSelect,
   onMoveTargetClick,
+  onSegmentClick,
 }: EditableSegmentRowProps) {
   const handleMouseUp = () => {
     if (isSelectingMoveTarget || isEditing) return
@@ -94,6 +96,8 @@ export function EditableSegmentRow({
   const handleClick = () => {
     if (isSelectingMoveTarget && isValidMoveTarget) {
       onMoveTargetClick()
+    } else if (!isSelectingMoveTarget) {
+      onSegmentClick?.()
     }
   }
 
@@ -156,9 +160,11 @@ export function EditableSegmentRow({
     <>
       <div
         data-segment-id={id}
-        className={`p-4 mb-3 rounded-xl bg-secondary border-l-4 transition-all cursor-pointer relative ${
-          isActive ? "shadow-[0_0_0_2px_rgba(var(--color-primary),0.3),0_4px_12px_rgba(0,0,0,0.05)] bg-background" : ""
-        } ${showSpeakerLabels ? (speaker === 1 ? "border-primary" : "border-purple-500") : "border-border"}`}
+        className={`p-4 mb-3 rounded-xl border-l-4 transition-all cursor-pointer relative ${
+          isActive
+            ? "bg-blue-50/50 border-l-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.2),0_4px_12px_rgba(0,0,0,0.05)]"
+            : "bg-secondary"
+        } ${showSpeakerLabels && !isActive ? (speaker === 1 ? "border-primary" : "border-purple-500") : !isActive ? "border-border" : ""}`}
         onClick={handleClick}
         onMouseUp={handleMouseUp}
       >

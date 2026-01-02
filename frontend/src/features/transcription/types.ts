@@ -77,6 +77,17 @@ export interface TranscribeResponse {
 }
 
 /**
+ * Word-level timing data from transcription API
+ */
+export interface TranscriptionWord {
+  text: string
+  start: number  // seconds
+  end: number    // seconds
+  type: 'word' | 'spacing' | 'audio_event'
+  speaker_id?: string
+}
+
+/**
  * Segment as returned by the API
  */
 export interface ApiSegment {
@@ -86,6 +97,7 @@ export interface ApiSegment {
   text: string
   speaker?: string
   speaker_id?: number
+  words?: TranscriptionWord[]
 }
 
 /**
@@ -99,6 +111,7 @@ export interface TranscriptionStatus {
   text?: string
   transcribed_text?: string  // Used in composed entry details response
   segments?: ApiSegment[]
+  words?: TranscriptionWord[]  // Flat array of all words with timing info
   error?: string
 }
 

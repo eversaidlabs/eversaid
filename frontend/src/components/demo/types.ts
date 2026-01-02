@@ -1,3 +1,5 @@
+import type { TranscriptionWord } from "@/features/transcription/types"
+
 export interface SpellcheckError {
   word: string
   start: number
@@ -13,6 +15,7 @@ export interface Segment {
   cleanedText: string
   originalRawText: string // Immutable original raw text for revert functionality
   paragraphs?: string[] // Optional array of paragraphs for cleaned text
+  words?: TranscriptionWord[] // Word-level timing for playback highlighting
 }
 
 export interface HistoryEntry {

@@ -15,6 +15,7 @@ import type {
   CleanedSegment,
   RateLimitInfo,
   AnalysisResult,
+  TranscriptionWord,
 } from "./types"
 import { ApiError } from "./types"
 import { parseAllSegmentTimes, findSegmentAtTime } from "@/lib/time-utils"
@@ -237,10 +238,15 @@ function formatTime(seconds: number): string {
 
 /**
  * Transform API segments to frontend Segment format
+ *
+ * @param rawSegments - Array of segments from API
+ * @param cleanedSegments - Array of cleaned segments
+ * @param flatWords - Flat array of all words with timing info (optional)
  */
 function transformApiSegments(
   rawSegments: ApiSegment[],
-  cleanedSegments: CleanedSegment[]
+  cleanedSegments: CleanedSegment[],
+  flatWords?: TranscriptionWord[]
 ): Segment[] {
   // Create a map of cleaned segments by their raw_segment_id or index
   const cleanedMap = new Map<string, CleanedSegment>()
@@ -259,6 +265,14 @@ function transformApiSegments(
 
     const timeStr = `${formatTime(rawSeg.start)} – ${formatTime(rawSeg.end)}`
 
+    // Filter words that fall within this segment's time range
+    let segmentWords: TranscriptionWord[] | undefined = undefined
+    if (flatWords && flatWords.length > 0) {
+      segmentWords = flatWords.filter(word =>
+        word.start >= rawSeg.start && word.end <= rawSeg.end
+      )
+    }
+
     return {
       id: rawSeg.id || `seg-${index}`,
       speaker: rawSeg.speaker_id ?? 0,
@@ -266,6 +280,7 @@ function transformApiSegments(
       rawText: rawSeg.text,
       cleanedText: cleanedSeg?.text || rawSeg.text,
       originalRawText: rawSeg.text, // Store immutable original raw text
+      words: segmentWords, // Word-level timing for playback highlighting
     }
   })
 }
@@ -459,9 +474,11 @@ export function useTranscription(
               if (cleanedEntry.status === "completed") {
                 // Transform and set segments
                 const rawSegments = transcriptionStatus.segments || []
+                const flatWords = transcriptionStatus.words || []
                 let transformedSegments = transformApiSegments(
                   rawSegments,
-                  cleanedEntry.cleaned_segments || []
+                  cleanedEntry.cleaned_segments || [],
+                  flatWords
                 )
 
                 // Fallback: Create single segment from full text when no diarization
@@ -729,11 +746,14 @@ export function useTranscription(
         // Transform segments
         const rawSegments = transcription.segments || []
         const cleanedSegments = cleanupData.cleaned_segments || []
+        const flatWords = transcription.words || []
         console.log("[loadEntry] Raw segments count:", rawSegments.length)
         console.log("[loadEntry] Cleaned segments count:", cleanedSegments.length)
+        console.log("[loadEntry] Flat words count:", flatWords.length)
         let transformedSegments = transformApiSegments(
           rawSegments,
-          cleanedSegments
+          cleanedSegments,
+          flatWords
         )
         console.log("[loadEntry] Transformed segments:", transformedSegments.length)
 
