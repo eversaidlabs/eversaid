@@ -744,7 +744,10 @@ export function useTranscription(
         setSegments(transformedSegments)
         setEntryId(entryIdToLoad)
         setCleanupId(cleanupData.id)
-        setAnalysisId(null) // Analysis is managed by useAnalysis hook
+        // Set analysis ID from latest analysis if available (for previously processed entries)
+        const latestAnalysisId = entryDetails.latest_analysis?.id ?? null
+        setAnalysisId(latestAnalysisId)
+        console.log("[loadEntry] Latest analysis ID:", latestAnalysisId)
         setStatus("complete")
         console.log("[loadEntry] Entry loaded successfully")
       } catch (err) {

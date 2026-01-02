@@ -506,8 +506,8 @@ export default function DemoPage() {
   const handleEntrySelect = useCallback(async (entryId: string) => {
     await transcription.loadEntry(entryId)
     feedbackHook.reset()
-    analysisHook.reset()
-  }, [transcription, feedbackHook, analysisHook])
+    // Note: analysisHook auto-resets when transcription.analysisId changes via its useEffect
+  }, [transcription, feedbackHook])
 
   const handleRerunAnalysis = useCallback((profileId: string) => {
     analysisHook.analyze(profileId)

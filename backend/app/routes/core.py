@@ -224,8 +224,24 @@ async def get_entry(
         if cleanup_response.status_code == 200:
             cleanup_data = cleanup_response.json()
 
-    # 5. Compose response with cleanup data included
+    # 5. Fetch analyses for this cleaned entry to get the latest analysis
+    latest_analysis = None
+    if cleanup_id:
+        analyses_response = await core_api.request(
+            "GET",
+            f"/api/v1/cleaned-entries/{cleanup_id}/analyses",
+            session.access_token,
+        )
+        if analyses_response.status_code == 200:
+            analyses_data = analyses_response.json()
+            # Get the most recent analysis (first in list, assuming sorted by date desc)
+            analyses_list = analyses_data.get("analyses", [])
+            if analyses_list:
+                latest_analysis = analyses_list[0]
+
+    # 6. Compose response with cleanup and analysis data included
     entry_data["cleanup"] = cleanup_data
+    entry_data["latest_analysis"] = latest_analysis
 
     return entry_data
 

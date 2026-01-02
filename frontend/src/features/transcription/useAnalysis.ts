@@ -118,7 +118,6 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
 
   // Polling interval ref
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const hasAutoTriggeredRef = useRef(false)
 
   /**
    * Clear polling interval
@@ -249,21 +248,39 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     setError(null)
     setAnalysisId(null)
     clearPolling()
-    hasAutoTriggeredRef.current = false
   }, [clearPolling])
 
+  // Track previous analysisId to detect changes
+  const prevAnalysisIdRef = useRef<string | null | undefined>(undefined)
+
   /**
-   * Auto-fetch existing analysis when analysisId is provided
+   * Auto-fetch existing analysis when analysisId is provided or changes
    * (Backend already triggered analysis during transcribe, we just poll for results)
    */
   useEffect(() => {
-    if (initialAnalysisId && !hasAutoTriggeredRef.current && !isLoading && !data) {
-      hasAutoTriggeredRef.current = true
-      setAnalysisId(initialAnalysisId)
-      setIsLoading(true)
-      startPolling(initialAnalysisId)
+    // Detect if analysisId changed (including from null to a value or from one value to another)
+    const analysisIdChanged = prevAnalysisIdRef.current !== initialAnalysisId
+    prevAnalysisIdRef.current = initialAnalysisId
+
+    if (analysisIdChanged) {
+      // Reset state when switching to a new analysis
+      clearPolling()
+      setData(null)
+      setError(null)
+      setIsPolling(false)
+
+      if (initialAnalysisId) {
+        // Start polling for the new analysis
+        setAnalysisId(initialAnalysisId)
+        setIsLoading(true)
+        startPolling(initialAnalysisId)
+      } else {
+        // No analysis ID - just reset
+        setAnalysisId(null)
+        setIsLoading(false)
+      }
     }
-  }, [initialAnalysisId, isLoading, data, startPolling])
+  }, [initialAnalysisId, startPolling, clearPolling])
 
   /**
    * Cleanup polling on unmount
@@ -273,15 +290,6 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
       clearPolling()
     }
   }, [clearPolling])
-
-  /**
-   * Reset when cleanup ID or analysis ID changes
-   */
-  useEffect(() => {
-    if (cleanupId !== null || initialAnalysisId !== null) {
-      reset()
-    }
-  }, [cleanupId, initialAnalysisId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     data,

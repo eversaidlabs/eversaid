@@ -238,6 +238,8 @@ export interface EntryDetails {
   primary_transcription?: TranscriptionStatus
   /** Cleanup data - composed by wrapper backend (may be null if not yet available) */
   cleanup?: CleanedEntry | null
+  /** Latest analysis for this entry - composed by wrapper backend */
+  latest_analysis?: AnalysisResult | null
 }
 
 /**
