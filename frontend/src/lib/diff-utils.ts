@@ -143,10 +143,14 @@ export function groupDiffTokens(tokens: DiffToken[]): DiffToken[] {
     }
 
     if (token.type === current.type) {
-      // If both are non-whitespace, add a space between them only if current doesn't end with whitespace
+      // If both are non-whitespace, only add space between word tokens (not punctuation)
       if (current.text.trim() && token.text.trim()) {
-        // Only add space if current doesn't already end with whitespace
-        if (!current.text.match(/\s$/)) {
+        // Check if current ends with a word char AND next starts with a word char
+        const currentEndsWithWord = /[\p{L}\p{N}]$/u.test(current.text)
+        const tokenStartsWithWord = /^[\p{L}\p{N}]/u.test(token.text)
+
+        // Only add space if both are words (not punctuation)
+        if (currentEndsWithWord && tokenStartsWithWord) {
           current.text += " " + token.text
         } else {
           current.text += token.text

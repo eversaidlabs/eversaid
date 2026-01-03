@@ -10,6 +10,7 @@ import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
 import { AudioPlayer } from "@/components/demo/audio-player"
 import { UploadZone } from "@/components/demo/upload-zone"
+import { ExpandableCard } from "@/components/demo/expandable-card"
 import type { Segment, SpellcheckError, TextMoveSelection } from "@/components/demo/types"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 import { useTranslations } from "next-intl"
@@ -659,11 +660,12 @@ function DemoPageContent() {
         ) : (
           /* Transcript Mode */
           <>
-            <div className={`bg-card shadow-lg border border-border overflow-hidden transition-all duration-300 ${
-              isEditorExpanded
-                ? "fixed inset-x-0 top-16 bottom-0 z-40 rounded-none border-x-0"
-                : "rounded-xl mb-12"
-            }`}>
+            <ExpandableCard
+              isExpanded={isEditorExpanded}
+              topOffset={64}
+              collapsedClassName="rounded-xl mb-12"
+              expandedClassName="rounded-none border-x-0"
+            >
               {audioUrl && (
                 <audio src={audioUrl} {...audioPlayer.audioProps} preload="metadata" className="hidden" />
               )}
@@ -675,6 +677,7 @@ function DemoPageContent() {
                   currentTime={audioPlayer.currentTime}
                   duration={audioPlayer.duration}
                   playbackSpeed={audioPlayer.playbackSpeed}
+                  isFullscreen={isEditorExpanded}
                   onPlayPause={handlePlayPause}
                   onSeek={handleSeek}
                   onSpeedChange={handleSpeedChange}
@@ -718,7 +721,7 @@ function DemoPageContent() {
                 onExpandToggle={() => setIsEditorExpanded(true)}
                 onClose={() => setIsEditorExpanded(false)}
               />
-            </div>
+            </ExpandableCard>
 
             {/* Analysis and Feedback - animated visibility */}
             <AnimatePresence mode="wait">

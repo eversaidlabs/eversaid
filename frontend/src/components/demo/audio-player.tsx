@@ -10,6 +10,8 @@ export interface AudioPlayerProps {
   duration: number
   playbackSpeed: number
   showSpeedMenu?: boolean
+  /** Whether the player is in fullscreen mode (removes rounded corners) */
+  isFullscreen?: boolean
   onPlayPause: () => void
   onSeek: (time: number) => void
   onSpeedChange: (speed: number) => void
@@ -30,6 +32,7 @@ export function AudioPlayer({
   duration,
   playbackSpeed,
   showSpeedMenu: showSpeedMenuProp,
+  isFullscreen = false,
   onPlayPause,
   onSeek,
   onSpeedChange,
@@ -57,7 +60,7 @@ export function AudioPlayer({
   }
 
   return (
-    <div className="bg-gradient-to-br from-[#1E293B] via-[#334155] to-[#1E293B] px-8 py-5 flex items-center gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] border-b border-white/5 rounded-t-2xl">
+    <div className={`bg-gradient-to-br from-[#1E293B] via-[#334155] to-[#1E293B] px-8 py-5 flex items-center gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] border-b border-white/5 ${isFullscreen ? "" : "rounded-t-2xl"}`}>
       <button
         onClick={onPlayPause}
         className="w-12 h-12 bg-gradient-to-br from-white/12 to-white/5 hover:from-white/18 hover:to-white/8 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 backdrop-blur-sm border border-white/10"

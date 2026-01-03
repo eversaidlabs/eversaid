@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useRef, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { motion, AnimatePresence, useReducedMotion } from "@/components/motion"
+import { motion, AnimatePresence } from "@/components/motion"
 import { Maximize2 } from "lucide-react"
 import { RawSegmentList } from "./raw-segment-list"
 import { EditableSegmentList } from "./editable-segment-list"
@@ -97,12 +97,6 @@ export function TranscriptComparisonLayout({
   const rawScrollRef = useRef<HTMLDivElement>(null)
   const cleanedScrollRef = useRef<HTMLDivElement>(null)
   const isSyncingScrollRef = useRef(false)
-  const shouldReduceMotion = useReducedMotion()
-
-  // Animation settings respecting reduced motion preference
-  const springTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: "spring" as const, damping: 30, stiffness: 300 }
 
   const handleRawScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (isSyncingScrollRef.current) return
@@ -166,20 +160,8 @@ export function TranscriptComparisonLayout({
     return () => window.removeEventListener("resize", syncHeights)
   }, [segments, showDiff, isExpanded])
 
-  // Calculate height based on expanded state
-  // When expanded: fills remaining space in fixed container (after audio player ~100px + header ~50px)
-  // When collapsed: fixed 400px height
-  const getEditorHeight = () => {
-    if (variant !== "demo") return undefined
-    return isExpanded ? "calc(100vh - 230px)" : "400px"
-  }
-
   return (
-    <motion.div
-      layout
-      className="relative"
-      transition={{ layout: springTransition }}
-    >
+    <div className={`relative flex flex-col ${variant === "demo" && !isExpanded ? "" : "h-full"}`}>
       <div className="grid grid-cols-2 border-b border-border">
         <TranscriptHeader
           title={t('rawTitle')}
@@ -200,11 +182,9 @@ export function TranscriptComparisonLayout({
         />
       </div>
 
-      <motion.div
-        layout
-        className="grid grid-cols-2 overflow-hidden"
-        style={{ height: getEditorHeight() }}
-        transition={{ height: springTransition }}
+      <div
+        className={`grid grid-cols-2 overflow-hidden ${variant === "demo" && !isExpanded ? "" : "flex-1"}`}
+        style={{ height: variant === "demo" && !isExpanded ? "280px" : undefined }}
       >
         <RawSegmentList
           ref={rawScrollRef}
@@ -252,7 +232,7 @@ export function TranscriptComparisonLayout({
           onScroll={handleCleanedScroll}
           showRevertButton={showRevertButton}
         />
-      </motion.div>
+      </div>
 
       {/* Expand overlay - only shown when collapsed */}
       <AnimatePresence>
@@ -282,6 +262,6 @@ export function TranscriptComparisonLayout({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   )
 }
