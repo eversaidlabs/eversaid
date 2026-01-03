@@ -7,9 +7,7 @@ test.describe("Demo Page", () => {
   })
 
   test("loads with transcript visible", async ({ page }) => {
-    // Page header
-    await expect(page.getByRole("heading", { name: "Try eversaid" })).toBeVisible()
-
+    // In mock mode, transcript is loaded immediately (no upload mode)
     // Audio player - target by the play icon container (button with Play/Pause icon)
     await expect(page.locator("button").filter({ has: page.locator("svg[class*='fill-white']") }).first()).toBeVisible()
 
@@ -33,6 +31,14 @@ test.describe("Demo Page", () => {
   })
 
   test("can toggle diff view", async ({ page }) => {
+    // First expand the editor by clicking the overlay (required since fullscreen mode was added)
+    const expandOverlay = page.getByRole("button", { name: /expand editor/i })
+    await expect(expandOverlay).toBeVisible()
+    await expandOverlay.click()
+
+    // Wait for editor to expand
+    await page.waitForTimeout(300)
+
     // Find the diff toggle button by its text
     const diffButton = page.getByRole("button", { name: /diff/i })
 
@@ -51,6 +57,14 @@ test.describe("Demo Page", () => {
   })
 
   test("transcript copy buttons work", async ({ page }) => {
+    // First expand the editor by clicking the overlay (required since fullscreen mode was added)
+    const expandOverlay = page.getByRole("button", { name: /expand editor/i })
+    await expect(expandOverlay).toBeVisible()
+    await expandOverlay.click()
+
+    // Wait for editor to expand
+    await page.waitForTimeout(300)
+
     // Copy button should be visible (there are multiple, pick first)
     const copyButton = page.getByRole("button", { name: "Copy" }).first()
     await expect(copyButton).toBeVisible()
@@ -68,14 +82,22 @@ test.describe("Demo Page", () => {
     // The section should be visible, either showing loading, empty state, or content
   })
 
-  test("sidebar elements are visible", async ({ page }) => {
-    // History card - actual text is "Your Transcriptions"
-    await expect(page.getByText("Your Transcriptions")).toBeVisible()
+  test("sidebar elements are visible in transcript mode", async ({ page }) => {
+    // In mock/transcript mode, FeedbackCard is visible (not EntryHistoryCard)
+    // EntryHistoryCard only shows in upload mode (when no segments loaded)
 
     // Feedback card - actual text is "How was the quality?"
     await expect(page.getByText("How was the quality?")).toBeVisible()
 
-    // Waitlist CTA
+    // Waitlist CTA (appears in various places)
     await expect(page.getByText(/waitlist/i).first()).toBeVisible()
+  })
+
+  test("sidebar elements are visible in upload mode", async ({ page }) => {
+    // Go to demo without mock param to be in upload mode
+    await page.goto("/en/demo")
+
+    // History card - visible in upload mode
+    await expect(page.getByText("Your Transcriptions")).toBeVisible()
   })
 })
