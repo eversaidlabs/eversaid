@@ -18,6 +18,7 @@ import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { motion, AnimatePresence } from "@/components/motion"
 import { OfflineBanner } from "@/components/ui/offline-banner"
+import { PersistentWarning } from "@/components/ui/persistent-warning"
 import { ErrorDisplay } from "@/components/demo/error-display"
 import { RateLimitModal } from "@/components/demo/rate-limit-modal"
 import { useTranscription } from "@/features/transcription/useTranscription"
@@ -63,17 +64,19 @@ function DemoPageContent() {
   // MSW intercepts network requests at the test level, keeping production code unaware of testing.
   // Current approach: ?mock param enables mock mode for Playwright E2E tests to bypass upload flow.
   // This works but leaks test concerns into production code. See: https://mswjs.io/
-  const isMockMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('mock')
+  // Navigation hooks for URL query params (browser back button support)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // URL-based flags (use searchParams hook to avoid hydration mismatch)
+  const isMockMode = searchParams.has('mock')
+  const isTestWarning = searchParams.has('testWarning')
 
   // Transcription hook
   const transcription = useTranscription({ mockMode: isMockMode })
 
   // Translation hook
   const t = useTranslations()
-
-  // Navigation hooks for URL query params (browser back button support)
-  const router = useRouter()
-  const searchParams = useSearchParams()
 
   // Feedback hook
   const feedbackHook = useFeedback({
@@ -595,6 +598,12 @@ function DemoPageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <OfflineBanner />
+      <PersistentWarning
+        message={transcription.cleanedSegmentsWarning || "Per-segment cleanup unavailable. Showing original text."}
+        show={!!transcription.cleanedSegmentsWarning || isTestWarning}
+        autoCollapseMs={5000}
+        onDismiss={transcription.dismissCleanedSegmentsWarning}
+      />
       <DemoNavigation />
 
       <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">

@@ -156,6 +156,10 @@ export interface UseTranscriptionReturn {
   rateLimits: RateLimitInfo | null
   /** Audio duration in seconds (from API, used as fallback for audio player) */
   durationSeconds: number
+  /** Warning when cleaned_segments is missing but diarization detected multiple speakers */
+  cleanedSegmentsWarning: string | null
+  /** Dismiss the cleaned segments warning */
+  dismissCleanedSegmentsWarning: () => void
 
   // Segment mutations
   /**
@@ -342,6 +346,7 @@ export function useTranscription(
   const [analyses, setAnalyses] = useState<AnalysisResult[]>([])
   const [rateLimits, setRateLimits] = useState<RateLimitInfo | null>(null)
   const [durationSeconds, setDurationSeconds] = useState<number>(0)
+  const [cleanedSegmentsWarning, setCleanedSegmentsWarning] = useState<string | null>(null)
 
   // Track reverted segments for undo functionality
   const [revertedSegments, setRevertedSegments] = useState<Map<string, string>>(
@@ -506,6 +511,20 @@ export function useTranscription(
                 }
 
                 setSegments(transformedSegments)
+
+                // Check for missing cleaned_segments when diarization detected multiple speakers
+                const uniqueSpeakers = new Set(rawSegments.map(s => s.speaker || s.speaker_id))
+                const hasMultipleSpeakers = uniqueSpeakers.size > 1
+                const cleanedSegmentsMissing = !cleanedEntry.cleaned_segments || cleanedEntry.cleaned_segments.length === 0
+
+                if (hasMultipleSpeakers && cleanedSegmentsMissing) {
+                  setCleanedSegmentsWarning(
+                    "Per-segment cleanup unavailable. Showing original text."
+                  )
+                } else {
+                  setCleanedSegmentsWarning(null)
+                }
+
                 setStatus("complete")
                 resolve()
               } else if (cleanedEntry.status === "failed") {
@@ -786,6 +805,20 @@ export function useTranscription(
         }
 
         setSegments(transformedSegments)
+
+        // Check for missing cleaned_segments when diarization detected multiple speakers
+        const uniqueSpeakers = new Set(rawSegments.map(s => s.speaker || s.speaker_id))
+        const hasMultipleSpeakers = uniqueSpeakers.size > 1
+        const cleanedSegmentsMissing = cleanedSegments.length === 0
+
+        if (hasMultipleSpeakers && cleanedSegmentsMissing) {
+          setCleanedSegmentsWarning(
+            "Per-segment cleanup unavailable. Showing original text."
+          )
+        } else {
+          setCleanedSegmentsWarning(null)
+        }
+
         setEntryId(entryIdToLoad)
         setCleanupId(cleanupData.id)
         // Set all analyses for client-side caching by profile
@@ -831,7 +864,15 @@ export function useTranscription(
     setRateLimits(null)
     setDurationSeconds(0)
     setRevertedSegments(new Map())
+    setCleanedSegmentsWarning(null)
   }, [initialSegments, mockMode])
+
+  /**
+   * Dismiss the cleaned segments warning
+   */
+  const dismissCleanedSegmentsWarning = useCallback(() => {
+    setCleanedSegmentsWarning(null)
+  }, [])
 
   /**
    * Fetch current rate limits from API
@@ -861,6 +902,8 @@ export function useTranscription(
     analyses,
     rateLimits,
     durationSeconds,
+    cleanedSegmentsWarning,
+    dismissCleanedSegmentsWarning,
     updateSegmentCleanedText,
     revertSegmentToRaw,
     undoRevert,
