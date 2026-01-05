@@ -3,6 +3,8 @@
 import type React from "react"
 import { FileAudio, X } from "lucide-react"
 import { useTranslations } from 'next-intl'
+import type { ProcessingStage, StageId } from "@/features/transcription/types"
+import { ProcessingStages } from "./processing-stages"
 
 export interface UploadZoneProps {
   selectedSpeakerCount: number
@@ -15,6 +17,10 @@ export interface UploadZoneProps {
   onSpeakerCountChange: (count: number) => void
   onTranscribeClick: () => void
   onRecordClick: () => void
+  /** Processing stages for stage-based progress display */
+  stages?: ProcessingStage[]
+  /** Currently active stage ID */
+  currentStageId?: StageId | null
 }
 
 function formatFileSize(bytes: number): string {
@@ -35,6 +41,8 @@ export function UploadZone({
   onSpeakerCountChange,
   onTranscribeClick,
   onRecordClick,
+  stages,
+  currentStageId,
 }: UploadZoneProps) {
   const t = useTranslations('demo.upload')
   const tCommon = useTranslations('common')
@@ -130,17 +138,26 @@ export function UploadZone({
         </div>
 
         {isUploading ? (
-          <div className="w-full py-4 bg-[#F1F5F9] rounded-xl">
-            <div className="h-2 bg-[#E2E8F0] rounded-full overflow-hidden mx-4">
-              <div
-                className="h-full bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
+          stages && stages.length > 0 ? (
+            <div className="w-full bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+              <ProcessingStages
+                stages={stages}
+                currentStageId={currentStageId ?? null}
               />
             </div>
-            <p className="text-[13px] text-[#64748B] text-center mt-2">
-              {t('uploading', { progress: uploadProgress })}
-            </p>
-          </div>
+          ) : (
+            <div className="w-full py-4 bg-[#F1F5F9] rounded-xl">
+              <div className="h-2 bg-[#E2E8F0] rounded-full overflow-hidden mx-4">
+                <div
+                  className="h-full bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-[13px] text-[#64748B] text-center mt-2">
+                {t('uploading', { progress: uploadProgress })}
+              </p>
+            </div>
+          )
         ) : (
           <button
             disabled={!hasFile}

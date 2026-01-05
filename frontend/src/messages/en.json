@@ -299,7 +299,27 @@
       "cancel": "Cancel",
       "moveTo": "Move to..."
     },
-    "processing": "Processing..."
+    "processing": {
+      "stages": {
+        "upload": "Upload",
+        "transcribe": "Transcribing",
+        "cleanup": "AI Cleanup",
+        "analyze": "Analysis"
+      },
+      "messages": {
+        "upload": "Uploading your audio file...",
+        "transcribe": "Transcribing with speaker diarization...",
+        "cleanup": "AI is cleaning up the transcript...",
+        "analyze": "Generating summary and insights..."
+      },
+      "estimates": {
+        "upload": "a few seconds",
+        "transcribe": "30-60 seconds",
+        "cleanup": "5-15 seconds",
+        "analyze": "5-10 seconds"
+      },
+      "estimated": "Estimated"
+    }
   },
   "waitlist": {
     "toast": {

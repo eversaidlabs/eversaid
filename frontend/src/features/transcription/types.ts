@@ -22,6 +22,29 @@ export type ProcessingStatus =
   | "complete"
   | "error"
 
+// =============================================================================
+// Stage-Based Progress Types
+// =============================================================================
+
+/**
+ * Stage identifiers for the processing pipeline
+ */
+export type StageId = 'upload' | 'transcribe' | 'cleanup' | 'analyze'
+
+/**
+ * Status of an individual processing stage
+ */
+export type StageStatus = 'pending' | 'active' | 'completed' | 'error'
+
+/**
+ * Individual processing stage with status and optional time estimate
+ */
+export interface ProcessingStage {
+  id: StageId
+  status: StageStatus
+  estimatedSeconds?: { min: number; max: number }
+}
+
 /**
  * Transcription state managed by useTranscription
  */

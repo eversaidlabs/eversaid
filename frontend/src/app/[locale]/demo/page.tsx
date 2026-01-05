@@ -32,7 +32,9 @@ import { useEntries } from "@/features/transcription/useEntries"
 import { useAudioPlayer } from "@/features/transcription/useAudioPlayer"
 import { useWordHighlight } from "@/features/transcription/useWordHighlight"
 import { useAnalysis } from "@/features/transcription/useAnalysis"
+import { useProcessingStages } from "@/features/transcription/useProcessingStages"
 import { getEntryAudioUrl } from "@/features/transcription/api"
+import { ProcessingStages } from "@/components/demo/processing-stages"
 
 // Mock spellcheck - in production, call a Slovenian spellcheck API
 const checkSpelling = (text: string): SpellcheckError[] => {
@@ -142,6 +144,13 @@ function DemoPageContent() {
   const analysisHook = useAnalysis({
     cleanupId: transcription.cleanupId,
     analysisId: transcription.analysisId,
+  })
+
+  // Processing stages for progress UI
+  const processingStages = useProcessingStages({
+    status: transcription.status,
+    isAnalyzing: analysisHook.isPolling,
+    hasError: transcription.status === 'error',
   })
 
   // Waitlist modal state
@@ -575,6 +584,12 @@ function DemoPageContent() {
   const isLoadingEntry = transcription.segments.length === 0 &&
     (transcription.status === 'loading' || (hasEntryParam && transcription.status === 'idle'))
 
+  // Show processing stages when loading an existing entry that's still processing
+  // (has entry ID, no segments yet, and is transcribing/cleaning)
+  const isLoadingProcessingEntry = transcription.entryId &&
+    transcription.segments.length === 0 &&
+    ['transcribing', 'cleaning'].includes(transcription.status)
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <OfflineBanner />
@@ -624,9 +639,17 @@ function DemoPageContent() {
 
       <main className="mx-auto px-6 max-w-[1400px]">
         {isLoadingEntry ? (
-          /* Loading State */
+          /* Loading State - fetching entry data */
           <div className="rounded-xl overflow-hidden shadow-lg">
             <TranscriptLoadingSkeleton />
+          </div>
+        ) : isLoadingProcessingEntry ? (
+          /* Processing State - entry is still being transcribed/cleaned */
+          <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-lg">
+            <ProcessingStages
+              stages={processingStages.stages}
+              currentStageId={processingStages.currentStageId}
+            />
           </div>
         ) : transcription.segments.length === 0 ? (
           /* Upload Mode */
@@ -634,7 +657,7 @@ function DemoPageContent() {
             <div className="lg:col-span-2">
               <UploadZone
                 selectedSpeakerCount={selectedSpeakerCount}
-                isUploading={transcription.status === 'uploading' || transcription.status === 'transcribing'}
+                isUploading={processingStages.isProcessing}
                 uploadProgress={transcription.uploadProgress}
                 hasFile={!!selectedFile}
                 selectedFile={selectedFile}
@@ -643,6 +666,8 @@ function DemoPageContent() {
                 onSpeakerCountChange={handleSpeakerCountChange}
                 onTranscribeClick={handleTranscribeClick}
                 onRecordClick={handleRecordClick}
+                stages={processingStages.stages}
+                currentStageId={processingStages.currentStageId}
               />
             </div>
             <div>

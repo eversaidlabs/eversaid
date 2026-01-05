@@ -299,7 +299,27 @@
       "cancel": "Prekliči",
       "moveTo": "Premakni na..."
     },
-    "processing": "Obdelava..."
+    "processing": {
+      "stages": {
+        "upload": "Nalaganje",
+        "transcribe": "Transkripcija",
+        "cleanup": "AI čiščenje",
+        "analyze": "Analiza"
+      },
+      "messages": {
+        "upload": "Nalaganje vaše zvočne datoteke...",
+        "transcribe": "Transkripcija z ločevanjem govorcev...",
+        "cleanup": "AI čisti prepis...",
+        "analyze": "Ustvarjanje povzetka in vpogledov..."
+      },
+      "estimates": {
+        "upload": "nekaj sekund",
+        "transcribe": "30-60 sekund",
+        "cleanup": "5-15 sekund",
+        "analyze": "5-10 sekund"
+      },
+      "estimated": "Predvideno"
+    }
   },
   "waitlist": {
     "toast": {
