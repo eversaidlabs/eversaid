@@ -8,6 +8,7 @@ import { EntryHistoryCard } from "@/components/demo/entry-history-card"
 import { FeedbackCard } from "@/components/demo/feedback-card"
 import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
+import { TranscriptLoadingSkeleton } from "@/components/demo/transcript-loading-skeleton"
 import { AudioPlayer } from "@/components/demo/audio-player"
 import { UploadZone } from "@/components/demo/upload-zone"
 import { ExpandableCard } from "@/components/demo/expandable-card"
@@ -223,29 +224,7 @@ function DemoPageContent() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isEditorExpanded, transcription.segments.length])
 
-  // Sync segment heights
-  useEffect(() => {
-    const syncHeights = () => {
-      transcription.segments.forEach((seg) => {
-        const rawSegment = document.querySelector(`[data-segment-id="${seg.id}"]`) as HTMLElement
-        const cleanedSegments = document.querySelectorAll(`[data-segment-id="${seg.id}"]`) as NodeListOf<HTMLElement>
-
-        if (rawSegment && cleanedSegments.length === 2) {
-          const cleanedSegment = cleanedSegments[1]
-          const rawHeight = rawSegment.offsetHeight
-          const cleanedHeight = cleanedSegment.offsetHeight
-          const maxHeight = Math.max(rawHeight, cleanedHeight)
-
-          rawSegment.style.minHeight = `${maxHeight}px`
-          cleanedSegment.style.minHeight = `${maxHeight}px`
-        }
-      })
-    }
-
-    syncHeights()
-    window.addEventListener("resize", syncHeights)
-    return () => window.removeEventListener("resize", syncHeights)
-  }, [transcription.segments, showDiff])
+  // Height sync logic removed - moved to transcript-comparison-layout component
 
   // Segment Handlers
   const handleRevertSegment = useCallback(
@@ -595,6 +574,12 @@ function DemoPageContent() {
     return uniqueSpeakers.size > 1
   }, [transcription.segments])
 
+  // Computed state for loading skeleton
+  // Show loading when: actively loading OR when URL has entry param but hasn't started loading yet
+  const hasEntryParam = !!searchParams.get('entry')
+  const isLoadingEntry = transcription.segments.length === 0 &&
+    (transcription.status === 'loading' || (hasEntryParam && transcription.status === 'idle'))
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <OfflineBanner />
@@ -606,42 +591,49 @@ function DemoPageContent() {
       />
       <DemoNavigation />
 
-      <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">
-        {transcription.segments.length === 0 && (
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold text-[#1E293B] mb-2">Try eversaid</h1>
-              <p className="text-[#64748B] text-lg">
-                Upload audio or record directly. See the AI cleanup difference in seconds.
-              </p>
-            </div>
-            {transcription.rateLimits?.day &&
-             transcription.rateLimits.day.remaining <= Number(process.env.NEXT_PUBLIC_RATE_LIMIT_WARNING_THRESHOLD || 2) && (
-              <div className="flex gap-4">
-                <div className="px-4 py-2 bg-amber-50 rounded-lg border border-amber-200 shadow-sm">
-                  <span className="text-sm font-semibold text-amber-700">
-                    {t('demo.rateLimit.remaining', { count: transcription.rateLimits.day.remaining })}
-                  </span>
-                </div>
+      {!isLoadingEntry && (
+        <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">
+          {transcription.segments.length === 0 && (
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-4xl font-bold text-[#1E293B] mb-2">Try eversaid</h1>
+                <p className="text-[#64748B] text-lg">
+                  Upload audio or record directly. See the AI cleanup difference in seconds.
+                </p>
               </div>
-            )}
-          </div>
-        )}
+              {transcription.rateLimits?.day &&
+               transcription.rateLimits.day.remaining <= Number(process.env.NEXT_PUBLIC_RATE_LIMIT_WARNING_THRESHOLD || 2) && (
+                <div className="flex gap-4">
+                  <div className="px-4 py-2 bg-amber-50 rounded-lg border border-amber-200 shadow-sm">
+                    <span className="text-sm font-semibold text-amber-700">
+                      {t('demo.rateLimit.remaining', { count: transcription.rateLimits.day.remaining })}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* Error display for upload/transcription errors */}
-        {transcription.error && transcription.status === 'error' && (
-          <div className="mb-6">
-            <ErrorDisplay
-              error={transcription.error}
-              onRetry={handleRetryUpload}
-              retryLabel="Try Again"
-            />
-          </div>
-        )}
-      </div>
+          {/* Error display for upload/transcription errors */}
+          {transcription.error && transcription.status === 'error' && (
+            <div className="mb-6">
+              <ErrorDisplay
+                error={transcription.error}
+                onRetry={handleRetryUpload}
+                retryLabel="Try Again"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <main className="mx-auto px-6 max-w-[1400px]">
-        {transcription.segments.length === 0 ? (
+        {isLoadingEntry ? (
+          /* Loading State */
+          <div className="rounded-xl overflow-hidden shadow-lg">
+            <TranscriptLoadingSkeleton />
+          </div>
+        ) : transcription.segments.length === 0 ? (
           /* Upload Mode */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">

@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useRef, useEffect } from "react"
 import { RotateCcw, Check, X, Undo2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { SpellcheckError } from "./types"
@@ -82,6 +83,20 @@ export function EditableSegmentRow({
   onSegmentClick,
 }: EditableSegmentRowProps) {
   const t = useTranslations("demo")
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-resize textarea when editing
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (!textarea || !isEditing) return
+
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto'
+    const scrollHeight = textarea.scrollHeight
+    // Apply height with min constraint only (no max - grows to fit content)
+    const newHeight = Math.max(scrollHeight, 60)
+    textarea.style.height = `${newHeight}px`
+  }, [editedText, isEditing])
 
   const handleMouseUp = () => {
     if (isSelectingMoveTarget || isEditing) return
@@ -241,11 +256,16 @@ export function EditableSegmentRow({
 
         {isEditing ? (
           <textarea
+            ref={textareaRef}
             value={editedText}
             onChange={(e) => onTextChange(e.target.value)}
             onDoubleClick={onEditStart}
-            className="w-full min-h-[200px] text-[15px] leading-[1.7] text-foreground p-4 rounded-lg border-2 border-primary bg-background font-inherit resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm"
-            style={{ fontFamily: "inherit" }}
+            className="w-full text-[15px] leading-[1.7] text-foreground p-4 rounded-lg border-2 border-primary bg-background font-inherit overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm"
+            style={{
+              fontFamily: "inherit",
+              minHeight: "60px",
+              resize: "none"
+            }}
           />
         ) : (
           <div className="text-[15px] leading-[1.7] text-foreground select-text" onDoubleClick={onEditStart}>

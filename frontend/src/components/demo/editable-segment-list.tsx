@@ -88,7 +88,7 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
       <div
         ref={ref}
         data-column="cleaned"
-        className="p-5 overflow-y-auto bg-[linear-gradient(180deg,rgba(56,189,248,0.02)_0%,transparent_100%)]"
+        className="p-5 pb-16 overflow-y-auto bg-[linear-gradient(180deg,rgba(56,189,248,0.02)_0%,transparent_100%)]"
         onScroll={onScroll}
       >
         {editingCount > 0 && (
@@ -102,7 +102,7 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
             </button>
           </div>
         )}
-        <div className="space-y-0">
+        <div className="space-y-0 pb-12">
           {segments.map((seg) => {
             const hasUnsavedEdits = editedTexts.has(seg.id) && editedTexts.get(seg.id) !== seg.cleanedText
             const isMoveSource =

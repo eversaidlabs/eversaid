@@ -107,10 +107,14 @@ export function TranscriptComparisonLayout({
 
     isSyncingScrollRef.current = true
 
-    // Calculate scroll percentage
-    const scrollPercentage = rawEl.scrollTop / (rawEl.scrollHeight - rawEl.clientHeight)
-    // Apply to cleaned side
-    cleanedEl.scrollTop = scrollPercentage * (cleanedEl.scrollHeight - cleanedEl.clientHeight)
+    // Use percentage-based scrolling to handle different content heights
+    const rawMaxScroll = rawEl.scrollHeight - rawEl.clientHeight
+    const cleanedMaxScroll = cleanedEl.scrollHeight - cleanedEl.clientHeight
+
+    if (rawMaxScroll > 0 && cleanedMaxScroll > 0) {
+      const scrollPercentage = rawEl.scrollTop / rawMaxScroll
+      cleanedEl.scrollTop = scrollPercentage * cleanedMaxScroll
+    }
 
     requestAnimationFrame(() => {
       isSyncingScrollRef.current = false
@@ -126,39 +130,21 @@ export function TranscriptComparisonLayout({
 
     isSyncingScrollRef.current = true
 
-    // Calculate scroll percentage
-    const scrollPercentage = cleanedEl.scrollTop / (cleanedEl.scrollHeight - cleanedEl.clientHeight)
-    // Apply to raw side
-    rawEl.scrollTop = scrollPercentage * (rawEl.scrollHeight - rawEl.clientHeight)
+    // Use percentage-based scrolling to handle different content heights
+    const rawMaxScroll = rawEl.scrollHeight - rawEl.clientHeight
+    const cleanedMaxScroll = cleanedEl.scrollHeight - cleanedEl.clientHeight
+
+    if (rawMaxScroll > 0 && cleanedMaxScroll > 0) {
+      const scrollPercentage = cleanedEl.scrollTop / cleanedMaxScroll
+      rawEl.scrollTop = scrollPercentage * rawMaxScroll
+    }
 
     requestAnimationFrame(() => {
       isSyncingScrollRef.current = false
     })
   }
 
-  // Sync segment heights
-  useEffect(() => {
-    const syncHeights = () => {
-      segments.forEach((seg) => {
-        const rawSegment = document.querySelector(`[data-segment-id="${seg.id}"]`) as HTMLElement
-        const cleanedSegments = document.querySelectorAll(`[data-segment-id="${seg.id}"]`) as NodeListOf<HTMLElement>
-
-        if (rawSegment && cleanedSegments.length === 2) {
-          const cleanedSegment = cleanedSegments[1]
-          const rawHeight = rawSegment.offsetHeight
-          const cleanedHeight = cleanedSegment.offsetHeight
-          const maxHeight = Math.max(rawHeight, cleanedHeight)
-
-          rawSegment.style.minHeight = `${maxHeight}px`
-          cleanedSegment.style.minHeight = `${maxHeight}px`
-        }
-      })
-    }
-
-    syncHeights()
-    window.addEventListener("resize", syncHeights)
-    return () => window.removeEventListener("resize", syncHeights)
-  }, [segments, showDiff, isExpanded])
+  // Removed height sync logic - it was preventing proper scrolling when columns had different total heights
 
   return (
     <div className={`relative flex flex-col ${variant === "demo" && !isExpanded ? "" : "h-full"}`}>
