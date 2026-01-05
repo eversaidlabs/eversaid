@@ -12,6 +12,9 @@ from app.config import Settings, get_settings
 from app.core_client import CoreAPIClient, CoreAPIError, get_core_api
 from app.database import get_db
 from app.models import Session as SessionModel
+from app.utils.logger import get_logger
+
+logger = get_logger("session")
 
 # Cookie configuration
 SESSION_COOKIE_NAME = "eversaid_session_id"
@@ -78,6 +81,8 @@ async def _create_anonymous_session(
     db.commit()
     db.refresh(session)
 
+    logger.info("Session created", session_id=session_id[:8], ip=ip_address)
+
     return session
 
 
@@ -124,6 +129,8 @@ async def _refresh_session_tokens(
 
     db.commit()
     db.refresh(session)
+
+    logger.info("Session tokens refreshed", session_id=session.session_id[:8])
 
     return session
 

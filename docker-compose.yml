@@ -11,9 +11,15 @@ services:
   backend:
     build: ./backend
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    labels:
+      logging: "loki"
     ports:
       - "8001:8001"
     environment:
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      # Core API
       CORE_API_URL: ${CORE_API_URL:-http://host.docker.internal:8000}
       SESSION_DURATION_DAYS: ${SESSION_DURATION_DAYS:-7}
       # Transcribe rate limits
@@ -30,6 +36,11 @@ services:
       - ./data:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 3
+
+networks:
+  default:
+    external: true
+    name: smart-transcribe-api_default

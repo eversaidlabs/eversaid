@@ -10,9 +10,11 @@ from app.config import get_settings
 from app.core_client import CoreAPIClient, CoreAPIError
 from app.database import Base, engine
 from app import models  # noqa: F401 - Import models to register them with Base
+from app.middleware.logging import RequestLoggingMiddleware
 from app.rate_limit import RateLimitExceeded
 from app.routes.core import router as core_router
 from app.routes.local import router as local_router
+from app.utils.logger import setup_logging
 
 
 # =============================================================================
@@ -50,11 +52,14 @@ class RateLimitHeaderMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Initialize resources on startup, cleanup on shutdown."""
+    # Initialize logging first
+    settings = get_settings()
+    setup_logging(settings)
+
     # Create database tables
     Base.metadata.create_all(bind=engine)
 
     # Initialize Core API client
-    settings = get_settings()
     app.state.core_api = CoreAPIClient(base_url=settings.CORE_API_URL)
 
     yield
@@ -74,7 +79,9 @@ app = FastAPI(
 app.include_router(core_router)
 app.include_router(local_router)
 
-# Register middleware (order matters: CORS should be outermost)
+# Register middleware (order matters: CORS outermost, logging innermost)
+# Execution order: CORS -> RateLimit -> Logging -> Route
+app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RateLimitHeaderMiddleware)
 
 # CORS configuration for frontend access
@@ -90,6 +97,7 @@ app.add_middleware(
         "X-RateLimit-Remaining-Day",
         "X-RateLimit-Reset",
         "Retry-After",
+        "X-Request-ID",
     ],
 )
 

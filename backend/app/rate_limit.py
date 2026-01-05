@@ -31,6 +31,9 @@ from app.config import Settings, get_settings
 from app.database import get_db
 from app.models import RateLimitEntry, Session as SessionModel
 from app.session import get_session
+from app.utils.logger import get_logger
+
+logger = get_logger("rate_limit")
 
 
 # =============================================================================
@@ -364,6 +367,12 @@ def require_rate_limit(action: str = "transcribe"):
         )
 
         if not result.allowed:
+            logger.warning(
+                "Rate limit exceeded",
+                action=action,
+                limit_type=result.exceeded_type,
+                retry_after=result.retry_after,
+            )
             raise RateLimitExceeded(result)
 
         # Store db session in request state so endpoint can commit on success.

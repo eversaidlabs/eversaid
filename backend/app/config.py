@@ -6,6 +6,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    # Logging
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "text"  # "text" (human-readable) or "json" (for Loki)
+
     CORE_API_URL: str = "http://localhost:8000"
     SESSION_DURATION_DAYS: int = 7
     # Transcribe rate limits (per-session daily, per-IP daily, global daily)

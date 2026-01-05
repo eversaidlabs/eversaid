@@ -1,9 +1,14 @@
 """HTTP client for Core API communication."""
 
+import time
 from typing import Any
 
 import httpx
 from fastapi import HTTPException, Request
+
+from app.utils.logger import get_logger
+
+logger = get_logger("core_client")
 
 
 class CoreAPIError(Exception):
@@ -138,6 +143,7 @@ class CoreAPIClient:
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"Bearer {access_token}"
 
+        start_time = time.time()
         try:
             response = await self.client.request(
                 method,
@@ -145,8 +151,26 @@ class CoreAPIClient:
                 headers=headers,
                 **kwargs,
             )
+            duration_ms = (time.time() - start_time) * 1000
+
+            logger.info(
+                "Core API request",
+                method=method,
+                path=path,
+                status=response.status_code,
+                duration_ms=f"{duration_ms:.1f}",
+            )
+
             return response
         except httpx.RequestError as e:
+            duration_ms = (time.time() - start_time) * 1000
+            logger.error(
+                "Core API connection error",
+                method=method,
+                path=path,
+                duration_ms=f"{duration_ms:.1f}",
+                error=str(e),
+            )
             raise CoreAPIError(
                 status_code=503,
                 detail=f"Core API connection error: {e}",
