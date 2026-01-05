@@ -106,7 +106,7 @@
         "title": "No Training",
         "description": "Never used for AI training."
       },
-      "disclaimerDemo": "Free demo uses secure connection. Full encryption & GDPR compliance included with accounts.",
+      "disclaimerDemo": "Free demo uses secure connection. Full encryption, EU-only processing & GDPR compliance included with accounts.",
       "spellcheck": "Slovenian spellcheck included. More languages coming soon."
     },
     "useCases": {
@@ -320,7 +320,7 @@
       },
       "estimated": "Estimated"
     },
-    "warning": "In demo mode, uploads are stored for quality analysis. Don't upload sensitive data. You can delete anytime.",
+    "warning": "Demo mode: avoid uploading sensitive data. You can delete all data at any time.",
     "delete": {
       "button": "Delete entry",
       "confirmTitle": "Delete this entry?",

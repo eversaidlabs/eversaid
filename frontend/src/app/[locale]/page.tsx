@@ -441,7 +441,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               variants={fadeUp}
             >
-              <p className="text-center text-[13px] text-[#1D3557] mt-5 italic">
+              <p className="text-center text-sm text-[#1D3557] mt-5 italic">
                 {t('features.disclaimerDemo')}
               </p>
             </MotionDiv>

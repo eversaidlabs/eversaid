@@ -106,7 +106,7 @@
         "title": "Brez učenja",
         "description": "Nikoli uporabljeno za učenje AI."
       },
-      "disclaimerDemo": "Brezplačni demo uporablja varno povezavo. Polno šifriranje in GDPR skladnost sta vključena z računi.",
+      "disclaimerDemo": "Brezplačni demo uporablja varno povezavo. Polno šifriranje, obdelava samo v EU in GDPR skladnost so vključeni z računi.",
       "spellcheck": "Slovenski črkovalec vključen. Več jezikov kmalu."
     },
     "useCases": {
@@ -320,7 +320,7 @@
       },
       "estimated": "Predvideno"
     },
-    "warning": "V demo načinu, naložene datoteke shranjujemo za analizo kakovosti. Ne nalagajte občutljivih podatkov. Kadarkoli jih lahko izbrišete.",
+    "warning": "Demo način: ne nalagajte občutljivih podatkov. Vse podatke lahko kadarkoli izbrišete.",
     "delete": {
       "button": "Izbriši vnos",
       "confirmTitle": "Izbrisati ta vnos?",
