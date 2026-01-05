@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useEffect } from "react"
 import { toast } from "sonner"
-import { getEntries } from "./api"
+import { getEntries, deleteEntry as deleteEntryApi } from "./api"
 import type { EntrySummary } from "./types"
 import type { HistoryEntry } from "@/components/demo/types"
 import { formatDuration } from "@/lib/time-utils"
@@ -29,8 +29,12 @@ export interface UseEntriesReturn {
   error: string | null
   /** Total count from API */
   total: number
+  /** Entry ID currently being deleted */
+  deletingId: string | null
   /** Refresh entries from API */
   refresh: () => Promise<void>
+  /** Delete an entry by ID. Returns true if deleted, false otherwise. */
+  deleteEntry: (entryId: string) => Promise<boolean>
 }
 
 /**
@@ -89,6 +93,7 @@ export function useEntries(options: UseEntriesOptions = {}): UseEntriesReturn {
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
     setIsLoading(true)
@@ -108,6 +113,30 @@ export function useEntries(options: UseEntriesOptions = {}): UseEntriesReturn {
     }
   }, [limit])
 
+  const deleteEntry = useCallback(async (entryId: string): Promise<boolean> => {
+    setDeletingId(entryId)
+
+    // Optimistic update - remove from list immediately
+    const previousEntries = rawEntries
+    setRawEntries((prev) => prev.filter((e) => e.id !== entryId))
+    setTotal((prev) => Math.max(0, prev - 1))
+
+    try {
+      await deleteEntryApi(entryId)
+      return true
+    } catch (err) {
+      // Restore on error
+      setRawEntries(previousEntries)
+      setTotal((prev) => prev + 1)
+      const message =
+        err instanceof Error ? err.message : "Failed to delete entry"
+      toast.error(message)
+      return false
+    } finally {
+      setDeletingId(null)
+    }
+  }, [rawEntries])
+
   // Auto-fetch on mount
   useEffect(() => {
     if (autoFetch) {
@@ -124,6 +153,8 @@ export function useEntries(options: UseEntriesOptions = {}): UseEntriesReturn {
     isLoading,
     error,
     total,
+    deletingId,
     refresh,
+    deleteEntry,
   }
 }

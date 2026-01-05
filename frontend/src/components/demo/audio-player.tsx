@@ -2,7 +2,19 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Play, Pause, Download } from "lucide-react"
+import { Play, Pause, Download, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export interface AudioPlayerProps {
   isPlaying: boolean
@@ -17,6 +29,7 @@ export interface AudioPlayerProps {
   onSpeedChange: (speed: number) => void
   onToggleSpeedMenu?: () => void
   onDownload: () => void
+  onDelete?: () => void
 }
 
 function formatTime(seconds: number): string {
@@ -38,8 +51,10 @@ export function AudioPlayer({
   onSpeedChange,
   onToggleSpeedMenu: onToggleSpeedMenuProp,
   onDownload,
+  onDelete,
 }: AudioPlayerProps) {
   const [internalShowSpeedMenu, setInternalShowSpeedMenu] = useState(false)
+  const t = useTranslations("demo.delete")
 
   const showSpeedMenu = showSpeedMenuProp !== undefined ? showSpeedMenuProp : internalShowSpeedMenu
   const handleToggleSpeedMenu = onToggleSpeedMenuProp ?? (() => setInternalShowSpeedMenu(prev => !prev))
@@ -162,6 +177,34 @@ export function AudioPlayer({
         >
           <Download className="w-5 h-5 stroke-white/85" />
         </button>
+
+        {onDelete && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className="w-11 h-11 bg-gradient-to-br from-red-500/20 to-red-600/10 hover:from-red-500/30 hover:to-red-600/20 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 backdrop-blur-sm border border-red-500/20"
+                aria-label={t("button")}
+              >
+                <Trash2 className="w-5 h-5 stroke-red-400" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>{t("confirmDescription")}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={onDelete}
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                >
+                  {t("confirm")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   )

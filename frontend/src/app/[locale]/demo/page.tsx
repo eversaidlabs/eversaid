@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useCallback, useRef, useEffect, useMemo, Suspense } from "react"
 import { DemoNavigation } from "@/components/demo/demo-navigation"
 import { AnalysisSection } from "@/components/demo/analysis-section"
+import { DemoWarningBanner } from "@/components/demo/demo-warning-banner"
 import { EntryHistoryCard } from "@/components/demo/entry-history-card"
 import { FeedbackCard } from "@/components/demo/feedback-card"
 import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
@@ -167,9 +168,16 @@ function DemoPageContent() {
   const [showRecordingModal, setShowRecordingModal] = useState(false)
   const recorder = useVoiceRecorder()
 
+  // Track deleted entry IDs to prevent reloading from URL after deletion
+  const deletedEntryRef = useRef<string | null>(null)
+
   // Load entry from URL query param on mount (for browser back button support)
   useEffect(() => {
     const entryId = searchParams.get('entry')
+    // Don't reload if this entry was just deleted
+    if (entryId && entryId === deletedEntryRef.current) {
+      return
+    }
     if (entryId && !transcription.entryId && transcription.status === 'idle') {
       transcription.loadEntry(entryId)
     }
@@ -558,10 +566,29 @@ function DemoPageContent() {
   }, [audioPlayer])
 
   const handleEntrySelect = useCallback(async (entryId: string) => {
-    await transcription.loadEntry(entryId)
-    // Note: feedbackHook auto-loads existing feedback when entryId changes via its useEffect
-    // Note: analysisHook auto-resets when transcription.analysisId changes via its useEffect
-  }, [transcription])
+    try {
+      await transcription.loadEntry(entryId)
+      // Note: feedbackHook auto-loads existing feedback when entryId changes via its useEffect
+      // Note: analysisHook auto-resets when transcription.analysisId changes via its useEffect
+    } catch (err) {
+      // If entry was deleted (404), remove from list and stay on upload mode
+      if (err instanceof ApiError && err.status === 404) {
+        await entriesHook.refresh()
+      }
+    }
+  }, [transcription, entriesHook])
+
+  // Handle entry deletion
+  const handleDeleteEntry = useCallback(async (entryId: string) => {
+    const deleted = await entriesHook.deleteEntry(entryId)
+    if (deleted && transcription.entryId === entryId) {
+      // Mark as deleted to prevent useEffect from trying to reload from URL
+      deletedEntryRef.current = entryId
+      // Clear URL and reset to upload mode
+      router.push('/demo')
+      transcription.reset()
+    }
+  }, [entriesHook, transcription, router])
 
   // Handle profile selection - checks cache, then API, then triggers LLM if needed
   const handleSelectProfile = useCallback((profileId: string) => {
@@ -655,6 +682,7 @@ function DemoPageContent() {
           /* Upload Mode */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
+              <DemoWarningBanner />
               <UploadZone
                 selectedSpeakerCount={selectedSpeakerCount}
                 isUploading={processingStages.isProcessing}
@@ -674,7 +702,9 @@ function DemoPageContent() {
               <EntryHistoryCard
                 entries={entriesHook.entries}
                 activeId={transcription.entryId}
+                deletingId={entriesHook.deletingId}
                 onSelect={handleEntrySelect}
+                onDelete={handleDeleteEntry}
                 isEmpty={entriesHook.entries.length === 0 && !entriesHook.isLoading}
               />
             </div>
@@ -704,6 +734,7 @@ function DemoPageContent() {
                   onSeek={handleSeek}
                   onSpeedChange={handleSpeedChange}
                   onDownload={handleDownload}
+                  onDelete={transcription.entryId ? () => handleDeleteEntry(transcription.entryId!) : undefined}
                 />
               </div>
 

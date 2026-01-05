@@ -319,6 +319,14 @@
         "analyze": "5-10 seconds"
       },
       "estimated": "Estimated"
+    },
+    "warning": "In demo mode, uploads are stored for quality analysis. Don't upload sensitive data. You can delete anytime.",
+    "delete": {
+      "button": "Delete entry",
+      "confirmTitle": "Delete this entry?",
+      "confirmDescription": "This will permanently remove the audio file, transcription, and all associated data.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
     }
   },
   "waitlist": {

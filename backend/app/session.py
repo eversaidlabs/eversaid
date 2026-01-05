@@ -17,6 +17,7 @@ from app.models import Session as SessionModel
 SESSION_COOKIE_NAME = "eversaid_session_id"
 TOKEN_EXPIRY_DAYS = 7  # Assumed access token expiry (Core API default)
 TOKEN_REFRESH_THRESHOLD_HOURS = 1  # Refresh if within this many hours of expiry
+COOKIE_MAX_AGE_SECONDS = 315360000  # 10 years - sessions persist indefinitely
 
 
 async def _create_anonymous_session(
@@ -130,21 +131,17 @@ async def _refresh_session_tokens(
 def _set_session_cookie(
     response: Response,
     session_id: str,
-    settings: Settings,
 ) -> None:
     """Set the session cookie on the response.
 
     Args:
         response: FastAPI response object
         session_id: Session ID to store in cookie
-        settings: Application settings
     """
-    max_age = settings.SESSION_DURATION_DAYS * 86400  # seconds
-
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=session_id,
-        max_age=max_age,
+        max_age=COOKIE_MAX_AGE_SECONDS,
         httponly=True,
         samesite="lax",
         # secure=True should be set in production via reverse proxy
@@ -160,12 +157,13 @@ async def get_or_create_session(
 ) -> SessionModel:
     """FastAPI dependency to get or create an anonymous session.
 
+    Sessions persist indefinitely (no expiry). Users can manually delete entries.
+
     Flow:
     1. Check for session_id cookie
     2. If cookie exists, load session from DB
-    3. If session expired (past expires_at), create new session
-    4. If token near expiry, refresh tokens
-    5. If no cookie, create anonymous user in Core API and store session
+    3. If token near expiry, refresh tokens
+    4. If no cookie, create anonymous user in Core API and store session
 
     Args:
         request: FastAPI request object
@@ -189,20 +187,6 @@ async def get_or_create_session(
         if session:
             now = datetime.utcnow()
 
-            # Check if session has expired
-            if session.expires_at < now:
-                # Session expired - create new one
-                db.delete(session)
-                db.commit()
-                session = await _create_anonymous_session(
-                    core_api=core_api,
-                    db=db,
-                    settings=settings,
-                    ip_address=ip_address,
-                )
-                _set_session_cookie(response, session.session_id, settings)
-                return session
-
             # Check if token needs refresh (within threshold of expiry)
             refresh_threshold = now + timedelta(hours=TOKEN_REFRESH_THRESHOLD_HOURS)
             if session.token_expires_at < refresh_threshold:
@@ -221,7 +205,7 @@ async def get_or_create_session(
         settings=settings,
         ip_address=ip_address,
     )
-    _set_session_cookie(response, session.session_id, settings)
+    _set_session_cookie(response, session.session_id)
 
     return session
 

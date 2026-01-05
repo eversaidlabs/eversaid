@@ -319,6 +319,14 @@
         "analyze": "5-10 sekund"
       },
       "estimated": "Predvideno"
+    },
+    "warning": "V demo načinu, naložene datoteke shranjujemo za analizo kakovosti. Ne nalagajte občutljivih podatkov. Kadarkoli jih lahko izbrišete.",
+    "delete": {
+      "button": "Izbriši vnos",
+      "confirmTitle": "Izbrisati ta vnos?",
+      "confirmDescription": "To bo trajno odstranilo zvočno datoteko, transkripcijo in vse povezane podatke.",
+      "confirm": "Izbriši",
+      "cancel": "Prekliči"
     }
   },
   "waitlist": {
