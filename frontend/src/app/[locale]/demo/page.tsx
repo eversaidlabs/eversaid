@@ -120,8 +120,11 @@ function DemoPageContent() {
   // Analysis State
   const [analysisType, setAnalysisType] = useState<"summary" | "action-items" | "sentiment">("summary")
 
-  // Entry history hook
-  const entriesHook = useEntries()
+  // Session initialization state (prevents race condition on first load)
+  const [sessionReady, setSessionReady] = useState(false)
+
+  // Entry history hook (autoFetch disabled - we fetch after session is ready)
+  const entriesHook = useEntries({ autoFetch: false })
 
   // Audio playback hook
   const audioUrl = transcription.entryId ? getEntryAudioUrl(transcription.entryId) : null
@@ -442,11 +445,25 @@ function DemoPageContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcription.status, transcription.entryId])
 
-  // Load analysis profiles on mount
+  // Initialize session: fetch rate limits first (establishes session cookie)
+  // Then mark session as ready for other API calls
   useEffect(() => {
-    analysisHook.loadProfiles()
+    const initSession = async () => {
+      await transcription.fetchRateLimits()
+      setSessionReady(true)
+    }
+    initSession()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // After session is ready, fetch entries and analysis profiles
+  useEffect(() => {
+    if (sessionReady) {
+      entriesHook.refresh()
+      analysisHook.loadProfiles()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionReady])
 
   // Populate analysis cache when analyses are loaded from entry
   useEffect(() => {
@@ -455,12 +472,6 @@ function DemoPageContent() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcription.analyses])
-
-  // Fetch rate limits on mount
-  useEffect(() => {
-    transcription.fetchRateLimits()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // Auto-scroll to active segment during playback
   useEffect(() => {
