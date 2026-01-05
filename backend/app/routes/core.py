@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Body, Depends, Form, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from starlette.background import BackgroundTask
 
 from app.core_client import CoreAPIClient, CoreAPIError, get_core_api
 from app.models import Session as SessionModel
@@ -303,13 +304,16 @@ async def get_entry_audio(
         f"inline; filename={entry_id}",
     )
 
-    # Stream the body
+    # Stream the body - no cleanup in finally block to avoid
+    # "anext(): asynchronous generator is already running" error
+    # when client disconnects during streaming
     async def stream_audio():
-        try:
-            async for chunk in response.aiter_bytes():
-                yield chunk
-        finally:
-            await client_stream.__aexit__(None, None, None)
+        async for chunk in response.aiter_bytes():
+            yield chunk
+
+    # Cleanup function runs as background task after response completes
+    async def cleanup():
+        await client_stream.__aexit__(None, None, None)
 
     # Build response headers - pass through from Core API
     response_headers = {
@@ -325,6 +329,7 @@ async def get_entry_audio(
         stream_audio(),
         media_type=content_type,
         headers=response_headers,
+        background=BackgroundTask(cleanup),
     )
 
 
