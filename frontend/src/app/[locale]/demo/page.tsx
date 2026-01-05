@@ -411,13 +411,6 @@ function DemoPageContent() {
     }
   }, [selectedFile, selectedSpeakerCount, transcription, rateLimits])
 
-  // Auto-submit feedback for ratings >= 4
-  useEffect(() => {
-    if (feedbackHook.rating >= 4 && !feedbackHook.isSubmitted && !feedbackHook.isSubmitting) {
-      feedbackHook.submit()
-    }
-  }, [feedbackHook.rating, feedbackHook.isSubmitted, feedbackHook.isSubmitting, feedbackHook])
-
   // Refresh entry list after upload completes
   useEffect(() => {
     if (transcription.status === 'complete' && transcription.entryId) {
@@ -524,9 +517,9 @@ function DemoPageContent() {
 
   const handleEntrySelect = useCallback(async (entryId: string) => {
     await transcription.loadEntry(entryId)
-    feedbackHook.reset()
+    // Note: feedbackHook auto-loads existing feedback when entryId changes via its useEffect
     // Note: analysisHook auto-resets when transcription.analysisId changes via its useEffect
-  }, [transcription, feedbackHook])
+  }, [transcription])
 
   // Handle profile selection - checks cache, then API, then triggers LLM if needed
   const handleSelectProfile = useCallback((profileId: string) => {
@@ -732,8 +725,10 @@ function DemoPageContent() {
                       onRatingChange={feedbackHook.setRating}
                       onFeedbackChange={feedbackHook.setFeedbackText}
                       onSubmit={feedbackHook.submit}
+                      isLoading={feedbackHook.isLoading}
                       isSubmitting={feedbackHook.isSubmitting}
                       isSubmitted={feedbackHook.isSubmitted}
+                      hasExisting={feedbackHook.hasExisting}
                       disabled={!transcription.entryId}
                     />
                   </div>

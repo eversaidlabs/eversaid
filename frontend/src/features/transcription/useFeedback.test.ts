@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 // Mock the API module
 vi.mock('./api', () => ({
   submitFeedback: vi.fn(),
+  getFeedback: vi.fn(),
 }))
 
 // Mock sonner toast
@@ -21,6 +22,8 @@ vi.mock('sonner', () => ({
 describe('useFeedback', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default: no existing feedback
+    vi.mocked(api.getFeedback).mockResolvedValue({ data: [], rateLimitInfo: null })
   })
 
   // ===========================================================================
@@ -28,16 +31,59 @@ describe('useFeedback', () => {
   // ===========================================================================
 
   describe('initial state', () => {
-    it('initializes with default values', () => {
+    it('initializes with default values after loading', async () => {
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      // Wait for loading to complete
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       expect(result.current.rating).toBe(0)
       expect(result.current.feedbackText).toBe('')
       expect(result.current.isSubmitting).toBe(false)
       expect(result.current.isSubmitted).toBe(false)
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.hasExisting).toBe(false)
       expect(result.current.error).toBeNull()
+    })
+
+    it('loads existing feedback when entryId has feedback', async () => {
+      vi.mocked(api.getFeedback).mockResolvedValue({
+        data: [
+          {
+            id: 'feedback-1',
+            entry_id: 'entry-123',
+            feedback_type: 'transcription',
+            rating: 4,
+            feedback_text: 'Great quality!',
+            created_at: '2024-01-01T00:00:00Z',
+          },
+        ],
+        rateLimitInfo: null,
+      })
+
+      const { result } = renderHook(() =>
+        useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
+      )
+
+      // Wait for loading to complete
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      expect(result.current.rating).toBe(4)
+      expect(result.current.feedbackText).toBe('Great quality!')
+      expect(result.current.hasExisting).toBe(true)
+      expect(result.current.isSubmitted).toBe(false)
+    })
+
+    it('handles empty entryId without calling API', async () => {
+      const { result } = renderHook(() =>
+        useFeedback({ entryId: '', feedbackType: 'transcription' })
+      )
+
+      expect(api.getFeedback).not.toHaveBeenCalled()
+      expect(result.current.rating).toBe(0)
+      expect(result.current.isLoading).toBe(false)
     })
   })
 
@@ -46,10 +92,12 @@ describe('useFeedback', () => {
   // ===========================================================================
 
   describe('state management', () => {
-    it('updates rating when setRating is called', () => {
+    it('updates rating when setRating is called', async () => {
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       act(() => {
         result.current.setRating(4)
@@ -58,10 +106,12 @@ describe('useFeedback', () => {
       expect(result.current.rating).toBe(4)
     })
 
-    it('updates feedbackText when setFeedbackText is called', () => {
+    it('updates feedbackText when setFeedbackText is called', async () => {
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       act(() => {
         result.current.setFeedbackText('Great transcription!')
@@ -74,6 +124,8 @@ describe('useFeedback', () => {
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       // Set some values first
       act(() => {
@@ -90,6 +142,7 @@ describe('useFeedback', () => {
       expect(result.current.feedbackText).toBe('')
       expect(result.current.isSubmitting).toBe(false)
       expect(result.current.isSubmitted).toBe(false)
+      expect(result.current.hasExisting).toBe(false)
       expect(result.current.error).toBeNull()
     })
   })
@@ -104,6 +157,8 @@ describe('useFeedback', () => {
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
 
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
       // Try to submit without rating
       await act(async () => {
         await result.current.submit()
@@ -115,16 +170,21 @@ describe('useFeedback', () => {
 
     it('submits feedback successfully', async () => {
       vi.mocked(api.submitFeedback).mockResolvedValue({
-        id: 'feedback-123',
-        entry_id: 'entry-123',
-        feedback_type: 'transcription',
-        rating: 4,
-        created_at: '2024-01-01T00:00:00Z',
+        data: {
+          id: 'feedback-123',
+          entry_id: 'entry-123',
+          feedback_type: 'transcription',
+          rating: 4,
+          created_at: '2024-01-01T00:00:00Z',
+        },
+        rateLimitInfo: null,
       })
 
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       // Set rating and text
       act(() => {
@@ -149,16 +209,21 @@ describe('useFeedback', () => {
 
     it('submits feedback without text when empty', async () => {
       vi.mocked(api.submitFeedback).mockResolvedValue({
-        id: 'feedback-123',
-        entry_id: 'entry-123',
-        feedback_type: 'cleanup',
-        rating: 5,
-        created_at: '2024-01-01T00:00:00Z',
+        data: {
+          id: 'feedback-123',
+          entry_id: 'entry-123',
+          feedback_type: 'cleanup',
+          rating: 5,
+          created_at: '2024-01-01T00:00:00Z',
+        },
+        rateLimitInfo: null,
       })
 
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'cleanup' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       act(() => {
         result.current.setRating(5)
@@ -183,11 +248,14 @@ describe('useFeedback', () => {
           new Promise((resolve) => {
             resolvePromise = () =>
               resolve({
-                id: 'feedback-123',
-                entry_id: 'entry-123',
-                feedback_type: 'transcription',
-                rating: 4,
-                created_at: '2024-01-01T00:00:00Z',
+                data: {
+                  id: 'feedback-123',
+                  entry_id: 'entry-123',
+                  feedback_type: 'transcription',
+                  rating: 4,
+                  created_at: '2024-01-01T00:00:00Z',
+                },
+                rateLimitInfo: null,
               })
           })
       )
@@ -195,6 +263,8 @@ describe('useFeedback', () => {
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       act(() => {
         result.current.setRating(4)
@@ -230,6 +300,8 @@ describe('useFeedback', () => {
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
 
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
       act(() => {
         result.current.setRating(3)
       })
@@ -252,6 +324,8 @@ describe('useFeedback', () => {
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
 
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
       act(() => {
         result.current.setRating(2)
       })
@@ -273,6 +347,8 @@ describe('useFeedback', () => {
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
 
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
       act(() => {
         result.current.setRating(1)
       })
@@ -292,6 +368,8 @@ describe('useFeedback', () => {
         useFeedback({ entryId: 'entry-123', feedbackType: 'analysis' })
       )
 
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
       act(() => {
         result.current.setRating(3)
       })
@@ -308,16 +386,21 @@ describe('useFeedback', () => {
       vi.mocked(api.submitFeedback)
         .mockRejectedValueOnce(new ApiError(500, 'Server error', null))
         .mockResolvedValueOnce({
-          id: 'feedback-123',
-          entry_id: 'entry-123',
-          feedback_type: 'transcription',
-          rating: 4,
-          created_at: '2024-01-01T00:00:00Z',
+          data: {
+            id: 'feedback-123',
+            entry_id: 'entry-123',
+            feedback_type: 'transcription',
+            rating: 4,
+            created_at: '2024-01-01T00:00:00Z',
+          },
+          rateLimitInfo: null,
         })
 
       const { result } = renderHook(() =>
         useFeedback({ entryId: 'entry-123', feedbackType: 'transcription' })
       )
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
 
       act(() => {
         result.current.setRating(4)
@@ -349,16 +432,21 @@ describe('useFeedback', () => {
       'submits %s feedback type correctly',
       async (feedbackType) => {
         vi.mocked(api.submitFeedback).mockResolvedValue({
-          id: 'feedback-123',
-          entry_id: 'entry-123',
-          feedback_type: feedbackType,
-          rating: 5,
-          created_at: '2024-01-01T00:00:00Z',
+          data: {
+            id: 'feedback-123',
+            entry_id: 'entry-123',
+            feedback_type: feedbackType,
+            rating: 5,
+            created_at: '2024-01-01T00:00:00Z',
+          },
+          rateLimitInfo: null,
         })
 
         const { result } = renderHook(() =>
           useFeedback({ entryId: 'entry-123', feedbackType })
         )
+
+        await waitFor(() => expect(result.current.isLoading).toBe(false))
 
         act(() => {
           result.current.setRating(5)

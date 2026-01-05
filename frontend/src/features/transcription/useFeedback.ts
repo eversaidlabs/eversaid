@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { submitFeedback } from './api'
+import { submitFeedback, getFeedback } from './api'
 import type { FeedbackType } from './types'
 import { ApiError } from './types'
 
@@ -20,10 +20,14 @@ export interface UseFeedbackReturn {
   rating: number
   /** Optional feedback text */
   feedbackText: string
+  /** Whether existing feedback is being loaded */
+  isLoading: boolean
   /** Whether submission is in progress */
   isSubmitting: boolean
   /** Whether feedback has been successfully submitted */
   isSubmitted: boolean
+  /** Whether feedback was loaded from the backend (vs fresh) */
+  hasExisting: boolean
   /** Error message if submission failed */
   error: string | null
   /** Set the rating value */
@@ -61,9 +65,47 @@ export function useFeedback(options: UseFeedbackOptions): UseFeedbackReturn {
 
   const [rating, setRating] = useState(0)
   const [feedbackText, setFeedbackText] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [hasExisting, setHasExisting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Load existing feedback when entryId changes
+  useEffect(() => {
+    if (!entryId) {
+      setRating(0)
+      setFeedbackText('')
+      setIsSubmitted(false)
+      setHasExisting(false)
+      setError(null)
+      return
+    }
+
+    setIsLoading(true)
+    setIsSubmitted(false)
+    setHasExisting(false)
+    setError(null)
+
+    getFeedback(entryId)
+      .then(({ data }) => {
+        const existing = data.find((f) => f.feedback_type === feedbackType)
+        if (existing) {
+          setRating(existing.rating)
+          setFeedbackText(existing.feedback_text || '')
+          setHasExisting(true)
+        } else {
+          setRating(0)
+          setFeedbackText('')
+        }
+      })
+      .catch(() => {
+        // Silently fail, user can still submit fresh
+        setRating(0)
+        setFeedbackText('')
+      })
+      .finally(() => setIsLoading(false))
+  }, [entryId, feedbackType])
 
   const submit = useCallback(async () => {
     // Validate rating
@@ -109,14 +151,17 @@ export function useFeedback(options: UseFeedbackOptions): UseFeedbackReturn {
     setFeedbackText('')
     setIsSubmitting(false)
     setIsSubmitted(false)
+    setHasExisting(false)
     setError(null)
   }, [])
 
   return {
     rating,
     feedbackText,
+    isLoading,
     isSubmitting,
     isSubmitted,
+    hasExisting,
     error,
     setRating,
     setFeedbackText,

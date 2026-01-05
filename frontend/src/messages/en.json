@@ -272,7 +272,9 @@
     "feedback": {
       "title": "How was the quality?",
       "placeholder": "What went wrong? Your feedback helps us improve.",
+      "placeholderPositive": "What did you find most useful?",
       "submit": "Submit Feedback",
+      "update": "Update Feedback",
       "submitting": "Submitting...",
       "thanks": "Thank you for your feedback!"
     },

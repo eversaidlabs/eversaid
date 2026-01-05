@@ -272,7 +272,9 @@
     "feedback": {
       "title": "Kakšna je bila kakovost?",
       "placeholder": "Kaj je šlo narobe? Vaše povratne informacije nam pomagajo izboljšati.",
+      "placeholderPositive": "Kaj vam je bilo najbolj uporabno?",
       "submit": "Pošlji povratno informacijo",
+      "update": "Posodobi povratno informacijo",
       "submitting": "Pošiljanje...",
       "thanks": "Hvala za vašo povratno informacijo!"
     },
