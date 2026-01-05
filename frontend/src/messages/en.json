@@ -183,9 +183,25 @@
       "audioFile": "Audio file"
     },
     "recording": {
-      "start": "Start recording",
-      "stop": "Stop recording",
-      "recording": "Recording..."
+      "title": "Record Audio",
+      "subtitle": "Click the button to start recording from your microphone",
+      "previewSubtitle": "Listen to your recording before using it",
+      "startRecording": "Start Recording",
+      "stopRecording": "Stop Recording",
+      "recording": "Recording...",
+      "preview": "Preview your recording",
+      "duration": "Duration: {time}",
+      "useRecording": "Use This Recording",
+      "reRecord": "Record Again",
+      "tryAgain": "Try Again",
+      "hint": "Your browser will ask for microphone permission",
+      "errors": {
+        "permissionDenied": "Microphone permission denied. Please allow access in your browser settings.",
+        "notFound": "No microphone found. Please connect a microphone.",
+        "notSupported": "Audio recording is not supported in this browser.",
+        "inUse": "Microphone is in use by another application.",
+        "generic": "Failed to start recording. Please try again."
+      }
     },
     "player": {
       "download": "Download",

@@ -22,7 +22,9 @@ import { OfflineBanner } from "@/components/ui/offline-banner"
 import { PersistentWarning } from "@/components/ui/persistent-warning"
 import { ErrorDisplay } from "@/components/demo/error-display"
 import { RateLimitModal } from "@/components/demo/rate-limit-modal"
+import { RecordingModal } from "@/components/demo/recording-modal"
 import { useTranscription } from "@/features/transcription/useTranscription"
+import { useVoiceRecorder } from "@/features/transcription/useVoiceRecorder"
 import { useRateLimits } from "@/features/transcription/useRateLimits"
 import { ApiError } from "@/features/transcription/types"
 import { useFeedback } from "@/features/transcription/useFeedback"
@@ -151,6 +153,10 @@ function DemoPageContent() {
   // Rate limit modal state
   const [showRateLimitModal, setShowRateLimitModal] = useState(false)
   const rateLimits = useRateLimits()
+
+  // Recording modal state
+  const [showRecordingModal, setShowRecordingModal] = useState(false)
+  const recorder = useVoiceRecorder()
 
   // Load entry from URL query param on mount (for browser back button support)
   useEffect(() => {
@@ -478,6 +484,33 @@ function DemoPageContent() {
     handleOpenWaitlist("extended_usage")
   }, [handleOpenWaitlist])
 
+  // Recording modal handlers
+  const handleRecordClick = useCallback(() => {
+    setShowRecordingModal(true)
+  }, [])
+
+  const handleRecordingConfirm = useCallback(() => {
+    if (recorder.audioBlob) {
+      const file = new File(
+        [recorder.audioBlob],
+        `recording-${Date.now()}.webm`,
+        { type: recorder.audioBlob.type }
+      )
+      setSelectedFile(file)
+      setShowRecordingModal(false)
+      recorder.resetRecording()
+    }
+  }, [recorder])
+
+  const handleRecordingClose = useCallback(() => {
+    setShowRecordingModal(false)
+    recorder.resetRecording()
+  }, [recorder])
+
+  const handleReRecord = useCallback(() => {
+    recorder.resetRecording()
+  }, [recorder])
+
   // Retry handler for error display
   const handleRetryUpload = useCallback(() => {
     transcription.reset()
@@ -609,6 +642,7 @@ function DemoPageContent() {
                 onRemoveFile={handleRemoveFile}
                 onSpeakerCountChange={handleSpeakerCountChange}
                 onTranscribeClick={handleTranscribeClick}
+                onRecordClick={handleRecordClick}
               />
             </div>
             <div>
@@ -765,6 +799,19 @@ function DemoPageContent() {
         retryAfter={rateLimits.retryAfter}
         onClose={handleRateLimitModalClose}
         onJoinWaitlist={handleRateLimitJoinWaitlist}
+      />
+
+      <RecordingModal
+        isOpen={showRecordingModal}
+        isRecording={recorder.isRecording}
+        duration={recorder.duration}
+        audioBlob={recorder.audioBlob}
+        error={recorder.error}
+        onStartRecording={recorder.startRecording}
+        onStopRecording={recorder.stopRecording}
+        onConfirm={handleRecordingConfirm}
+        onReRecord={handleReRecord}
+        onClose={handleRecordingClose}
       />
     </div>
   )

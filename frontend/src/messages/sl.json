@@ -183,9 +183,25 @@
       "audioFile": "Zvočna datoteka"
     },
     "recording": {
-      "start": "Začni snemanje",
-      "stop": "Ustavi snemanje",
-      "recording": "Snemanje..."
+      "title": "Posnemi zvok",
+      "subtitle": "Kliknite gumb za začetek snemanja z mikrofona",
+      "previewSubtitle": "Poslušajte posnetek pred uporabo",
+      "startRecording": "Začni snemanje",
+      "stopRecording": "Ustavi snemanje",
+      "recording": "Snemanje...",
+      "preview": "Predogled posnetka",
+      "duration": "Trajanje: {time}",
+      "useRecording": "Uporabi ta posnetek",
+      "reRecord": "Posnemi znova",
+      "tryAgain": "Poskusi znova",
+      "hint": "Brskalnik bo zahteval dovoljenje za mikrofon",
+      "errors": {
+        "permissionDenied": "Dovoljenje za mikrofon zavrnjeno. Dovolite dostop v nastavitvah brskalnika.",
+        "notFound": "Mikrofon ni najden. Povežite mikrofon.",
+        "notSupported": "Snemanje zvoka ni podprto v tem brskalniku.",
+        "inUse": "Mikrofon uporablja druga aplikacija.",
+        "generic": "Snemanje ni uspelo. Poskusite znova."
+      }
     },
     "player": {
       "download": "Prenesi",

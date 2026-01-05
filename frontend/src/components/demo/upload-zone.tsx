@@ -14,6 +14,7 @@ export interface UploadZoneProps {
   onRemoveFile: () => void
   onSpeakerCountChange: (count: number) => void
   onTranscribeClick: () => void
+  onRecordClick: () => void
 }
 
 function formatFileSize(bytes: number): string {
@@ -33,6 +34,7 @@ export function UploadZone({
   onRemoveFile,
   onSpeakerCountChange,
   onTranscribeClick,
+  onRecordClick,
 }: UploadZoneProps) {
   const t = useTranslations('demo.upload')
   const tCommon = useTranslations('common')
@@ -77,7 +79,10 @@ export function UploadZone({
       </div>
 
       <div className="p-6 flex items-center justify-center">
-        <button className="flex items-center gap-2.5 px-7 py-3.5 bg-white hover:bg-[#FEF2F2] border-2 border-[#E2E8F0] hover:border-[#EF4444] rounded-xl text-[15px] font-semibold text-[#0F172A] transition-all">
+        <button
+          onClick={onRecordClick}
+          className="flex items-center gap-2.5 px-7 py-3.5 bg-white hover:bg-[#FEF2F2] border-2 border-[#E2E8F0] hover:border-[#EF4444] rounded-xl text-[15px] font-semibold text-[#0F172A] transition-all"
+        >
           <div className="w-3 h-3 bg-[#EF4444] rounded-full" />
           {t('record')}
         </button>
@@ -119,7 +124,7 @@ export function UploadZone({
                   : "bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]"
               }`}
             >
-              {num === 5 ? t('fivePlus') : num}
+              {num}
             </button>
           ))}
         </div>
