@@ -57,14 +57,13 @@ export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
         >
           {t('features')}
         </Link>
-        <Link
-          href="/api-docs"
-          className={`text-sm font-medium transition-colors ${
-            currentPage === "api" ? "text-white" : "text-white/70 hover:text-white"
-          }`}
+        {/* TODO: Enable when API docs are ready */}
+        <span
+          className="text-sm font-medium text-white/40 cursor-not-allowed"
+          title="Coming soon"
         >
           {t('apiDocs')}
-        </Link>
+        </span>
       </div>
 
       <div className="flex items-center gap-4">

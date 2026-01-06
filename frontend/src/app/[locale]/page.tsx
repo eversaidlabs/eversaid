@@ -137,9 +137,13 @@ export default function HomePage() {
           >
             {tNav('howItWorks')}
           </Link>
-          <Link href="/api-docs" className="text-white/80 hover:text-white text-[15px] font-medium transition-colors">
+          {/* TODO: Enable when API docs are ready */}
+          <span
+            className="text-white/40 text-[15px] font-medium cursor-not-allowed"
+            title="Coming soon"
+          >
             {tNav('apiDocs')}
-          </Link>
+          </span>
           <LanguageSwitcher />
         </div>
       </nav>
