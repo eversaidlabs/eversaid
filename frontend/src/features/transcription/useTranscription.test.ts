@@ -576,15 +576,26 @@ describe('useTranscription', () => {
         await result.current.updateSegmentCleanedText('seg-1', 'Updated text')
       })
 
-      expect(api.saveUserEdit).toHaveBeenCalledWith('cleanup-123', 'Updated text')
+      // API now expects words-first format with EditedData object
+      expect(api.saveUserEdit).toHaveBeenCalledWith(
+        'cleanup-123',
+        expect.objectContaining({
+          words: expect.arrayContaining([
+            expect.objectContaining({
+              text: 'Updated text',
+              type: 'segment_text',
+            }),
+          ]),
+        })
+      )
     })
 
-    it('calls revertUserEdit API when reverting segment', async () => {
-      vi.mocked(api.revertUserEdit).mockResolvedValue({
+    it('calls saveUserEdit API when reverting segment (words-first format)', async () => {
+      vi.mocked(api.saveUserEdit).mockResolvedValue({
         data: {
           id: 'cleanup-123',
           entry_id: 'entry-123',
-          cleaned_text: 'original clean',
+          cleaned_text: 'raw text',
           user_edited_text: null,
           status: 'completed',
           segments: [],
@@ -633,7 +644,18 @@ describe('useTranscription', () => {
         await result.current.revertSegmentToRaw('seg-1')
       })
 
-      expect(api.revertUserEdit).toHaveBeenCalledWith('cleanup-123')
+      // Revert now uses saveUserEdit with raw text (not revertUserEdit)
+      expect(api.saveUserEdit).toHaveBeenCalledWith(
+        'cleanup-123',
+        expect.objectContaining({
+          words: expect.arrayContaining([
+            expect.objectContaining({
+              text: 'raw text',
+              type: 'segment_text',
+            }),
+          ]),
+        })
+      )
     })
   })
 })
