@@ -1,0 +1,151 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Eversaid is an audio transcription demo application with AI-powered cleanup and analysis. It consists of:
+- **frontend/** - Next.js 16 with App Router, Tailwind CSS v4, shadcn/ui
+- **backend/** - FastAPI wrapper that proxies to a private Core API
+
+## Development Commands
+
+### Frontend (in `frontend/`)
+```bash
+npm run dev          # Start dev server (port 3000)
+npm run build        # Production build
+npm run lint         # ESLint
+npm run test         # Vitest watch mode
+npm run test:run     # Vitest single run
+npm run test:coverage # Vitest with coverage
+npm run test:e2e     # Playwright E2E tests (headless)
+npm run test:e2e:ui  # Playwright interactive UI mode
+npm run storybook    # Component development (port 6006)
+```
+
+### Backend (in `backend/`)
+```bash
+uvicorn app.main:app --reload --port 8001   # Start dev server
+pytest tests/ -v                             # Run all tests
+pytest tests/test_session.py -v              # Run single test file
+pytest tests/ -k "test_name" -v              # Run tests matching pattern
+```
+
+### Docker
+```bash
+docker compose up                        # Dev: frontend + backend
+docker compose --profile production up   # Prod: adds nginx reverse proxy
+```
+
+## Architecture
+
+```
+Frontend (Next.js) → Wrapper Backend (FastAPI) → Core API (private)
+```
+
+The wrapper backend handles:
+- Anonymous session management (cookies)
+- Rate limiting (per-session, per-IP, global)
+- Proxying requests with Bearer auth to Core API
+- Feedback and waitlist collection (local SQLite)
+
+## Frontend Architecture Rules
+
+### Component Structure
+- **V0 components are PRESENTATION ONLY** - no useState, no business logic
+- All business logic goes in `src/features/` hooks
+- All API calls go through `src/features/transcription/api.ts`
+- Containers in pages wire hooks to presentation components
+
+### Key Directories
+```
+src/
+├── app/[locale]/     # Next.js routes with i18n
+├── components/       # Presentation components (demo/, landing/, ui/)
+├── features/         # Business logic hooks
+│   └── transcription/
+│       ├── api.ts           # All API calls
+│       ├── types.ts         # TypeScript types
+│       ├── useTranscription.ts
+│       ├── useAudioPlayer.ts
+│       ├── useAnalysis.ts
+│       └── ...
+├── lib/              # Utilities (session, storage, diff-utils)
+├── i18n/             # Internationalization config
+└── messages/         # Translation files (sl.json, en.json)
+```
+
+### i18n
+- Uses next-intl with Slovenian (sl) and English (en)
+- All user-facing text must use translations
+- Slovenian plurals: 1=one, 2=two, 3-4=few, 5+=other
+
+### Key Libraries
+- diff (JsDiff): Segment-level diff computation
+- react-virtuoso: Virtualized scrolling for transcript segments
+- Motion.js: Animations
+- Sonner: Toast notifications
+- react-hook-form + Zod: Form validation
+
+## Backend Architecture
+
+### Key Files
+```
+backend/app/
+├── main.py          # FastAPI app, lifespan, error handlers
+├── config.py        # Pydantic Settings (env vars)
+├── core_client.py   # HTTP client for Core API
+├── session.py       # Anonymous session management
+├── rate_limit.py    # Multi-tier rate limiting
+├── middleware/      # Request/response middleware
+├── utils/           # Shared utilities
+└── routes/
+    ├── core.py      # Core API proxy endpoints
+    └── local.py     # Local endpoints (feedback, waitlist)
+```
+
+### Environment Variables
+Key backend configuration (see `docker-compose.yml` for full list):
+- `CORE_API_URL` - Core API base URL (default: http://localhost:8000)
+- `RATE_LIMIT_DAY` / `RATE_LIMIT_IP_DAY` / `RATE_LIMIT_GLOBAL_DAY` - Transcription limits
+- `RATE_LIMIT_LLM_*` - LLM/analysis limits (10x transcription by default)
+- `LOG_FORMAT` - "text" (dev) or "json" (production/Loki)
+
+### Rate Limiting
+- Multi-tier: per-session/day, per-IP/day, global/day
+- LLM limits are 10x higher than transcription limits
+- Rate limits are committed only after successful Core API calls to avoid locking users out on failures
+
+### Session Management
+- Anonymous sessions via cookies (`eversaid_session_id`)
+- Auto-registration with Core API using `anon-{uuid}@anon.eversaid.example`
+- Token refresh when within 1 hour of expiry
+
+## Design System
+
+### Colors
+- Navy: #1D3557, Coral: #E85D04, White: #FFFFFF, Gray: #F5F5F5
+- Style: Professional European B2B
+- Avoid: Purple gradients, neon, 3D objects, startup aesthetics
+
+### Speaker Colors (Diarization)
+- Speaker 0: Blue #3B82F6
+- Speaker 1: Green #10B981
+- Speaker 2: Purple #8B5CF6
+- Speaker 3: Amber #F59E0B
+- Speaker 4+: Cycle through above
+
+### UI Conventions
+- Border radius: rounded-lg
+- Shadows: shadow-sm
+- shadcn/ui with New York style, Zinc base
+
+## Known Limitations
+
+Workarounds for Core API limitations identified during development:
+
+- Entry detail missing related resources — 5 API calls instead of 1 (`backend/app/routes/core.py:147-243`)
+- Analyses list missing `result` field — requires extra fetch per profile (`frontend/src/features/transcription/useAnalysis.ts:295-355`)
+- No `?profile_id=` filter on analyses endpoint — must fetch all and filter client-side
+
+These add latency but allowed shipping fast to validate demand first.
