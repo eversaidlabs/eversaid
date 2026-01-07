@@ -84,7 +84,9 @@ jobs:
 
       - name: Run backend tests
         working-directory: backend
-        run: pytest tests/ -v
+        run: |
+          mkdir -p data
+          pytest tests/ -v
 
   # ===========================================================================
   # BUILD
