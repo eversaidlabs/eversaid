@@ -26,6 +26,8 @@ export function LanguageSwitcher() {
   }, [])
 
   const handleLocaleChange = (newLocale: Locale) => {
+    // Set cookie to persist locale preference (next-intl reads NEXT_LOCALE)
+    document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax`
     router.replace(pathname, { locale: newLocale })
     setIsOpen(false)
   }
@@ -81,6 +83,8 @@ export function LanguageSwitcherLight() {
   }, [])
 
   const handleLocaleChange = (newLocale: Locale) => {
+    // Set cookie to persist locale preference (next-intl reads NEXT_LOCALE)
+    document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;SameSite=Lax`
     router.replace(pathname, { locale: newLocale })
     setIsOpen(false)
   }

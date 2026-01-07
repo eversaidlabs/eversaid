@@ -86,7 +86,7 @@ export const RawSegmentList = forwardRef<HTMLDivElement, RawSegmentListProps>(
                     <span className="text-[11px] text-muted-foreground font-medium">{seg.time}</span>
                     {isValidTarget && (
                       <span className="text-[10px] font-semibold text-blue-700 bg-blue-50/50 px-1.5 py-0.5 rounded animate-pulse">
-                        Click to move here
+                        {t("transcript.clickToMoveHere")}
                       </span>
                     )}
                   </div>

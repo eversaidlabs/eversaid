@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowRight, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export interface TextMoveToolbarProps {
   selectedText: string
@@ -10,6 +11,9 @@ export interface TextMoveToolbarProps {
 }
 
 export function TextMoveToolbar({ selectedText, isSelectingTarget, onMoveClick, onCancel }: TextMoveToolbarProps) {
+  const t = useTranslations("demo.textMove")
+  const tCommon = useTranslations("common")
+
   if (!selectedText && !isSelectingTarget) return null
 
   return (
@@ -19,14 +23,14 @@ export function TextMoveToolbar({ selectedText, isSelectingTarget, onMoveClick, 
           <>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-primary-foreground rounded-full animate-pulse" />
-              <span className="text-sm text-primary-foreground font-medium">Click a segment to move text there</span>
+              <span className="text-sm text-primary-foreground font-medium">{t("instruction")}</span>
             </div>
             <button
               onClick={onCancel}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-secondary rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-all"
             >
               <X className="w-4 h-4" />
-              Cancel
+              {tCommon("cancel")}
             </button>
           </>
         ) : (
@@ -36,7 +40,7 @@ export function TextMoveToolbar({ selectedText, isSelectingTarget, onMoveClick, 
               onClick={onMoveClick}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-primary rounded-lg text-sm font-semibold text-accent-foreground transition-all shadow-[0_2px_8px_rgba(56,189,248,0.3)]"
             >
-              Move to...
+              {t("moveTo")}
               <ArrowRight className="w-4 h-4" />
             </button>
             <button

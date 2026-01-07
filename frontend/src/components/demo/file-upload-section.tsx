@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { Upload, FileAudio } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export interface FileUploadSectionProps {
   selectedFile: File | null
@@ -19,6 +20,8 @@ export function FileUploadSection({
   onFileSelect,
   onTranscribeClick,
 }: FileUploadSectionProps) {
+  const t = useTranslations("demo.upload")
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -35,8 +38,8 @@ export function FileUploadSection({
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mb-4">
               <FileAudio className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">Upload Audio</h1>
-            <p className="text-slate-600 text-sm mt-2">Upload an audio file to begin transcription</p>
+            <h1 className="text-2xl font-bold text-slate-900">{t("title")}</h1>
+            <p className="text-slate-600 text-sm mt-2">{t("uploadSubtitle")}</p>
           </div>
 
           {/* Upload Area */}
@@ -44,8 +47,8 @@ export function FileUploadSection({
             <label className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-blue-300 rounded-xl bg-blue-50 hover:bg-blue-100 cursor-pointer transition-colors">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-12 h-12 text-blue-500 mb-2" />
-                <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
-                <p className="text-xs text-slate-500 mt-1">MP3, WAV, or M4A (up to 1GB)</p>
+                <p className="text-sm font-medium text-slate-700">{t("clickToUpload")}</p>
+                <p className="text-xs text-slate-500 mt-1">{t("formats")}</p>
               </div>
               <input
                 type="file"
@@ -89,7 +92,7 @@ export function FileUploadSection({
             disabled={!selectedFile || isUploading}
             className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-slate-400 disabled:to-slate-400 text-white font-semibold py-3 rounded-lg transition-all disabled:cursor-not-allowed"
           >
-            {isUploading ? "Transcribing..." : "Start Transcription"}
+            {isUploading ? t("transcribing") : t("startTranscription")}
           </button>
         </div>
       </div>

@@ -107,7 +107,7 @@
         "description": "Nikoli uporabljeno za učenje AI."
       },
       "disclaimerDemo": "Brezplačni demo uporablja varno povezavo. Polno šifriranje, obdelava samo v EU in GDPR skladnost so vključeni z računi.",
-      "spellcheck": "Slovenski črkovalec vključen. Več jezikov kmalu."
+      "spellcheck": "Slovenski črkovalec kmalu."
     },
     "useCases": {
       "sectionLabel": "Primeri uporabe",
@@ -171,13 +171,18 @@
     "title": "Preizkusi EverSaid",
     "subtitle": "Naložite zvok ali posnemite neposredno. Poglejte razliko AI čiščenja v sekundah.",
     "upload": {
+      "title": "Naloži zvok",
+      "uploadSubtitle": "Naložite zvočno datoteko za začetek transkripcije",
       "dropTitle": "Spustite zvočno datoteko tukaj",
+      "clickToUpload": "Kliknite za nalaganje ali povlecite in spustite",
       "formats": "MP3, WAV, M4A, FLAC · Največ 50MB · Največ 5 minut",
       "browse": "Prebrskaj datoteke",
       "record": "Posnemi zvok",
       "speakerCount": "Število govorcev",
       "fivePlus": "5+",
       "transcribeNow": "Prepiši zdaj",
+      "startTranscription": "Začni transkripcijo",
+      "transcribing": "Prepis v teku...",
       "selectFile": "Izberite datoteko za prepis",
       "uploading": "Nalaganje... {progress}%",
       "audioFile": "Zvočna datoteka"
@@ -320,13 +325,21 @@
       },
       "estimated": "Predvideno"
     },
-    "warning": "Demo način: ne nalagajte občutljivih podatkov. Vse podatke lahko kadarkoli izbrišete.",
+    "warning": "Demo način: izogibajte se zaupnim ali klientskim posnetkom. Zvok usmerjen preko ZDA za obdelavo (samo demo). Shranjeno v EU. Izbrišite kadarkoli.",
     "delete": {
       "button": "Izbriši vnos",
       "confirmTitle": "Izbrisati ta vnos?",
       "confirmDescription": "To bo trajno odstranilo zvočno datoteko, transkripcijo in vse povezane podatke.",
       "confirm": "Izbriši",
       "cancel": "Prekliči"
+    },
+    "featuresHint": {
+      "title": "Kaj boste dobili",
+      "sideBySide": "Primerjava drug ob drugem",
+      "speakerLabels": "Identifikacija govorcev",
+      "aiCleanup": "AI čiščenje",
+      "audioLinked": "Segmenti povezani z zvokom",
+      "analysis": "Analiza pogovora"
     }
   },
   "waitlist": {

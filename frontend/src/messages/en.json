@@ -107,7 +107,7 @@
         "description": "Never used for AI training."
       },
       "disclaimerDemo": "Free demo uses secure connection. Full encryption, EU-only processing & GDPR compliance included with accounts.",
-      "spellcheck": "Slovenian spellcheck included. More languages coming soon."
+      "spellcheck": "Slovenian spellcheck coming soon."
     },
     "useCases": {
       "sectionLabel": "Use Cases",
@@ -171,13 +171,18 @@
     "title": "Try EverSaid",
     "subtitle": "Upload audio or record directly. See the AI cleanup difference in seconds.",
     "upload": {
+      "title": "Upload Audio",
+      "uploadSubtitle": "Upload an audio file to begin transcription",
       "dropTitle": "Drop your audio file here",
+      "clickToUpload": "Click to upload or drag and drop",
       "formats": "MP3, WAV, M4A, FLAC · Max 50MB · Max 5 minutes",
       "browse": "Browse Files",
       "record": "Record Audio",
       "speakerCount": "Number of speakers",
       "fivePlus": "5+",
       "transcribeNow": "Transcribe Now",
+      "startTranscription": "Start Transcription",
+      "transcribing": "Transcribing...",
       "selectFile": "Select a file to transcribe",
       "uploading": "Uploading... {progress}%",
       "audioFile": "Audio file"
@@ -320,13 +325,21 @@
       },
       "estimated": "Estimated"
     },
-    "warning": "Demo mode: avoid uploading sensitive data. You can delete all data at any time.",
+    "warning": "Demo mode: avoid confidential or client recordings. Audio routed through US for processing (demo only). Stored in EU. Delete anytime.",
     "delete": {
       "button": "Delete entry",
       "confirmTitle": "Delete this entry?",
       "confirmDescription": "This will permanently remove the audio file, transcription, and all associated data.",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "featuresHint": {
+      "title": "What you'll get",
+      "sideBySide": "Side-by-side comparison",
+      "speakerLabels": "Speaker identification",
+      "aiCleanup": "AI-powered cleanup",
+      "audioLinked": "Audio-linked segments",
+      "analysis": "Conversation analysis"
     }
   },
   "waitlist": {
