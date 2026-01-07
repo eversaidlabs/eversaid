@@ -1,0 +1,310 @@
+# =============================================================================
+# Build and Deploy Pipeline
+# =============================================================================
+#
+# Automated deployment with staging environment for safe testing before production.
+#
+# TRIGGERS:
+#   - Push to master   → Deploy to staging (test changes before production)
+#   - Tag v*           → Deploy to production (explicit release control)
+#   - Manual button    → Re-deploy or recover without code changes
+#
+# FLOW:
+#   Test → Build images → Push to ghcr.io → Deploy to server
+#
+# BENEFITS:
+#   - Staging catches issues before they reach users
+#   - Version tags create clear release history
+#   - Images tagged with SHA enable instant rollback
+#   - Build cache speeds up subsequent builds
+#
+# =============================================================================
+
+name: Build and Deploy
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deploy to environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/eversaid-frontend
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/eversaid-backend
+
+jobs:
+  # ===========================================================================
+  # TEST
+  # ===========================================================================
+  # Gate: Nothing deploys if tests fail.
+  # Runs unit tests only (E2E already ran on PR). Keeps deploys fast.
+  # ===========================================================================
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps
+
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm run test:run
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run backend tests
+        working-directory: backend
+        run: pytest tests/ -v
+
+  # ===========================================================================
+  # BUILD
+  # ===========================================================================
+  # Creates Docker images and stores them in GitHub Container Registry.
+  #
+  # Why ghcr.io?
+  #   - Images live next to code (same permissions, same org)
+  #   - Free for public repos
+  #   - No separate Docker Hub account needed
+  #
+  # Why tag with SHA?
+  #   - Every build is addressable: ghcr.io/.../frontend:abc123
+  #   - Instant rollback: just deploy previous SHA
+  #   - Never lose a build
+  #
+  # Why build cache?
+  #   - Unchanged layers are reused
+  # ===========================================================================
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for images
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=
+
+      # Frontend needs API URL baked in at build time (Next.js limitation)
+      - name: Set API URL
+        id: api_url
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "url=https://eversaid.ai" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://staging.eversaid.ai" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:${{ steps.meta.outputs.version }}
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ steps.api_url.outputs.url }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:${{ steps.meta.outputs.version }}
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===========================================================================
+  # DEPLOY STAGING
+  # ===========================================================================
+  # Auto-deploys on every push to main.
+  #
+  # Why automatic?
+  #   - Fast feedback: see changes on real server within minutes
+  #   - Protected by Cloudflare Access: only team can see staging
+  #   - If something breaks, only staging is affected
+  # ===========================================================================
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/master' && github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ~/eversaid/staging
+
+            # Update image tag
+            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=master/' .env
+
+            # Login to ghcr.io (use stored credentials)
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull and restart
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+
+            # Wait for health check
+            sleep 10
+            curl -f http://localhost:9001/health || exit 1
+
+            echo "Staging deployment complete!"
+
+  # ===========================================================================
+  # DEPLOY PRODUCTION
+  # ===========================================================================
+  # Deploys only on version tags (v1.0.0, v1.2.3, etc.)
+  #
+  # Why tags instead of auto-deploy?
+  #   - Explicit control: production only changes when you decide
+  #   - Version history: git tags = deployment history
+  #   - Easy rollback: deploy previous tag
+  #
+  # To deploy: git tag v1.2.3 && git push origin v1.2.3
+  # ===========================================================================
+  deploy-production:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Deploy to production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ~/eversaid/production
+
+            # Update image tag to version
+            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=${{ steps.version.outputs.tag }}/' .env
+
+            # Login to ghcr.io
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull and restart
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+            # Wait for health check
+            sleep 10
+            curl -f http://localhost:8001/health || exit 1
+
+            echo "Production deployment complete! Version: ${{ steps.version.outputs.tag }}"
+
+  # ===========================================================================
+  # MANUAL DEPLOY
+  # ===========================================================================
+  # Triggered via GitHub Actions UI: Actions → Build and Deploy → Run workflow
+  #
+  # Use cases:
+  #   - Re-deploy after server maintenance
+  #   - Deploy specific branch for testing
+  #   - Emergency recovery without code changes
+  # ===========================================================================
+  deploy-manual:
+    needs: build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Set deployment variables
+        id: vars
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
+            echo "dir=production" >> $GITHUB_OUTPUT
+            echo "compose_file=docker-compose.prod.yml" >> $GITHUB_OUTPUT
+            echo "port=8001" >> $GITHUB_OUTPUT
+          else
+            echo "dir=staging" >> $GITHUB_OUTPUT
+            echo "compose_file=docker-compose.staging.yml" >> $GITHUB_OUTPUT
+            echo "port=9001" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ~/eversaid/${{ steps.vars.outputs.dir }}
+
+            # Login to ghcr.io
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull and restart
+            docker compose -f docker-compose.yml -f ${{ steps.vars.outputs.compose_file }} pull
+            docker compose -f docker-compose.yml -f ${{ steps.vars.outputs.compose_file }} up -d
+
+            # Wait for health check
+            sleep 10
+            curl -f http://localhost:${{ steps.vars.outputs.port }}/health || exit 1
+
+            echo "Manual deployment to ${{ github.event.inputs.environment }} complete!"

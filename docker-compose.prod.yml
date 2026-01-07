@@ -1,0 +1,31 @@
+# Production environment overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Differences from base:
+# - Uses pre-built images from ghcr.io (no local build)
+# - Production container names
+# - Standard ports: 3000 (frontend), 8001 (backend)
+# - No code volume mounts (uses baked-in code from image)
+# - No --reload flag (production mode)
+
+services:
+  frontend:
+    image: ghcr.io/gaspermerela/eversaid-frontend:${IMAGE_TAG:-latest}
+    build: !reset null
+    container_name: eversaid-frontend-prod
+    ports:
+      - "3000:3000"
+
+  backend:
+    image: ghcr.io/gaspermerela/eversaid-backend:${IMAGE_TAG:-latest}
+    build: !reset null
+    container_name: eversaid-backend-prod
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./data:/app/data  # Only data volume, no code mount
+
+networks:
+  default:
+    name: eversaid-prod-network

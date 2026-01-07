@@ -1,0 +1,31 @@
+# Staging environment overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+#
+# Differences from base:
+# - Uses pre-built images from ghcr.io (no local build)
+# - Different container names to avoid conflicts with production
+# - Staging ports: 4000 (frontend), 9001 (backend)
+# - No code volume mounts (uses baked-in code from image)
+# - No --reload flag (production mode)
+
+services:
+  frontend:
+    image: ghcr.io/gaspermerela/eversaid-frontend:${IMAGE_TAG:-master}
+    build: !reset null
+    container_name: eversaid-frontend-staging
+    ports:
+      - "4000:3000"
+
+  backend:
+    image: ghcr.io/gaspermerela/eversaid-backend:${IMAGE_TAG:-master}
+    build: !reset null
+    container_name: eversaid-backend-staging
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "9001:8001"
+    volumes:
+      - ./data:/app/data  # Only data volume, no code mount
+
+networks:
+  default:
+    name: eversaid-staging-network
