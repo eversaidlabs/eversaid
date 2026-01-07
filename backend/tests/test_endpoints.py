@@ -179,7 +179,8 @@ class TestEntryEndpoints:
         assert response.status_code == 200
 
     def test_get_entry_success(self, client, test_settings):
-        """Test getting a single entry."""
+        """Test getting a single entry with all related resources."""
+        # 1. Main entry endpoint
         respx.get(f"{test_settings.CORE_API_URL}/api/v1/entries/entry-123").mock(
             return_value=Response(
                 200,
@@ -196,6 +197,54 @@ class TestEntryEndpoints:
                         "text": "Hello world",
                     },
                 },
+            )
+        )
+
+        # 2. Full transcription with segments
+        respx.get(f"{test_settings.CORE_API_URL}/api/v1/transcriptions/trans-123").mock(
+            return_value=Response(
+                200,
+                json={
+                    "id": "trans-123",
+                    "status": "completed",
+                    "text": "Hello world",
+                    "segments": [{"id": "seg-1", "start": 0, "end": 10, "text": "Hello world"}],
+                },
+            )
+        )
+
+        # 3. Entries list (to find cleanup_id)
+        respx.get(f"{test_settings.CORE_API_URL}/api/v1/entries").mock(
+            return_value=Response(
+                200,
+                json={
+                    "entries": [
+                        {
+                            "id": "entry-123",
+                            "latest_cleaned_entry": {"id": "cleanup-123"},
+                        }
+                    ],
+                    "total": 1,
+                },
+            )
+        )
+
+        # 4. Cleanup details
+        respx.get(f"{test_settings.CORE_API_URL}/api/v1/cleaned-entries/cleanup-123").mock(
+            return_value=Response(
+                200,
+                json={
+                    "id": "cleanup-123",
+                    "cleaned_text": "Hello world, cleaned.",
+                },
+            )
+        )
+
+        # 5. Analyses for this cleanup
+        respx.get(f"{test_settings.CORE_API_URL}/api/v1/cleaned-entries/cleanup-123/analyses").mock(
+            return_value=Response(
+                200,
+                json={"analyses": []},
             )
         )
 
@@ -265,7 +314,7 @@ class TestCleanupEndpoints:
         assert data["cleaned_text"] == "Hello world, cleaned."
 
     def test_update_user_edit_success(self, client, test_settings):
-        """Test updating user edit."""
+        """Test updating user edit with words-first format."""
         respx.put(
             f"{test_settings.CORE_API_URL}/api/v1/cleaned-entries/cleanup-123/user-edit"
         ).mock(
@@ -280,9 +329,16 @@ class TestCleanupEndpoints:
             )
         )
 
+        # API now expects edited_data with words array (words-first format)
         response = client.put(
             "/api/cleaned-entries/cleanup-123/user-edit",
-            json={"edited_text": "User modified text"},
+            json={
+                "edited_data": {
+                    "words": [
+                        {"id": 0, "text": "User modified text", "type": "segment_text", "start": 0, "end": 10, "speaker_id": 0}
+                    ]
+                }
+            },
         )
 
         assert response.status_code == 200
