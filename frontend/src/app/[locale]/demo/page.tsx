@@ -15,6 +15,7 @@ import { UploadZone } from "@/components/demo/upload-zone"
 import { ExpandableCard } from "@/components/demo/expandable-card"
 import type { Segment, SpellcheckError, TextMoveSelection } from "@/components/demo/types"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { useWaitlist } from "@/features/transcription/useWaitlist"
 import { useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
@@ -160,8 +161,18 @@ function DemoPageContent() {
   // Waitlist modal state
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
   const [waitlistType, setWaitlistType] = useState<"extended_usage" | "api_access">("extended_usage")
-  const [waitlistEmail, setWaitlistEmail] = useState("")
-  const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
+
+  // Form fields (not managed by hook)
+  const [useCase, setUseCase] = useState("")
+  const [volume, setVolume] = useState("")
+  const [source, setSource] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  // Hook for API integration
+  const waitlist = useWaitlist({
+    waitlistType,
+    sourcePage: '/demo'
+  })
 
   // Rate limit modal state
   const [showRateLimitModal, setShowRateLimitModal] = useState(false)
@@ -561,18 +572,27 @@ function DemoPageContent() {
     setWaitlistState("form")
   }, [])
 
-  const handleWaitlistSubmit = useCallback(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setWaitlistReferralCode("EVERSAID-" + Math.random().toString(36).substring(2, 8).toUpperCase())
-      setWaitlistState("success")
-    }, 500)
-  }, [])
+  const handleWaitlistSubmit = useCallback(async () => {
+    await waitlist.submit({ useCase, volume, source })
+    // Transition to success state - the hook handles errors internally with toasts
+    setWaitlistState("success")
+  }, [waitlist, useCase, volume, source])
 
   const handleWaitlistClose = useCallback(() => {
     setWaitlistState("hidden")
-    setWaitlistEmail("")
-  }, [])
+    setUseCase("")
+    setVolume("")
+    setSource("")
+    setCopied(false)
+    waitlist.reset()
+  }, [waitlist])
+
+  const handleWaitlistCopyLink = useCallback(() => {
+    const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
+    navigator.clipboard.writeText(referralLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [waitlist.referralCode])
 
   // Rate limit modal handlers
   const handleRateLimitModalClose = useCallback(() => {
@@ -926,12 +946,21 @@ function DemoPageContent() {
       <WaitlistFlow
         state={waitlistState}
         type={waitlistType}
-        email={waitlistEmail}
-        referralCode={waitlistReferralCode}
-        onEmailChange={setWaitlistEmail}
+        email={waitlist.email}
+        useCase={useCase}
+        volume={volume}
+        source={source}
+        isSubmitting={waitlist.isSubmitting}
+        referralCode={waitlist.referralCode || ""}
+        copied={copied}
+        onEmailChange={waitlist.setEmail}
+        onUseCaseChange={setUseCase}
+        onVolumeChange={setVolume}
+        onSourceChange={setSource}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
         onOpenForm={() => setWaitlistState("form")}
+        onCopyLink={handleWaitlistCopyLink}
         t={t}
       />
 

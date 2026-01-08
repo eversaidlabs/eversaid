@@ -1,5 +1,63 @@
 import { test, expect } from "@playwright/test"
 
+test.describe("Waitlist Flow - Network Integration", () => {
+  test("landing page waitlist signup calls the API", async ({ page }) => {
+    await page.goto("/en")
+
+    // Set up request interception BEFORE triggering the action
+    const waitlistRequestPromise = page.waitForRequest(
+      req => req.url().includes('/api/waitlist') && req.method() === 'POST',
+      { timeout: 5000 }
+    )
+
+    // Open waitlist modal
+    await page.getByText("Ready to try smarter transcription?").scrollIntoViewIfNeeded()
+    await page.locator("button").filter({ hasText: "Join the waitlist →" }).click()
+
+    // Fill the form
+    await page.getByLabel(/Email Address/).fill("network-test@example.com")
+    await page.getByLabel(/How will you use EverSaid/i).fill("Testing API integration")
+
+    // Submit
+    await page.getByRole("dialog").getByRole("button", { name: "Join Waitlist" }).click()
+
+    // Verify API was actually called with correct payload
+    const request = await waitlistRequestPromise
+    const postData = request.postDataJSON()
+    expect(postData.email).toBe("network-test@example.com")
+    expect(postData.waitlist_type).toBe("extended_usage")
+    expect(postData.use_case).toBe("Testing API integration")
+  })
+
+  test("API docs waitlist signup calls the API", async ({ page }) => {
+    await page.goto("/en/api-docs")
+
+    // Set up request interception
+    const waitlistRequestPromise = page.waitForRequest(
+      req => req.url().includes('/api/waitlist') && req.method() === 'POST',
+      { timeout: 5000 }
+    )
+
+    // Open waitlist modal
+    await page.getByRole("navigation").getByRole("button", { name: "Join Waitlist" }).click()
+
+    // Fill the form
+    await page.getByLabel(/Email Address/).fill("api-network-test@example.com")
+    await page.getByLabel(/What will you build/).fill("Voice journal app")
+    await page.getByLabel(/Expected monthly volume/).selectOption("100-500")
+
+    // Submit
+    await page.getByRole("dialog").getByRole("button", { name: "Join Waitlist" }).click()
+
+    // Verify API was actually called with correct payload
+    const request = await waitlistRequestPromise
+    const postData = request.postDataJSON()
+    expect(postData.email).toBe("api-network-test@example.com")
+    expect(postData.waitlist_type).toBe("api_access")
+    expect(postData.use_case).toBe("Voice journal app")
+  })
+})
+
 test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/en")
@@ -17,7 +75,7 @@ test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
 
     // Fill the form
     await page.getByLabel(/Email Address/).fill("test@example.com")
-    await page.getByLabel(/How will you use eversaid/).fill("Meeting transcription for my team")
+    await page.getByLabel(/How will you use EverSaid/i).fill("Meeting transcription for my team")
 
     // Optional: How did you hear about us
     await page.getByLabel(/How did you hear about us/).fill("Twitter")
@@ -47,7 +105,7 @@ test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
 
     // Fill required fields and submit
     await page.getByLabel(/Email Address/).fill("copy-test@example.com")
-    await page.getByLabel(/How will you use eversaid/).fill("Testing copy functionality")
+    await page.getByLabel(/How will you use EverSaid/i).fill("Testing copy functionality")
     await page.getByRole("dialog").getByRole("button", { name: "Join Waitlist" }).click()
 
     // Wait for success state
@@ -69,7 +127,7 @@ test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
 
     // Fill and submit
     await page.getByLabel(/Email Address/).fill("close-test@example.com")
-    await page.getByLabel(/How will you use eversaid/).fill("Testing close")
+    await page.getByLabel(/How will you use EverSaid/i).fill("Testing close")
     await page.getByRole("dialog").getByRole("button", { name: "Join Waitlist" }).click()
 
     // Wait for success

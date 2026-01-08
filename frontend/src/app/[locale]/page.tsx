@@ -5,6 +5,7 @@ import { Shield } from "lucide-react"
 import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { useWaitlist } from "@/features/transcription/useWaitlist"
 import { LiveTranscriptPreview } from "@/components/landing/live-transcript-preview"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { MotionDiv } from "@/components/motion"
@@ -29,45 +30,48 @@ export default function HomePage() {
   const tNav = useTranslations('navigation')
   const tRoot = useTranslations()
 
+  // Waitlist modal state
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
   const [waitlistType, setWaitlistType] = useState<"extended_usage" | "api_access">("extended_usage")
-  const [waitlistEmail, setWaitlistEmail] = useState("")
-  const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
-  const [waitlistCopied, setWaitlistCopied] = useState(false)
+
+  // Form fields (not managed by hook)
+  const [useCase, setUseCase] = useState("")
+  const [volume, setVolume] = useState("")
+  const [source, setSource] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  // Hook for API integration
+  const waitlist = useWaitlist({
+    waitlistType,
+    sourcePage: '/'
+  })
 
   const handleWaitlistClick = useCallback((type: "extended_usage" | "api_access") => {
     setWaitlistType(type)
     setWaitlistState("form")
   }, [])
 
-  const handleWaitlistEmailChange = useCallback((email: string) => {
-    setWaitlistEmail(email)
-  }, [])
-
-  const handleWaitlistSubmit = useCallback(() => {
-    console.log("Waitlist submission:", { email: waitlistEmail, type: waitlistType })
-    const mockReferralCode = `REF${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-    setWaitlistReferralCode(mockReferralCode)
+  const handleWaitlistSubmit = useCallback(async () => {
+    await waitlist.submit({ useCase, volume, source })
+    // Transition to success state - the hook handles errors internally with toasts
     setWaitlistState("success")
-  }, [waitlistEmail, waitlistType])
+  }, [waitlist, useCase, volume, source])
 
   const handleWaitlistClose = useCallback(() => {
     setWaitlistState("hidden")
-    setWaitlistEmail("")
-    setWaitlistReferralCode("")
-    setWaitlistCopied(false)
-  }, [])
-
-  const handleWaitlistCopyCode = useCallback(() => {
-    navigator.clipboard.writeText(waitlistReferralCode)
-  }, [waitlistReferralCode])
+    setUseCase("")
+    setVolume("")
+    setSource("")
+    setCopied(false)
+    waitlist.reset()
+  }, [waitlist])
 
   const handleWaitlistCopyLink = useCallback(() => {
-    const referralLink = `https://eversaid.com?ref=${waitlistReferralCode}`
+    const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
     navigator.clipboard.writeText(referralLink)
-    setWaitlistCopied(true)
-    setTimeout(() => setWaitlistCopied(false), 2000)
-  }, [waitlistReferralCode])
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [waitlist.referralCode])
 
   return (
     <main className="h-screen overflow-y-scroll snap-y snap-proximity">
@@ -678,13 +682,19 @@ export default function HomePage() {
       <WaitlistFlow
         state={waitlistState}
         type={waitlistType}
-        email={waitlistEmail}
-        referralCode={waitlistReferralCode}
-        copied={waitlistCopied}
-        onEmailChange={handleWaitlistEmailChange}
+        email={waitlist.email}
+        useCase={useCase}
+        volume={volume}
+        source={source}
+        isSubmitting={waitlist.isSubmitting}
+        referralCode={waitlist.referralCode || ""}
+        copied={copied}
+        onEmailChange={waitlist.setEmail}
+        onUseCaseChange={setUseCase}
+        onVolumeChange={setVolume}
+        onSourceChange={setSource}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
-        onCopyCode={handleWaitlistCopyCode}
         onCopyLink={handleWaitlistCopyLink}
         t={tRoot}
       />

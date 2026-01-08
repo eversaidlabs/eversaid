@@ -2,10 +2,11 @@
 "use client"
 
 import { Link } from "@/i18n/routing"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Check, LinkIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
+import { useWaitlist } from "@/features/transcription/useWaitlist"
 
 export default function ApiDocsPage() {
   const tNav = useTranslations('navigation')
@@ -22,9 +23,20 @@ export default function ApiDocsPage() {
   // For upload tab
   const [activeUploadTab, setActiveUploadTab] = useState<string>("cURL")
 
+  // Waitlist modal state
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
-  const [waitlistEmail, setWaitlistEmail] = useState("")
-  const [waitlistReferralCode, setWaitlistReferralCode] = useState("")
+
+  // Form fields (not managed by hook)
+  const [useCase, setUseCase] = useState("")
+  const [volume, setVolume] = useState("")
+  const [source, setSource] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  // Hook for API integration (always api_access for this page)
+  const waitlist = useWaitlist({
+    waitlistType: 'api_access',
+    sourcePage: '/api-docs'
+  })
 
   const handleCopyCode = (code: string, id: string) => {
     navigator.clipboard.writeText(code)
@@ -49,10 +61,27 @@ export default function ApiDocsPage() {
     }
   }
 
-  const handleWaitlistSubmit = () => {
-    setWaitlistReferralCode("ABC123XYZ")
+  const handleWaitlistSubmit = useCallback(async () => {
+    await waitlist.submit({ useCase, volume, source })
+    // Transition to success state - the hook handles errors internally with toasts
     setWaitlistState("success")
-  }
+  }, [waitlist, useCase, volume, source])
+
+  const handleWaitlistClose = useCallback(() => {
+    setWaitlistState("hidden")
+    setUseCase("")
+    setVolume("")
+    setSource("")
+    setCopied(false)
+    waitlist.reset()
+  }, [waitlist])
+
+  const handleWaitlistCopyLink = useCallback(() => {
+    const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
+    navigator.clipboard.writeText(referralLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [waitlist.referralCode])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,11 +123,20 @@ export default function ApiDocsPage() {
       <WaitlistFlow
         state={waitlistState}
         type="api_access"
-        email={waitlistEmail}
-        referralCode={waitlistReferralCode}
-        onClose={() => setWaitlistState("hidden")}
-        onEmailChange={setWaitlistEmail}
+        email={waitlist.email}
+        useCase={useCase}
+        volume={volume}
+        source={source}
+        isSubmitting={waitlist.isSubmitting}
+        referralCode={waitlist.referralCode || ""}
+        copied={copied}
+        onEmailChange={waitlist.setEmail}
+        onUseCaseChange={setUseCase}
+        onVolumeChange={setVolume}
+        onSourceChange={setSource}
         onSubmit={handleWaitlistSubmit}
+        onClose={handleWaitlistClose}
+        onCopyLink={handleWaitlistCopyLink}
         t={tRoot}
       />
 
