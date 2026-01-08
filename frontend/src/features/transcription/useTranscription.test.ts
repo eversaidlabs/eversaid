@@ -14,6 +14,10 @@ vi.mock('./api', () => ({
   saveUserEdit: vi.fn(),
   revertUserEdit: vi.fn(),
   parseRateLimitHeaders: vi.fn(),
+  getRateLimits: vi.fn(),
+  getDemoEntry: vi.fn(),
+  getDemoAudioUrl: vi.fn(),
+  getEntry: vi.fn(),
 }))
 
 // Mock the storage module
@@ -22,24 +26,36 @@ vi.mock('@/lib/storage', () => ({
   cacheEntry: vi.fn(),
 }))
 
+// Test segments for use in tests
+const TEST_SEGMENTS: Segment[] = [
+  {
+    id: 'seg-1',
+    speaker: 0,
+    time: '0:00 – 0:18',
+    rawText: 'Uh so basically what we are trying to do.',
+    cleanedText: 'So basically what we are trying to do.',
+    originalRawText: 'Uh so basically what we are trying to do.',
+  },
+  {
+    id: 'seg-2',
+    speaker: 1,
+    time: '0:19 – 0:42',
+    rawText: 'Yeah I think we should start with research.',
+    cleanedText: 'Yes, I think we should start with research.',
+    originalRawText: 'Yeah I think we should start with research.',
+  },
+]
+
 describe('useTranscription', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // ===========================================================================
-  // Initialization (Mock Mode)
+  // Initialization
   // ===========================================================================
 
   describe('initialization', () => {
-    it('initializes with mock segments when mockMode is true', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
-
-      expect(result.current.segments.length).toBeGreaterThan(0)
-      expect(result.current.status).toBe('complete')
-      expect(result.current.entryId).toBeTruthy()
-    })
-
     it('initializes with custom segments', () => {
       const customSegments: Segment[] = [
         { id: 'custom-1', speaker: 1, time: '0:00 – 0:10', rawText: 'raw', cleanedText: 'clean', originalRawText: 'raw' },
@@ -53,17 +69,15 @@ describe('useTranscription', () => {
       expect(result.current.segments[0].id).toBe('custom-1')
     })
 
-    it('initializes empty when mockMode is false and no initial segments', () => {
-      const { result } = renderHook(() =>
-        useTranscription({ mockMode: false })
-      )
+    it('initializes empty when no initial segments', () => {
+      const { result } = renderHook(() => useTranscription())
 
       expect(result.current.segments).toHaveLength(0)
       expect(result.current.status).toBe('idle')
     })
 
     it('segments have parsed time fields', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segment = result.current.segments[0]
       expect(segment.startTime).toBeDefined()
@@ -72,20 +86,21 @@ describe('useTranscription', () => {
     })
 
     it('exposes cleanupId and rateLimits in return value', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
-      expect(result.current.cleanupId).toBeDefined()
+      // cleanupId is null initially (set by loadEntry or uploadAudio)
+      expect(result.current.cleanupId).toBeNull()
       expect(result.current.rateLimits).toBeNull()
     })
   })
 
   // ===========================================================================
-  // Segment Mutations (Mock Mode)
+  // Segment Mutations
   // ===========================================================================
 
   describe('updateSegmentCleanedText', () => {
     it('updates the cleaned text of a segment', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segmentId = result.current.segments[0].id
       const newText = 'Updated cleaned text'
@@ -99,7 +114,7 @@ describe('useTranscription', () => {
     })
 
     it('does not affect other segments', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const originalSecondSegment = result.current.segments[1].cleanedText
 
@@ -111,7 +126,7 @@ describe('useTranscription', () => {
     })
 
     it('clears reverted status when text is updated', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segmentId = result.current.segments[0].id
 
@@ -133,7 +148,7 @@ describe('useTranscription', () => {
 
   describe('revertSegmentToRaw', () => {
     it('sets cleaned text to raw text', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segment = result.current.segments[0]
       const originalRawText = segment.rawText
@@ -147,7 +162,7 @@ describe('useTranscription', () => {
     })
 
     it('returns the original cleaned text', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segment = result.current.segments[0]
       const originalCleanedText = segment.cleanedText
@@ -162,7 +177,7 @@ describe('useTranscription', () => {
     })
 
     it('returns undefined for non-existent segment', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       let returnedText: string | undefined
 
@@ -174,7 +189,7 @@ describe('useTranscription', () => {
     })
 
     it('marks segment as reverted', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segmentId = result.current.segments[0].id
 
@@ -190,7 +205,7 @@ describe('useTranscription', () => {
 
   describe('undoRevert', () => {
     it('restores the original cleaned text', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segment = result.current.segments[0]
       const originalCleanedText = segment.cleanedText
@@ -211,7 +226,7 @@ describe('useTranscription', () => {
     })
 
     it('clears reverted status', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segmentId = result.current.segments[0].id
       const originalCleanedText = result.current.segments[0].cleanedText
@@ -236,7 +251,7 @@ describe('useTranscription', () => {
 
   describe('getSegmentById', () => {
     it('returns segment by ID', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const firstSegment = result.current.segments[0]
       const found = result.current.getSegmentById(firstSegment.id)
@@ -246,7 +261,7 @@ describe('useTranscription', () => {
     })
 
     it('returns undefined for non-existent ID', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const found = result.current.getSegmentById('non-existent')
       expect(found).toBeUndefined()
@@ -255,16 +270,16 @@ describe('useTranscription', () => {
 
   describe('getSegmentAtTime', () => {
     it('returns segment at specified time', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
-      // First segment starts at 0:00
+      // First segment starts at 0:00 (0 seconds)
       const segment = result.current.getSegmentAtTime(5)
       expect(segment).toBeDefined()
       expect(segment?.id).toBe(result.current.segments[0].id)
     })
 
     it('returns undefined for time outside all segments', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const segment = result.current.getSegmentAtTime(10000)
       expect(segment).toBeUndefined()
@@ -273,7 +288,7 @@ describe('useTranscription', () => {
 
   describe('reset', () => {
     it('resets to initial state', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       const originalFirstCleanedText = result.current.segments[0].cleanedText
 
@@ -296,7 +311,7 @@ describe('useTranscription', () => {
 
   describe('state properties', () => {
     it('has correct initial state values', () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
+      const { result } = renderHook(() => useTranscription({ initialSegments: TEST_SEGMENTS }))
 
       expect(result.current.error).toBeNull()
       expect(result.current.uploadProgress).toBe(0)
@@ -304,32 +319,10 @@ describe('useTranscription', () => {
   })
 
   // ===========================================================================
-  // Mock Mode Upload
-  // ===========================================================================
-
-  describe('uploadAudio (mock mode)', () => {
-    it('simulates upload flow', async () => {
-      const { result } = renderHook(() => useTranscription({ mockMode: true }))
-
-      const file = new File(['audio'], 'test.mp3', { type: 'audio/mp3' })
-
-      // Run upload and wait for completion
-      await act(async () => {
-        await result.current.uploadAudio(file, 2)
-      })
-
-      expect(result.current.status).toBe('complete')
-      expect(result.current.segments.length).toBeGreaterThan(0)
-      expect(result.current.entryId).toContain('mock-entry-')
-      expect(result.current.cleanupId).toContain('mock-cleanup-')
-    }, 10000) // Increase timeout for mock delays
-  })
-
-  // ===========================================================================
   // API Mode Upload
   // ===========================================================================
 
-  describe('uploadAudio (API mode)', () => {
+  describe('uploadAudio', () => {
     it('uploads and polls for completion', async () => {
       // Mock successful API responses - wrapped in { data, rateLimitInfo } format
       vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
@@ -374,7 +367,7 @@ describe('useTranscription', () => {
         rateLimitInfo: null,
       })
 
-      const { result } = renderHook(() => useTranscription({ mockMode: false }))
+      const { result } = renderHook(() => useTranscription())
 
       const file = new File(['audio'], 'test.mp3', { type: 'audio/mp3' })
 
@@ -413,7 +406,7 @@ describe('useTranscription', () => {
         })
       )
 
-      const { result } = renderHook(() => useTranscription({ mockMode: false }))
+      const { result } = renderHook(() => useTranscription())
 
       const file = new File(['audio'], 'test.mp3', { type: 'audio/mp3' })
 
@@ -447,7 +440,7 @@ describe('useTranscription', () => {
         rateLimitInfo: null,
       })
 
-      const { result } = renderHook(() => useTranscription({ mockMode: false }))
+      const { result } = renderHook(() => useTranscription())
 
       const file = new File(['audio'], 'test.mp3', { type: 'audio/mp3' })
 
@@ -492,7 +485,7 @@ describe('useTranscription', () => {
         rateLimitInfo: null,
       })
 
-      const { result } = renderHook(() => useTranscription({ mockMode: false }))
+      const { result } = renderHook(() => useTranscription())
 
       const file = new File(['audio'], 'test.mp3', { type: 'audio/mp3' })
 
@@ -511,10 +504,10 @@ describe('useTranscription', () => {
   })
 
   // ===========================================================================
-  // API Mode Segment Editing
+  // Segment Editing with API
   // ===========================================================================
 
-  describe('segment editing (API mode)', () => {
+  describe('segment editing with API', () => {
     it('calls saveUserEdit API when updating segment', async () => {
       vi.mocked(api.saveUserEdit).mockResolvedValue({
         data: {
@@ -533,12 +526,11 @@ describe('useTranscription', () => {
       ]
 
       const { result } = renderHook(() =>
-        useTranscription({ mockMode: false, initialSegments: customSegments })
+        useTranscription({ initialSegments: customSegments })
       )
 
-      // Manually set cleanup ID (normally set by upload)
+      // Setup with upload to get a cleanup ID
       await act(async () => {
-        // Simulate having a cleanup ID by uploading
         vi.mocked(api.uploadAndTranscribe).mockResolvedValue({
           data: {
             entry_id: 'entry-123',
@@ -603,7 +595,7 @@ describe('useTranscription', () => {
         rateLimitInfo: null,
       })
 
-      const { result } = renderHook(() => useTranscription({ mockMode: false }))
+      const { result } = renderHook(() => useTranscription())
 
       // Setup with upload
       await act(async () => {

@@ -40,108 +40,11 @@ import {
   clearDemoSegmentEdit,
 } from "@/lib/demo-storage"
 
-/**
- * Mock segments data for development and testing
- * Note: speaker is 0-based index (0 = "Speaker 1", 1 = "Speaker 2")
- */
-const MOCK_SEGMENTS: Segment[] = [
-  {
-    id: "seg-1",
-    speaker: 0,
-    time: "0:00 – 0:18",
-    rawText:
-      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
-    cleanedText:
-      "So basically what we're trying to do here is figure out the best approach for the project timeline, ensuring everyone's on the same page.",
-    originalRawText:
-      "Uh so basically what we're trying to do here is um figure out the best approach for the the project timeline and um you know make sure everyone's on the same page.",
-  },
-  {
-    id: "seg-2",
-    speaker: 1,
-    time: "0:19 – 0:42",
-    rawText:
-      "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
-    cleanedText:
-      "Yes, I think we should probably start with the research phase first and then move on to the design work after we have all the data we need.",
-    originalRawText:
-      "Yeah I think we should we should probably start with the the research phase first you know and then move on to to the design work after we have all the the data we need.",
-  },
-  {
-    id: "seg-3",
-    speaker: 0,
-    time: "0:43 – 1:05",
-    rawText:
-      "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
-    cleanedText:
-      "That makes sense, and I was thinking maybe we could bring in some external consultants to help with the technical aspects of the project.",
-    originalRawText:
-      "That makes sense um and I was thinking maybe we could also like bring in some external consultants to help with the the technical aspects of the project.",
-  },
-  {
-    id: "seg-4",
-    speaker: 1,
-    time: "1:06 – 1:28",
-    rawText:
-      "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
-    cleanedText:
-      "Sure, that's a good idea. We definitely need some expertise in the machine learning side of things, especially for the data processing pipeline.",
-    originalRawText:
-      "Sure that's a good idea I mean we we definitely need some expertise in in the machine learning side of things especially for the the data processing pipeline.",
-  },
-  {
-    id: "seg-5",
-    speaker: 0,
-    time: "1:29 – 1:55",
-    rawText:
-      "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
-    cleanedText:
-      "Right, and what about the budget? Do we have enough resources allocated for bringing in outside help, or should we look at reallocating from other areas?",
-    originalRawText:
-      "Right right and um what about the the budget like do we have enough um resources allocated for for bringing in outside help or should we should we look at maybe reallocating from other areas?",
-  },
-  {
-    id: "seg-6",
-    speaker: 1,
-    time: "1:56 – 2:24",
-    rawText:
-      "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
-    cleanedText:
-      "Well, I think we have some flexibility there. The Q3 budget had a contingency fund set aside, so we could tap into that if needed.",
-    originalRawText:
-      "Well I I think we have some some flexibility there um the Q3 budget had a a contingency fund set aside so so we could tap into that if if needed you know what I mean.",
-  },
-  {
-    id: "seg-7",
-    speaker: 0,
-    time: "2:25 – 2:58",
-    rawText:
-      "Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that.",
-    cleanedText:
-      "Perfect, that's great to hear. Let's plan to have a follow-up meeting next week to finalize the consultant requirements and get the ball rolling on that.",
-    originalRawText:
-      "Perfect that's that's great to hear um so let's let's plan to to have like a follow-up meeting next week to to finalize the the consultant requirements and um get the ball rolling on that.",
-  },
-  {
-    id: "seg-8",
-    speaker: 1,
-    time: "2:59 – 3:28",
-    rawText:
-      "Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
-    cleanedText:
-      "Sounds good. I'll send out a calendar invite for Thursday afternoon if that works for everyone. We can also invite Sarah from procurement to help with the vendor selection process.",
-    originalRawText:
-      "Sounds good I'll I'll send out a a calendar invite for for Thursday afternoon if if that works for everyone and uh we can we can also invite Sarah from from procurement to to help with the the vendor selection process.",
-  },
-]
-
 // Polling interval for transcription status (2 seconds)
 const POLL_INTERVAL_MS = 2000
 
 export interface UseTranscriptionOptions {
-  /** Use mock data instead of API (default: false) */
-  mockMode?: boolean
-  /** Initial segments (optional, overrides mock data) */
+  /** Initial segments (optional) */
   initialSegments?: Segment[]
 }
 
@@ -341,7 +244,7 @@ function transformApiSegments(
  *   status,
  *   updateSegmentCleanedText,
  *   revertSegmentToRaw
- * } = useTranscription({ mockMode: false })
+ * } = useTranscription()
  *
  * // Upload audio
  * await uploadAudio(file, 2)
@@ -353,12 +256,10 @@ function transformApiSegments(
 export function useTranscription(
   options: UseTranscriptionOptions = {}
 ): UseTranscriptionReturn {
-  const { mockMode = false, initialSegments } = options
+  const { initialSegments } = options
 
   // Base segments state
-  const [segments, setSegments] = useState<Segment[]>(
-    initialSegments || (mockMode ? MOCK_SEGMENTS : [])
-  )
+  const [segments, setSegments] = useState<Segment[]>(initialSegments || [])
 
   // Processing state
   const [status, setStatus] = useState<ProcessingStatus>(
@@ -366,12 +267,8 @@ export function useTranscription(
   )
   const [error, setError] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [entryId, setEntryId] = useState<string | null>(
-    segments.length > 0 ? "mock-entry-1" : null
-  )
-  const [cleanupId, setCleanupId] = useState<string | null>(
-    mockMode ? "mock-cleanup-1" : null
-  )
+  const [entryId, setEntryId] = useState<string | null>(null)
+  const [cleanupId, setCleanupId] = useState<string | null>(null)
   const [analysisId, setAnalysisId] = useState<string | null>(null)
   const [analyses, setAnalyses] = useState<AnalysisResult[]>([])
   const [rateLimits, setRateLimits] = useState<RateLimitInfo | null>(null)
@@ -450,7 +347,7 @@ export function useTranscription(
       }
 
       // Call API in non-mock mode - send ALL segments
-      if (!mockMode && cleanupId) {
+      if (cleanupId) {
         try {
           const editedData: EditedData = {
             words: segmentsToEditWords(updatedSegments),
@@ -475,7 +372,7 @@ export function useTranscription(
         }
       }
     },
-    [mockMode, cleanupId, segmentsWithTime, segmentsToEditWords, isDemo, demoLocale]
+    [cleanupId, segmentsWithTime, segmentsToEditWords, isDemo, demoLocale]
   )
 
   /**
@@ -519,7 +416,7 @@ export function useTranscription(
       }
 
       // Call API in non-mock mode - save ALL segments
-      if (!mockMode && cleanupId) {
+      if (cleanupId) {
         try {
           const editedData: EditedData = {
             words: segmentsToEditWords(updatedSegments),
@@ -532,7 +429,7 @@ export function useTranscription(
 
       return originalCleanedText
     },
-    [segmentsWithTime, mockMode, cleanupId, segmentsToEditWords, isDemo, demoLocale]
+    [segmentsWithTime, cleanupId, segmentsToEditWords, isDemo, demoLocale]
   )
 
   /**
@@ -568,7 +465,7 @@ export function useTranscription(
       }
 
       // Call API in non-mock mode - save ALL segments
-      if (!mockMode && cleanupId) {
+      if (cleanupId) {
         try {
           const editedData: EditedData = {
             words: segmentsToEditWords(updatedSegments),
@@ -579,7 +476,7 @@ export function useTranscription(
         }
       }
     },
-    [segmentsWithTime, mockMode, cleanupId, segmentsToEditWords, isDemo, demoLocale]
+    [segmentsWithTime, cleanupId, segmentsToEditWords, isDemo, demoLocale]
   )
 
   /**
@@ -630,7 +527,7 @@ export function useTranscription(
       }
 
       // Call API in non-mock mode - send ALL segments
-      if (!mockMode && cleanupId) {
+      if (cleanupId) {
         try {
           const editedData: EditedData = {
             words: segmentsToEditWords(updatedSegments),
@@ -641,7 +538,7 @@ export function useTranscription(
         }
       }
     },
-    [mockMode, cleanupId, segmentsWithTime, segmentsToEditWords, isDemo, demoLocale]
+    [cleanupId, segmentsWithTime, segmentsToEditWords, isDemo, demoLocale]
   )
 
   /**
@@ -762,37 +659,6 @@ export function useTranscription(
         pollingRef.current = null
       }
 
-      if (mockMode) {
-        // Mock mode implementation
-        setError(null)
-        setStatus("uploading")
-        setUploadProgress(0)
-
-        // Simulate upload progress
-        for (let i = 0; i <= 100; i += 10) {
-          await new Promise((resolve) => setTimeout(resolve, 100))
-          setUploadProgress(i)
-        }
-
-        setStatus("transcribing")
-        await new Promise((resolve) => setTimeout(resolve, 500))
-
-        setStatus("cleaning")
-        await new Promise((resolve) => setTimeout(resolve, 300))
-
-        setSegments(MOCK_SEGMENTS)
-        setEntryId(`mock-entry-${Date.now()}`)
-        setCleanupId(`mock-cleanup-${Date.now()}`)
-        setStatus("complete")
-        setUploadProgress(0)
-
-        console.log(
-          `[Mock] Uploaded ${file.name} with ${speakerCount} speakers`
-        )
-        return
-      }
-
-      // Real API implementation
       setError(null)
       setStatus("uploading")
       setUploadProgress(0)
@@ -863,7 +729,7 @@ export function useTranscription(
         toast.error(errorMessage)
       }
     },
-    [mockMode, pollTranscriptionStatus]
+    [pollTranscriptionStatus]
   )
 
   /**
@@ -1037,8 +903,9 @@ export function useTranscription(
         }
 
         setEntryId(entryIdToLoad)
-        // Demo entries don't have cleanup IDs (edits go to localStorage)
-        setCleanupId(isDemoEntry ? null : cleanupData.id)
+        // Set cleanupId even for demo entries - needed for analysis to work
+        // Edits still go to localStorage for demo entries (controlled by isDemo state)
+        setCleanupId(cleanupData.id)
         // Set all analyses for client-side caching by profile
         const allAnalyses = entryDetails.analyses || []
         setAnalyses(allAnalyses)
@@ -1077,12 +944,12 @@ export function useTranscription(
       pollingRef.current = null
     }
 
-    setSegments(initialSegments || (mockMode ? MOCK_SEGMENTS : []))
-    setStatus(initialSegments?.length || mockMode ? "complete" : "idle")
+    setSegments(initialSegments || [])
+    setStatus(initialSegments?.length ? "complete" : "idle")
     setError(null)
     setUploadProgress(0)
-    setEntryId(initialSegments?.length || mockMode ? "mock-entry-1" : null)
-    setCleanupId(initialSegments?.length || mockMode ? "mock-cleanup-1" : null)
+    setEntryId(null)
+    setCleanupId(null)
     setAnalysisId(null)
     setAnalyses([])
     setRateLimits(null)
@@ -1093,7 +960,7 @@ export function useTranscription(
     setIsDemo(false)
     setDemoLocale(null)
     setDemoAudioUrl(null)
-  }, [initialSegments, mockMode])
+  }, [initialSegments])
 
   /**
    * Dismiss the cleaned segments warning
@@ -1106,8 +973,6 @@ export function useTranscription(
    * Fetch current rate limits from API
    */
   const fetchRateLimits = useCallback(async (): Promise<void> => {
-    if (mockMode) return
-
     try {
       const limits = await getRateLimits()
       if (limits) {
@@ -1117,7 +982,7 @@ export function useTranscription(
       // Silently fail - rate limits are not critical
       console.error("Failed to fetch rate limits:", err)
     }
-  }, [mockMode])
+  }, [])
 
   return {
     segments: segmentsWithTime,

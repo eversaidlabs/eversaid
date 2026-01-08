@@ -68,20 +68,15 @@ const checkSpelling = (text: string): SpellcheckError[] => {
 }
 
 function DemoPageContent() {
-   // TODO: Replace ?mock URL param with MSW (Mock Service Worker) for cleaner E2E testing.
-  // MSW intercepts network requests at the test level, keeping production code unaware of testing.
-  // Current approach: ?mock param enables mock mode for Playwright E2E tests to bypass upload flow.
-  // This works but leaks test concerns into production code. See: https://mswjs.io/
   // Navigation hooks for URL query params (browser back button support)
   const router = useRouter()
   const searchParams = useSearchParams()
 
   // URL-based flags (use searchParams hook to avoid hydration mismatch)
-  const isMockMode = searchParams.has('mock')
   const isTestWarning = searchParams.has('testWarning')
 
   // Transcription hook
-  const transcription = useTranscription({ mockMode: isMockMode })
+  const transcription = useTranscription()
 
   // Translation hook
   const t = useTranslations()
