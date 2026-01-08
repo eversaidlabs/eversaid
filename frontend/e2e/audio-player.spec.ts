@@ -1,61 +1,32 @@
-import { test, expect, Page, Locator } from "@playwright/test"
-import * as fs from "fs"
-import * as path from "path"
+import { test, expect, Locator } from "@playwright/test"
+import { setupDemoMocks } from "./mocks/setup-mocks"
 
 /**
  * Audio Player E2E Tests
  *
- * Uses mock mode which auto-populates with mock transcription data.
- * Audio endpoint is mocked to serve a local test file.
+ * Uses shared mock infrastructure which provides mock transcription data
+ * and a programmatically generated silent audio buffer.
  */
 
 test.describe("Audio Player", () => {
   let audioPlayerBar: Locator
 
   test.beforeEach(async ({ page }) => {
-    // Mock API endpoints
-    await page.route("**/api/rate-limits", async (route) => {
-      await route.fulfill({
-        json: {
-          day: { limit: 20, remaining: 20, reset: Date.now() + 86400000 },
-          ip_day: { limit: 100, remaining: 100, reset: Date.now() + 86400000 },
-          global_day: { limit: 10000, remaining: 10000, reset: Date.now() + 86400000 },
-        },
-      })
-    })
+    // Setup all API mocks before navigation
+    await setupDemoMocks(page)
+    // Use ?entry=demo-en to trigger demo loading via useTranscription.loadEntry
+    await page.goto("/en/demo?entry=demo-en")
 
-    await page.route("**/api/entries?*", async (route) => {
-      await route.fulfill({
-        json: { entries: [], total: 0, limit: 10, offset: 0 },
-      })
-    })
-
-    // Mock audio endpoint to serve local test file with proper headers
-    await page.route("**/api/entries/*/audio", async (route) => {
-      const audioPath = path.join(__dirname, "audio", "test_audio.wav")
-      const audioBuffer = fs.readFileSync(audioPath)
-
-      await route.fulfill({
-        body: audioBuffer,
-        headers: {
-          "Content-Type": "audio/wav",
-          "Content-Length": String(audioBuffer.length),
-          "Content-Disposition": `inline; filename="test_audio.wav"`,
-        },
-      })
-    })
-
-    // Go to demo page with mock mode - this auto-loads mock transcription data
-    await page.goto("/en/demo?mock")
-
-    // Wait for the audio player bar to be visible (mock mode shows it immediately)
+    // Wait for the audio player bar to be visible
     audioPlayerBar = page.locator(".bg-gradient-to-br.from-\\[\\#1E293B\\]")
     await expect(audioPlayerBar).toBeVisible({ timeout: 10000 })
   })
 
   test("displays duration from audio file", async ({ page }) => {
     // Duration display (right side of player)
-    const durationDisplay = audioPlayerBar.locator("span.text-right.min-w-\\[48px\\]")
+    const durationDisplay = audioPlayerBar.locator(
+      "span.text-right.min-w-\\[48px\\]"
+    )
     await expect(durationDisplay).toBeVisible()
 
     // Wait for duration to load from audio file (should not stay 0:00)
@@ -91,7 +62,9 @@ test.describe("Audio Player", () => {
     await page.waitForTimeout(300)
 
     // Find speed button (shows "1x")
-    const speedButton = audioPlayerBar.locator("button").filter({ hasText: /^1x$/ })
+    const speedButton = audioPlayerBar
+      .locator("button")
+      .filter({ hasText: /^1x$/ })
     await expect(speedButton).toBeVisible()
 
     // Click to open speed menu
@@ -101,7 +74,10 @@ test.describe("Audio Player", () => {
     await page.waitForTimeout(200)
 
     // Select 1.5x speed from the dropdown menu
-    const speedOption = page.locator("button").filter({ hasText: /^1\.5x$/ }).last()
+    const speedOption = page
+      .locator("button")
+      .filter({ hasText: /^1\.5x$/ })
+      .last()
     await expect(speedOption).toBeVisible()
     await speedOption.click()
 
@@ -109,7 +85,9 @@ test.describe("Audio Player", () => {
     await page.waitForTimeout(300)
 
     // Speed button should now show 1.5x
-    await expect(audioPlayerBar.locator("button").filter({ hasText: /^1\.5x$/ })).toBeVisible({ timeout: 5000 })
+    await expect(
+      audioPlayerBar.locator("button").filter({ hasText: /^1\.5x$/ })
+    ).toBeVisible({ timeout: 5000 })
   })
 
   // Regression tests for audio player visibility bug (fixed in flex layout update)
@@ -155,5 +133,4 @@ test.describe("Audio Player", () => {
     // Audio player should STILL be visible
     await expect(audioPlayerBar).toBeVisible()
   })
-
 })

@@ -1,15 +1,22 @@
 import { test, expect } from "@playwright/test"
+import { setupDemoMocks, setupUploadModeMocks } from "./mocks/setup-mocks"
 
 test.describe("Demo Page", () => {
   test.beforeEach(async ({ page }) => {
-    // Use ?mock parameter to load demo with mock transcript data for E2E testing
-    await page.goto("/en/demo?mock")
+    // Setup all API mocks before navigation
+    await setupDemoMocks(page)
+    // Use ?entry=demo-en to trigger demo loading via useTranscription.loadEntry
+    await page.goto("/en/demo?entry=demo-en")
   })
 
   test("loads with transcript visible", async ({ page }) => {
-    // In mock mode, transcript is loaded immediately (no upload mode)
     // Audio player - target by the play icon container (button with Play/Pause icon)
-    await expect(page.locator("button").filter({ has: page.locator("svg[class*='fill-white']") }).first()).toBeVisible()
+    await expect(
+      page
+        .locator("button")
+        .filter({ has: page.locator("svg[class*='fill-white']") })
+        .first()
+    ).toBeVisible()
 
     // Transcript sections visible
     await expect(page.getByText("Raw Transcription")).toBeVisible()
@@ -21,7 +28,10 @@ test.describe("Demo Page", () => {
 
   test("audio player controls work", async ({ page }) => {
     // Find play button by the gradient background container
-    const playButton = page.locator("button").filter({ has: page.locator("svg[class*='fill-white']") }).first()
+    const playButton = page
+      .locator("button")
+      .filter({ has: page.locator("svg[class*='fill-white']") })
+      .first()
 
     await expect(playButton).toBeVisible()
     await playButton.click()
@@ -77,24 +87,23 @@ test.describe("Demo Page", () => {
     // Analysis section header
     await expect(page.getByText("AI Analysis")).toBeVisible()
 
-    // In mock mode, analysis data is not available (requires API)
-    // So we just verify the section renders without error
     // The section should be visible, either showing loading, empty state, or content
   })
 
   test("sidebar elements are visible in transcript mode", async ({ page }) => {
-    // In mock/transcript mode, FeedbackCard is visible (not EntryHistoryCard)
-    // EntryHistoryCard only shows in upload mode (when no segments loaded)
-
+    // In transcript mode, FeedbackCard is visible (not EntryHistoryCard)
     // Feedback card - actual text is "How was the quality?"
     await expect(page.getByText("How was the quality?")).toBeVisible()
 
     // Waitlist CTA (appears in various places)
     await expect(page.getByText(/waitlist/i).first()).toBeVisible()
   })
+})
 
+test.describe("Demo Page - Upload Mode", () => {
   test("sidebar elements are visible in upload mode", async ({ page }) => {
-    // Go to demo without mock param to be in upload mode
+    // Setup mocks for upload mode (no demo entry available)
+    await setupUploadModeMocks(page)
     await page.goto("/en/demo")
 
     // History card - visible in upload mode

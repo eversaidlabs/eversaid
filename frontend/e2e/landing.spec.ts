@@ -30,14 +30,8 @@ test.describe("Landing Page", () => {
     await expect(page.getByRole("link", { name: "Features" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Use Cases" })).toBeVisible()
     await expect(page.getByRole("link", { name: "How It Works" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "API Docs" })).toBeVisible()
-  })
-
-  test("API Docs link navigates to api-docs page", async ({ page }) => {
-    await page.getByRole("link", { name: "API Docs" }).click()
-
-    await expect(page).toHaveURL("/en/api-docs")
-    await expect(page.getByRole("heading", { name: "API Documentation" })).toBeVisible()
+    // API Docs is shown as "Coming soon" tooltip, not a clickable link
+    await expect(page.getByText("API Docs")).toBeVisible()
   })
 
   test("displays feature sections", async ({ page }) => {
@@ -63,7 +57,7 @@ test.describe("Landing Page", () => {
   })
 
   test("footer contains expected links", async ({ page }) => {
-    await expect(page.getByText(/© \d{4} eversaid/)).toBeVisible()
+    await expect(page.getByText(/© \d{4} EverSaid/)).toBeVisible()
     await expect(page.getByRole("link", { name: "Privacy Policy" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Terms" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Contact" })).toBeVisible()
