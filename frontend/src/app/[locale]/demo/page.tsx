@@ -26,7 +26,6 @@ import { ErrorDisplay } from "@/components/demo/error-display"
 import { RateLimitModal } from "@/components/demo/rate-limit-modal"
 import { RecordingModal } from "@/components/demo/recording-modal"
 import { useTranscription } from "@/features/transcription/useTranscription"
-import { useDemoEntry, getDemoEntryId } from "@/features/transcription/useDemoEntry"
 import { useVoiceRecorder } from "@/features/transcription/useVoiceRecorder"
 import { useRateLimits } from "@/features/transcription/useRateLimits"
 import { ApiError } from "@/features/transcription/types"
@@ -81,11 +80,8 @@ function DemoPageContent() {
   // Translation hook
   const t = useTranslations()
 
-  // Locale hook for demo entry
+  // Locale hook
   const locale = useLocale()
-
-  // Demo entry hook - fetches pre-loaded demo data based on locale
-  const demoEntryHook = useDemoEntry({ locale })
 
   // Feedback hook
   const feedbackHook = useFeedback({
@@ -127,19 +123,16 @@ function DemoPageContent() {
   const [sessionReady, setSessionReady] = useState(false)
 
   // Entry history hook (autoFetch disabled - we fetch after session is ready)
-  // demoEntry is prepended to the list when available
+  // Demo entries are automatically copied to user's history by the database trigger
   const entriesHook = useEntries({
     autoFetch: false,
-    demoEntry: demoEntryHook.historyEntry,
   })
 
   // Audio playback hook
-  // Use demo audio URL for demo entries, otherwise use the entry audio URL
-  const audioUrl = transcription.isDemo
-    ? demoEntryHook.audioUrl
-    : transcription.entryId
-      ? getEntryAudioUrl(transcription.entryId)
-      : null
+  // All entries (including demo) use the standard entry audio URL
+  const audioUrl = transcription.entryId
+    ? getEntryAudioUrl(transcription.entryId)
+    : null
 
   const audioPlayer = useAudioPlayer({
     segments: transcription.segments,
