@@ -35,7 +35,7 @@ import { useAudioPlayer } from "@/features/transcription/useAudioPlayer"
 import { useWordHighlight } from "@/features/transcription/useWordHighlight"
 import { useAnalysis } from "@/features/transcription/useAnalysis"
 import { useProcessingStages } from "@/features/transcription/useProcessingStages"
-import { getEntryAudioUrl } from "@/features/transcription/api"
+import { getEntryAudioUrl, triggerCleanup, getCleanedEntry, triggerAnalysis } from "@/features/transcription/api"
 import { ProcessingStages } from "@/components/demo/processing-stages"
 
 // Mock spellcheck - in production, call a Slovenian spellcheck API

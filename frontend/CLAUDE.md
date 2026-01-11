@@ -1,9 +1,8 @@
-# Eversaid - Frontend
+# CLAUDE.md
 
-## V0 Prototype URLs
-- Landing page: [paste after creating]
-- Demo page: [paste after creating]
-- API docs: [paste after creating]
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Eversaid - Frontend
 
 ## Design Constraints (DO NOT DEVIATE)
 - Colors: Navy #1D3557, white #FFFFFF, coral #E85D04, gray #F5F5F5
@@ -33,29 +32,25 @@ src/
 │   ├── landing/
 │   ├── demo/
 │   └── api-docs/
-├── containers/         # Wires logic to presentation
 ├── features/
 │   └── transcription/
-│       ├── api.ts
+│       ├── api.ts           # All API calls
+│       ├── types.ts         # TypeScript types
 │       ├── useTranscription.ts
 │       ├── useAudioPlayer.ts
 │       ├── useVoiceRecorder.ts
 │       ├── useFeedback.ts
-│       ├── useDiff.ts
-│       └── useSyncScroll.ts
+│       ├── useAnalysis.ts
+│       └── useEntries.ts
 ├── lib/
 │   ├── session.ts
-│   ├── storage.ts
-│   └── diff.ts
+│   ├── diff-utils.ts
+│   └── time-utils.ts
+├── i18n/               # Internationalization config
 └── messages/
     ├── sl.json
     └── en.json
 ```
-
-## Task Isolation
-- One feature per Claude Code session
-- Commit after each working feature
-- Create backup branch before V0 re-imports
 
 ## i18n
 - Use next-intl
