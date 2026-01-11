@@ -24,6 +24,22 @@ export const mockEmptyEntries = {
   offset: 0,
 }
 
+// Demo entry that appears in user's history (created by PostgreSQL trigger)
+export const mockDemoEntryInHistory = {
+  id: "demo-en",
+  original_filename: "demo-en.mp3",
+  entry_type: "audio",
+  duration_seconds: 45,
+  created_at: new Date().toISOString(),
+}
+
+export const mockEntriesWithDemo = {
+  entries: [mockDemoEntryInHistory],
+  total: 1,
+  limit: 10,
+  offset: 0,
+}
+
 export const mockProfiles = [
   {
     id: "generic-summary",
@@ -80,10 +96,12 @@ export const mockEntry = {
   segments: mockSegments,
 }
 
+// Full demo entry details (returned by /api/entries/demo-en)
+// Uses filename pattern "demo-*.mp3" to identify demo entries
 export const mockDemoEntry = {
   id: "demo-en",
-  original_filename: "demo-conversation.mp3",
-  saved_filename: "demo-conversation.mp3",
+  original_filename: "demo-en.mp3", // Pattern: demo-{locale}.mp3
+  saved_filename: "demo-en.mp3",
   duration_seconds: 45,
   entry_type: "audio",
   uploaded_at: new Date().toISOString(),
@@ -225,28 +243,12 @@ export async function setupDemoMocks(
     await route.fulfill({ json: mockRateLimits })
   })
 
-  // Mock entries list (empty - user has no history)
+  // Mock entries list (includes demo entry from PostgreSQL trigger)
   await page.route("**/api/entries?*", async (route) => {
-    await route.fulfill({ json: mockEmptyEntries })
+    await route.fulfill({ json: mockEntriesWithDemo })
   })
 
-  // Mock demo entry endpoint
-  await page.route("**/api/demo/entry*", async (route) => {
-    await route.fulfill({ json: mockDemoEntry })
-  })
-
-  // Mock demo audio endpoint
-  await page.route("**/api/demo/audio/*", async (route) => {
-    await route.fulfill({
-      body: audioBuffer,
-      headers: {
-        "Content-Type": "audio/wav",
-        "Content-Length": String(audioBuffer.length),
-      },
-    })
-  })
-
-  // Mock entry details (for non-demo entries)
+  // Mock entry details - handles both demo and regular entries
   await page.route("**/api/entries/*", async (route) => {
     const url = route.request().url()
     // Skip sub-resource requests (handled by other routes)
@@ -257,7 +259,13 @@ export async function setupDemoMocks(
     ) {
       return route.continue()
     }
-    await route.fulfill({ json: mockEntry })
+    // Return demo entry for demo-* IDs, regular entry otherwise
+    const entryId = url.split("/api/entries/")[1]?.split("/")[0]?.split("?")[0]
+    if (entryId?.startsWith("demo-")) {
+      await route.fulfill({ json: mockDemoEntry })
+    } else {
+      await route.fulfill({ json: mockEntry })
+    }
   })
 
   // Mock entry audio endpoint
@@ -323,19 +331,16 @@ export async function setupDemoMocks(
 
 /**
  * Setup minimal mocks for upload mode tests (no transcript loaded).
+ * Simulates a fresh user with empty entry history.
  */
 export async function setupUploadModeMocks(page: Page): Promise<void> {
   await page.route("**/api/rate-limits", async (route) => {
     await route.fulfill({ json: mockRateLimits })
   })
 
+  // Empty entries list (simulates fresh user before trigger has run or user deleted entries)
   await page.route("**/api/entries?*", async (route) => {
     await route.fulfill({ json: mockEmptyEntries })
-  })
-
-  await page.route("**/api/demo/entry*", async (route) => {
-    // Return 404 to simulate no demo available (upload mode)
-    await route.fulfill({ status: 404, json: { detail: "Demo not found" } })
   })
 
   await page.route("**/api/analysis-profiles", async (route) => {

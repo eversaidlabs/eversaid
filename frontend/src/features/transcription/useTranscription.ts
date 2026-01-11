@@ -29,16 +29,8 @@ import {
   saveUserEdit,
   revertUserEdit,
   getRateLimits,
-  getDemoEntry,
-  getDemoAudioUrl,
 } from "./api"
 import { addEntryId, cacheEntry } from "@/lib/storage"
-import {
-  getDemoEdits,
-  saveDemoEdit,
-  saveDemoEdits,
-  clearDemoSegmentEdit,
-} from "@/lib/demo-storage"
 
 // Polling interval for transcription status (2 seconds)
 const POLL_INTERVAL_MS = 2000
@@ -120,28 +112,23 @@ export interface UseTranscriptionReturn {
   /**
    * Load an existing entry by ID.
    *
-   * Handles both real entries and demo entries:
-   * - Real entries (UUID format): Fetched from /api/entries/{id}
-   * - Demo entries ("demo-{locale}"): Fetched from /api/demo/entry
+   * All entries are fetched from /api/entries/{id}, including demo entries.
+   * Demo entries are identified by filename pattern (demo-*.mp3) for UI display.
    *
-   * Demo entries use the same EntryDetails format as real entries,
-   * allowing a unified code path. The difference is in edit storage:
-   * - Real entries: Edits saved to Core API
-   * - Demo entries: Edits saved to localStorage
-   *
-   * @param entryId - ID of the entry to load (e.g., "abc-123" or "demo-en")
+   * @param entryId - UUID of the entry to load
    */
   loadEntry: (entryId: string) => Promise<void>
 
   /**
-   * Whether current entry is a demo (not stored in Core API).
-   * Demo entries have different edit behavior (localStorage instead of API).
+   * Whether current entry is a demo entry.
+   * Demo entries are identified by filename pattern (demo-*.mp3).
+   * Used for UI display purposes only (e.g., showing demo badge).
    */
   isDemo: boolean
 
   /**
    * Locale of the current demo entry (null if not a demo).
-   * Used for keying localStorage edits.
+   * Extracted from filename pattern (e.g., "demo-sl.mp3" -> "sl").
    */
   demoLocale: string | null
 
@@ -315,9 +302,6 @@ export function useTranscription(
   /**
    * Update the cleaned text of a segment (calls API in non-mock mode)
    * Sends ALL segments to API on every save (words-first format)
-   *
-   * For demo entries: Saves to localStorage instead of API (instant, no rate limit).
-   * @see lib/demo-storage.ts for why demo entries use localStorage
    */
   const updateSegmentCleanedText = useCallback(
     async (segmentId: string, text: string) => {
@@ -340,13 +324,7 @@ export function useTranscription(
         return newMap
       })
 
-      // Demo entries: Save to localStorage instead of API
-      if (isDemo && demoLocale) {
-        saveDemoEdit(demoLocale, segmentId, text)
-        return
-      }
-
-      // Call API in non-mock mode - send ALL segments
+      // Save edit to API
       if (cleanupId) {
         try {
           const editedData: EditedData = {
@@ -372,7 +350,7 @@ export function useTranscription(
         }
       }
     },
-    [cleanupId, segmentsWithTime, segmentsToEditWords, isDemo, demoLocale]
+    [cleanupId, segmentsWithTime, segmentsToEditWords]
   )
 
   /**
@@ -407,15 +385,7 @@ export function useTranscription(
         )
       )
 
-      // Demo entries: Clear localStorage edit, save raw text as the new edit
-      if (isDemo && demoLocale) {
-        // For revert, we save the raw text as the new cleaned text
-        // This persists the "reverted" state across page reloads
-        saveDemoEdit(demoLocale, segmentId, segment.rawText)
-        return originalCleanedText
-      }
-
-      // Call API in non-mock mode - save ALL segments
+      // Save revert to API
       if (cleanupId) {
         try {
           const editedData: EditedData = {
@@ -429,7 +399,7 @@ export function useTranscription(
 
       return originalCleanedText
     },
-    [segmentsWithTime, cleanupId, segmentsToEditWords, isDemo, demoLocale]
+    [segmentsWithTime, cleanupId, segmentsToEditWords]
   )
 
   /**
@@ -458,13 +428,7 @@ export function useTranscription(
         return newMap
       })
 
-      // Demo entries: Save to localStorage
-      if (isDemo && demoLocale) {
-        saveDemoEdit(demoLocale, segmentId, originalCleanedText)
-        return
-      }
-
-      // Call API in non-mock mode - save ALL segments
+      // Save undo to API
       if (cleanupId) {
         try {
           const editedData: EditedData = {
@@ -476,7 +440,7 @@ export function useTranscription(
         }
       }
     },
-    [segmentsWithTime, cleanupId, segmentsToEditWords, isDemo, demoLocale]
+    [segmentsWithTime, cleanupId, segmentsToEditWords]
   )
 
   /**
@@ -520,13 +484,7 @@ export function useTranscription(
         return newMap
       })
 
-      // Demo entries: Save all edits to localStorage
-      if (isDemo && demoLocale) {
-        saveDemoEdits(demoLocale, updates)
-        return
-      }
-
-      // Call API in non-mock mode - send ALL segments
+      // Save all edits to API
       if (cleanupId) {
         try {
           const editedData: EditedData = {
@@ -538,7 +496,7 @@ export function useTranscription(
         }
       }
     },
-    [cleanupId, segmentsWithTime, segmentsToEditWords, isDemo, demoLocale]
+    [cleanupId, segmentsWithTime, segmentsToEditWords]
   )
 
   /**
@@ -755,11 +713,8 @@ export function useTranscription(
   /**
    * Load an existing entry by ID.
    *
-   * Handles both real entries and demo entries:
-   * - Real entries (UUID format): Fetched from /api/entries/{id}
-   * - Demo entries ("demo-{locale}"): Fetched from /api/demo/entry
-   *
-   * Both return the same EntryDetails format, allowing unified transformation.
+   * All entries (including demo entries) are fetched from /api/entries/{id}.
+   * Demo entries are identified by filename pattern (demo-*.mp3) for UI display only.
    */
   const loadEntry = useCallback(
     async (entryIdToLoad: string): Promise<void> => {
@@ -776,16 +731,10 @@ export function useTranscription(
       setSegments([])
       setRevertedSegments(new Map())
 
-      // Detect demo entry by ID pattern
-      const isDemoEntry = entryIdToLoad.startsWith("demo-")
-      const locale = isDemoEntry ? entryIdToLoad.replace("demo-", "") : null
-
       try {
-        // Fetch entry - same format for both real and demo
-        console.log("[loadEntry] Fetching entry details...", isDemoEntry ? "(demo)" : "(real)")
-        const { data: entryDetails } = isDemoEntry
-          ? await getDemoEntry(locale!)
-          : await getEntry(entryIdToLoad)
+        // Fetch entry from API
+        console.log("[loadEntry] Fetching entry details...")
+        const { data: entryDetails } = await getEntry(entryIdToLoad)
 
         if (!entryDetails) {
           throw new Error("Entry not found")
@@ -869,22 +818,6 @@ export function useTranscription(
           console.log("[loadEntry] Created fallback segment")
         }
 
-        // For demo entries: Merge localStorage edits with static data
-        // This ensures edits persist across page reloads
-        if (isDemoEntry && locale) {
-          const storedEdits = getDemoEdits(locale)
-          if (storedEdits && Object.keys(storedEdits.segments).length > 0) {
-            console.log("[loadEntry] Merging localStorage edits:", Object.keys(storedEdits.segments).length)
-            transformedSegments = transformedSegments.map((seg) => {
-              const edit = storedEdits.segments[seg.id]
-              if (edit) {
-                return { ...seg, cleanedText: edit.cleanedText }
-              }
-              return seg
-            })
-          }
-        }
-
         setSegments(transformedSegments)
 
         // Check for missing cleaned_segments when diarization detected multiple speakers
@@ -903,8 +836,6 @@ export function useTranscription(
         }
 
         setEntryId(entryIdToLoad)
-        // Set cleanupId even for demo entries - needed for analysis to work
-        // Edits still go to localStorage for demo entries (controlled by isDemo state)
         setCleanupId(cleanupData.id)
         // Set all analyses for client-side caching by profile
         const allAnalyses = entryDetails.analyses || []
@@ -916,10 +847,12 @@ export function useTranscription(
         // Set duration from API response (used as fallback when audio element can't determine duration)
         setDurationSeconds(entryDetails.duration_seconds || 0)
 
-        // Set demo state
-        setIsDemo(isDemoEntry)
-        setDemoLocale(locale)
-        setDemoAudioUrl(isDemoEntry && locale ? getDemoAudioUrl(locale) : null)
+        // Detect demo entry by filename pattern (demo-*.mp3)
+        const isDemoEntry = entryDetails.original_filename?.startsWith("demo-") &&
+                            entryDetails.original_filename?.endsWith(".mp3")
+        setIsDemo(isDemoEntry || false)
+        setDemoLocale(isDemoEntry ? entryDetails.original_filename?.replace("demo-", "").replace(".mp3", "") || null : null)
+        setDemoAudioUrl(null)  // Demo audio served via standard /api/entries/{id}/audio endpoint
 
         setStatus("complete")
         console.log("[loadEntry] Entry loaded successfully", isDemoEntry ? "(demo)" : "(real)")

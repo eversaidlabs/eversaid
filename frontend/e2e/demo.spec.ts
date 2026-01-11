@@ -4,8 +4,10 @@ import { setupDemoMocks, setupUploadModeMocks } from "./mocks/setup-mocks"
 test.describe("Demo Page", () => {
   test.beforeEach(async ({ page }) => {
     // Setup all API mocks before navigation
+    // Demo entries are now regular entries created by PostgreSQL trigger
+    // They're identified by filename pattern "demo-*.mp3"
     await setupDemoMocks(page)
-    // Use ?entry=demo-en to trigger demo loading via useTranscription.loadEntry
+    // Use ?entry=demo-en to load the demo entry via standard /api/entries/{id}
     await page.goto("/en/demo?entry=demo-en")
   })
 
@@ -102,7 +104,8 @@ test.describe("Demo Page", () => {
 
 test.describe("Demo Page - Upload Mode", () => {
   test("sidebar elements are visible in upload mode", async ({ page }) => {
-    // Setup mocks for upload mode (no demo entry available)
+    // Setup mocks for upload mode (empty entry history)
+    // Simulates fresh user before demo entry is created by trigger
     await setupUploadModeMocks(page)
     await page.goto("/en/demo")
 
