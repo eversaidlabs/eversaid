@@ -140,6 +140,34 @@ Key backend configuration (see `docker-compose.yml` for full list):
 - Shadows: shadow-sm
 - shadcn/ui with New York style, Zinc base
 
+## Demo Content System
+
+Demo entries are automatically created for anonymous users via a PostgreSQL trigger in Core API.
+
+### How it works
+1. PostgreSQL trigger fires on new anonymous user creation (`anon-*@anon.eversaid.example`)
+2. Trigger copies demo entries from `demo@system.eversaid.example` to the new user
+3. Demo entries identified by filename pattern `demo-*.mp3` (e.g., `demo-sl.mp3`, `demo-en.mp3`)
+4. Users see demo entries in their history and can trigger cleanup/analysis fresh
+
+### Seeding Demo Content
+```bash
+# In Core API repo (smart-transcribe-api/)
+# Requires ENCRYPTION_ENABLED=false on the API for unencrypted demo entries
+
+export DEMO_USER_PASSWORD="your-password"
+export API_URL="http://localhost:8000"
+
+python scripts/seed_demo_content.py                    # Seed demo content
+python scripts/seed_demo_content.py --check            # Check status
+python scripts/seed_demo_content.py --replace          # Replace existing demo
+python scripts/seed_demo_content.py --demo-audio /path # Custom audio directory
+```
+
+### E2E Test Mocks
+- `frontend/e2e/mocks/setup-mocks.ts` - Centralized mock data for Playwright tests
+- Demo entries mocked via standard `/api/entries/*` routes (no special demo endpoints)
+
 ## Known Limitations
 
 Workarounds for Core API limitations identified during development:

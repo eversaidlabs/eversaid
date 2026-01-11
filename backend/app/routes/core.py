@@ -338,6 +338,33 @@ async def get_entry_audio(
 # =============================================================================
 
 
+@router.post("/api/transcriptions/{transcription_id}/cleanup", status_code=202)
+async def trigger_cleanup(
+    transcription_id: str,
+    session: SessionModel = Depends(get_session),
+    core_api: CoreAPIClient = Depends(get_core_api),
+):
+    """Trigger LLM cleanup for a completed transcription.
+
+    Used for entries that have transcription but no cleanup (e.g., demo entries
+    created by PostgreSQL trigger).
+    """
+    response = await core_api.request(
+        "POST",
+        f"/api/v1/transcriptions/{transcription_id}/cleanup",
+        session.access_token,
+        json={},
+    )
+
+    if response.status_code >= 400:
+        raise CoreAPIError(
+            status_code=response.status_code,
+            detail=response.text,
+        )
+
+    return response.json()
+
+
 @router.get("/api/cleaned-entries/{cleanup_id}")
 async def get_cleaned_entry(
     cleanup_id: str,

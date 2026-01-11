@@ -312,6 +312,18 @@ export async function getCleanedEntry(
 }
 
 /**
+ * Trigger cleanup for a completed transcription.
+ * Used for entries that have transcription but no cleanup (e.g., demo entries).
+ */
+export async function triggerCleanup(
+  transcriptionId: string
+): Promise<{ data: { id: string; status: string }; rateLimitInfo: RateLimitInfo | null }> {
+  return request<{ id: string; status: string }>(`/api/transcriptions/${transcriptionId}/cleanup`, {
+    method: 'POST',
+  })
+}
+
+/**
  * Save user edits to cleaned text (words-first format)
  */
 export async function saveUserEdit(

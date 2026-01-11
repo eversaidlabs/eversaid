@@ -29,6 +29,8 @@ import {
   saveUserEdit,
   revertUserEdit,
   getRateLimits,
+  triggerCleanup,
+  triggerAnalysis,
 } from "./api"
 import { addEntryId, cacheEntry } from "@/lib/storage"
 
@@ -275,6 +277,10 @@ export function useTranscription(
 
   // Ref for cleanup on unmount
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Ref to store loadEntry function for circular dependency resolution
+  // pollCleanupStatus needs to call loadEntry, but loadEntry calls pollCleanupStatus
+  const loadEntryRef = useRef<((entryId: string) => Promise<void>) | null>(null)
 
   // Parse time strings into start/end times
   const segmentsWithTime = useMemo(
@@ -607,6 +613,54 @@ export function useTranscription(
   )
 
   /**
+   * Poll for cleanup status until complete or failed.
+   * Used for entries that have transcription but no cleanup (e.g., demo entries).
+   * After cleanup completes, triggers analysis with default profile.
+   */
+  const pollCleanupStatus = useCallback(
+    async (cleanupIdVal: string, entryIdToLoad: string): Promise<void> => {
+      const poll = async (): Promise<void> => {
+        try {
+          const { data: cleanedEntry } = await getCleanedEntry(cleanupIdVal)
+
+          if (cleanedEntry.status === "completed") {
+            console.log("[pollCleanupStatus] Cleanup complete, triggering analysis...")
+
+            // Trigger analysis with default profile
+            try {
+              const { data: analysisJob } = await triggerAnalysis(cleanupIdVal, "generic-summary")
+              setAnalysisId(analysisJob.id)
+              console.log("[pollCleanupStatus] Analysis triggered:", analysisJob.id)
+            } catch (analysisErr) {
+              console.warn("[pollCleanupStatus] Failed to trigger analysis:", analysisErr)
+              // Continue anyway - user can trigger manually
+            }
+
+            // Reload entry to get full data
+            // This will work because now cleanup exists, so loadEntry won't re-trigger
+            if (loadEntryRef.current) {
+              await loadEntryRef.current(entryIdToLoad)
+            }
+          } else if (cleanedEntry.status === "failed") {
+            setError(cleanedEntry.error_message || "Cleanup failed")
+            setStatus("error")
+          } else {
+            // Still processing, continue polling
+            pollingRef.current = setTimeout(poll, POLL_INTERVAL_MS)
+          }
+        } catch (err) {
+          console.error("[pollCleanupStatus] Error:", err)
+          setError("Failed to check cleanup status")
+          setStatus("error")
+        }
+      }
+
+      pollingRef.current = setTimeout(poll, POLL_INTERVAL_MS)
+    },
+    []
+  )
+
+  /**
    * Upload audio and start transcription
    */
   const uploadAudio = useCallback(
@@ -766,9 +820,24 @@ export function useTranscription(
         const cleanupData = entryDetails.cleanup
         console.log("[loadEntry] Cleanup data:", cleanupData)
         if (!cleanupData) {
-          console.log("[loadEntry] No cleanup data, setting status to cleaning")
+          console.log("[loadEntry] No cleanup data, triggering cleanup...")
           setEntryId(entryIdToLoad)
           setStatus("cleaning")
+
+          // Auto-trigger cleanup for entries with completed transcription (e.g., demo entries)
+          if (transcription.status === "completed" && transcription.id) {
+            try {
+              const { data: cleanupJob } = await triggerCleanup(transcription.id)
+              setCleanupId(cleanupJob.id)
+              console.log("[loadEntry] Cleanup triggered:", cleanupJob.id)
+              // Start polling for cleanup completion
+              pollCleanupStatus(cleanupJob.id, entryIdToLoad)
+            } catch (cleanupErr) {
+              console.error("[loadEntry] Failed to trigger cleanup:", cleanupErr)
+              setError("Failed to start cleanup process")
+              setStatus("error")
+            }
+          }
           return
         }
 
@@ -777,6 +846,8 @@ export function useTranscription(
           setEntryId(entryIdToLoad)
           setCleanupId(cleanupData.id)
           setStatus("cleaning")
+          // Start polling for cleanup completion
+          pollCleanupStatus(cleanupData.id, entryIdToLoad)
           return
         }
 
@@ -864,8 +935,13 @@ export function useTranscription(
         setStatus("error")
       }
     },
+    // Note: pollCleanupStatus is intentionally not in deps - it uses refs to avoid circular dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
+
+  // Update the ref so pollCleanupStatus can call loadEntry without circular dependency issues
+  loadEntryRef.current = loadEntry
 
   /**
    * Reset to initial state
