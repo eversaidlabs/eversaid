@@ -76,6 +76,11 @@ export type { Segment, SpellcheckError, HistoryEntry, SegmentEditState } from "@
 // =============================================================================
 
 /**
+ * Cleanup type options for LLM text cleanup
+ */
+export type CleanupType = 'verbatim' | 'corrected' | 'formal'
+
+/**
  * Options for uploading and transcribing audio
  */
 export interface TranscribeOptions {
@@ -84,6 +89,11 @@ export interface TranscribeOptions {
   speakerCount?: number
   enableAnalysis?: boolean
   analysisProfile?: string
+  // Cleanup options
+  cleanupType?: CleanupType
+  llmModel?: string        // LLM model for cleanup
+  // Analysis options (separate from cleanup)
+  analysisLlmModel?: string // LLM model for analysis (falls back to llmModel if not specified)
 }
 
 /**
@@ -456,4 +466,50 @@ export interface PaginationParams {
   limit?: number
   offset?: number
   entry_type?: string
+}
+
+// =============================================================================
+// Options Endpoint Types
+// =============================================================================
+
+/**
+ * Information about a single model
+ */
+export interface ModelInfo {
+  id: string
+  name: string
+  owned_by?: string
+  context_window?: number
+  size?: string
+  speed?: string
+  active?: boolean
+}
+
+/**
+ * Parameter configuration
+ */
+export interface ParameterConfig {
+  type: string
+  min?: number
+  max?: number
+  default?: number | string
+  description: string
+}
+
+/**
+ * Service options for transcription or LLM
+ */
+export interface ServiceOptions {
+  provider: string
+  available_providers: string[]
+  models: ModelInfo[]
+  parameters: Record<string, ParameterConfig>
+}
+
+/**
+ * Response from GET /api/options
+ */
+export interface OptionsResponse {
+  transcription: ServiceOptions
+  llm: ServiceOptions
 }

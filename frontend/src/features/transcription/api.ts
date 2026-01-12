@@ -5,10 +5,12 @@ import type {
   AnalysisProfile,
   AnalysisResult,
   CleanedEntry,
+  CleanupType,
   EditedData,
   EntryDetails,
   Feedback,
   FeedbackPayload,
+  OptionsResponse,
   PaginatedEntries,
   PaginationParams,
   RateLimitError,
@@ -219,6 +221,20 @@ export async function getRateLimits(): Promise<RateLimitInfo | null> {
 }
 
 // =============================================================================
+// Options Endpoint
+// =============================================================================
+
+/**
+ * Get available transcription and LLM options (models, parameters)
+ */
+export async function getOptions(): Promise<{
+  data: OptionsResponse
+  rateLimitInfo: RateLimitInfo | null
+}> {
+  return request<OptionsResponse>('/api/options')
+}
+
+// =============================================================================
 // Transcription Endpoints
 // =============================================================================
 
@@ -236,6 +252,17 @@ export async function uploadAndTranscribe(
   formData.append('speaker_count', String(options.speakerCount ?? 2))
   formData.append('enable_analysis', String(options.enableAnalysis ?? true))
   formData.append('analysis_profile', options.analysisProfile ?? 'generic-summary')
+
+  // Cleanup options
+  formData.append('cleanup_type', options.cleanupType ?? 'corrected')
+  if (options.llmModel) {
+    formData.append('llm_model', options.llmModel)
+  }
+
+  // Analysis options (separate from cleanup)
+  if (options.analysisLlmModel) {
+    formData.append('analysis_llm_model', options.analysisLlmModel)
+  }
 
   return request<TranscribeResponse>('/api/transcribe', {
     method: 'POST',
@@ -312,14 +339,32 @@ export async function getCleanedEntry(
 }
 
 /**
+ * Options for triggering cleanup
+ */
+export interface TriggerCleanupOptions {
+  cleanupType?: CleanupType
+  llmModel?: string
+}
+
+/**
  * Trigger cleanup for a completed transcription.
  * Used for entries that have transcription but no cleanup (e.g., demo entries).
  */
 export async function triggerCleanup(
-  transcriptionId: string
+  transcriptionId: string,
+  options: TriggerCleanupOptions = {}
 ): Promise<{ data: { id: string; status: string }; rateLimitInfo: RateLimitInfo | null }> {
+  const body: Record<string, string> = {}
+  if (options.cleanupType) {
+    body.cleanup_type = options.cleanupType
+  }
+  if (options.llmModel) {
+    body.llm_model = options.llmModel
+  }
+
   return request<{ id: string; status: string }>(`/api/transcriptions/${transcriptionId}/cleanup`, {
     method: 'POST',
+    body: Object.keys(body).length > 0 ? body : undefined,
   })
 }
 
@@ -370,15 +415,30 @@ export async function getAnalysisProfiles(): Promise<{
 }
 
 /**
+ * Options for triggering analysis
+ */
+export interface TriggerAnalysisOptions {
+  profileId?: string
+  llmModel?: string
+}
+
+/**
  * Trigger analysis on a cleaned entry
  */
 export async function triggerAnalysis(
   cleanupId: string,
-  profileId: string = 'generic-summary'
+  options: TriggerAnalysisOptions = {}
 ): Promise<{ data: AnalysisJob; rateLimitInfo: RateLimitInfo | null }> {
+  const body: Record<string, string> = {
+    profile_id: options.profileId ?? 'generic-summary',
+  }
+  if (options.llmModel) {
+    body.llm_model = options.llmModel
+  }
+
   return request<AnalysisJob>(`/api/cleaned-entries/${cleanupId}/analyze`, {
     method: 'POST',
-    body: { profile_id: profileId },
+    body,
   })
 }
 

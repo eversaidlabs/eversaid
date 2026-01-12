@@ -54,6 +54,8 @@ export interface UseTranscriptionReturn {
   uploadProgress: number
   /** Current entry ID */
   entryId: string | null
+  /** Current transcription ID (needed for re-cleanup) */
+  transcriptionId: string | null
   /** Current cleanup ID (needed for editing) */
   cleanupId: string | null
   /** Current analysis ID (for polling analysis results) */
@@ -257,6 +259,7 @@ export function useTranscription(
   const [error, setError] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [entryId, setEntryId] = useState<string | null>(null)
+  const [transcriptionId, setTranscriptionId] = useState<string | null>(null)
   const [cleanupId, setCleanupId] = useState<string | null>(null)
   const [analysisId, setAnalysisId] = useState<string | null>(null)
   const [analyses, setAnalyses] = useState<AnalysisResult[]>([])
@@ -628,7 +631,7 @@ export function useTranscription(
 
             // Trigger analysis with default profile
             try {
-              const { data: analysisJob } = await triggerAnalysis(cleanupIdVal, "generic-summary")
+              const { data: analysisJob } = await triggerAnalysis(cleanupIdVal, { profileId: "generic-summary" })
               setAnalysisId(analysisJob.id)
               console.log("[pollCleanupStatus] Analysis triggered:", analysisJob.id)
             } catch (analysisErr) {
@@ -808,6 +811,7 @@ export function useTranscription(
         if (transcription.status === "processing" || transcription.status === "pending") {
           console.log("[loadEntry] Transcription still processing:", transcription.status)
           setEntryId(entryIdToLoad)
+          setTranscriptionId(transcription.id || null)
           setStatus("transcribing")
           return
         }
@@ -822,6 +826,7 @@ export function useTranscription(
         if (!cleanupData) {
           console.log("[loadEntry] No cleanup data, triggering cleanup...")
           setEntryId(entryIdToLoad)
+          setTranscriptionId(transcription.id || null)
           setStatus("cleaning")
 
           // Auto-trigger cleanup for entries with completed transcription (e.g., demo entries)
@@ -844,6 +849,7 @@ export function useTranscription(
         if (cleanupData.status === "processing" || cleanupData.status === "pending") {
           console.log("[loadEntry] Cleanup still processing:", cleanupData.status)
           setEntryId(entryIdToLoad)
+          setTranscriptionId(transcription.id || null)
           setCleanupId(cleanupData.id)
           setStatus("cleaning")
           // Start polling for cleanup completion
@@ -907,6 +913,7 @@ export function useTranscription(
         }
 
         setEntryId(entryIdToLoad)
+        setTranscriptionId(transcription.id || null)
         setCleanupId(cleanupData.id)
         // Set all analyses for client-side caching by profile
         const allAnalyses = entryDetails.analyses || []
@@ -958,6 +965,7 @@ export function useTranscription(
     setError(null)
     setUploadProgress(0)
     setEntryId(null)
+    setTranscriptionId(null)
     setCleanupId(null)
     setAnalysisId(null)
     setAnalyses([])
@@ -999,6 +1007,7 @@ export function useTranscription(
     error,
     uploadProgress,
     entryId,
+    transcriptionId,
     cleanupId,
     analysisId,
     analyses,
