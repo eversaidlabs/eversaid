@@ -52,7 +52,9 @@ export interface UseAnalysisReturn {
   /** Select a profile - checks cache, then API, then triggers LLM if needed */
   selectProfile: (profileId: string) => Promise<void>
   /** Trigger analysis with a specific profile (always triggers new LLM call) */
-  analyze: (profileId?: string) => Promise<void>
+  analyze: (profileId?: string, llmModel?: string) => Promise<void>
+  /** Alias for analyze with clearer semantics */
+  runAnalysis: (profileId?: string, llmModel?: string) => Promise<void>
   /** Load profiles */
   loadProfiles: () => Promise<void>
   /** Populate cache from initial analyses (called when loading entry) */
@@ -223,8 +225,10 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
 
   /**
    * Trigger analysis (always triggers new LLM call)
+   * @param profileId - Profile ID to use (defaults to defaultProfileId)
+   * @param llmModel - Optional LLM model override
    */
-  const analyze = useCallback(async (profileId?: string) => {
+  const analyze = useCallback(async (profileId?: string, llmModel?: string) => {
     const profile = profileId ?? defaultProfileId
     if (!cleanupId) {
       setError('No cleanup ID available')
@@ -236,7 +240,10 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     setCurrentProfileId(profile)
 
     try {
-      const { data: job } = await triggerAnalysis(cleanupId, profile)
+      const { data: job } = await triggerAnalysis(cleanupId, {
+        profileId: profile,
+        llmModel,
+      })
       setAnalysisId(job.id)
 
       // Start polling for results
@@ -454,6 +461,7 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     currentProfileIntent,
     selectProfile,
     analyze,
+    runAnalysis: analyze,  // Alias for analyze with clearer semantics
     loadProfiles,
     populateCache,
     reset,

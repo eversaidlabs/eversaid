@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "@/components/motion"
 import { Maximize2 } from "lucide-react"
 import { RawSegmentList } from "./raw-segment-list"
 import { EditableSegmentList } from "./editable-segment-list"
-import { TranscriptHeader } from "./transcript-header"
+import { TranscriptHeader, type CleanupOptionsProps } from "./transcript-header"
 import type { Segment, TextMoveSelection, ActiveSuggestion, SpellcheckError } from "./types"
 
 interface TranscriptComparisonLayoutProps {
@@ -53,6 +53,8 @@ interface TranscriptComparisonLayoutProps {
   showRevertButton?: boolean
   showCopyButton?: boolean
   variant?: "demo" | "preview"
+  /** Cleanup options for AI CLEANED header (model/level selection) */
+  cleanupOptions?: CleanupOptionsProps
 }
 
 export function TranscriptComparisonLayout({
@@ -92,6 +94,7 @@ export function TranscriptComparisonLayout({
   showRevertButton = true,
   showCopyButton = true,
   variant = "demo",
+  cleanupOptions,
 }: TranscriptComparisonLayoutProps) {
   const t = useTranslations('demo.transcript')
   const rawScrollRef = useRef<HTMLDivElement>(null)
@@ -195,6 +198,7 @@ export function TranscriptComparisonLayout({
           showCopyButton={showCopyButton}
           showCloseButton={isExpanded && variant === "demo"}
           onClose={onClose}
+          cleanupOptions={cleanupOptions}
         />
       </div>
 

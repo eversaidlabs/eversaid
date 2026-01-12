@@ -103,7 +103,7 @@ export function useDemoCleanupTrigger(
             try {
               const { data: analysisJob } = await triggerAnalysis(
                 cleanupId,
-                "generic-summary"
+                { profileId: "generic-summary" }
               )
               console.log(
                 `[useDemoCleanupTrigger] Analysis triggered for entry ${entryId}:`,

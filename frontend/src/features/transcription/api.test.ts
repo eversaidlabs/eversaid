@@ -376,7 +376,7 @@ describe('API Client', () => {
         json: () => Promise.resolve({ id: 'analysis-123', status: 'processing' }),
       })
 
-      await triggerAnalysis('cleanup-123', 'action-items')
+      await triggerAnalysis('cleanup-123', { profileId: 'action-items' })
 
       expect(mockFetch).toHaveBeenCalledWith(
         `${API_BASE_URL}/api/cleaned-entries/cleanup-123/analyze`,

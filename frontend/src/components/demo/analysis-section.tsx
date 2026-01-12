@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { Check, ChevronDown, Loader2, AlertCircle, RefreshCw } from "lucide-react"
 import { useTranslations } from "next-intl"
+import type { ModelInfo } from "@/features/transcription/types"
 
 export interface AnalysisProfile {
   id: string
@@ -34,6 +36,10 @@ export interface AnalysisSectionProps {
   onSelectProfile?: (profileId: string) => void
   /** @deprecated Use onSelectProfile instead */
   onRerunAnalysis?: (profileId: string) => void
+  /** LLM model options */
+  availableModels?: ModelInfo[]
+  selectedModel?: string
+  onModelChange?: (modelId: string) => void
 }
 
 export function AnalysisSection({
@@ -50,10 +56,16 @@ export function AnalysisSection({
   onToggleAnalysisMenu,
   onSelectProfile,
   onRerunAnalysis,
+  availableModels = [],
+  selectedModel,
+  onModelChange,
 }: AnalysisSectionProps) {
+  const [showModelMenu, setShowModelMenu] = useState(false)
   // Use onSelectProfile if available, fall back to onRerunAnalysis for backward compatibility
   const handleProfileSelect = onSelectProfile || onRerunAnalysis
   const t = useTranslations('demo.analysis')
+
+  const selectedModelName = availableModels.find(m => m.id === selectedModel)?.name || selectedModel || "Default"
   const analysisLabels = {
     summary: t('types.summary'),
     "action-items": t('types.actionItems'),
@@ -140,66 +152,108 @@ export function AnalysisSection({
     <div className="bg-[linear-gradient(135deg,rgba(var(--color-primary),0.05)_0%,rgba(168,85,247,0.05)_100%)] border border-[rgba(var(--color-primary),0.2)] rounded-[20px] p-7">
       <div className="flex items-start gap-3 mb-5">
         <div className="text-[11px] font-bold text-primary uppercase tracking-[1px] pt-2.5">{t('label')}</div>
-        {/* Profile dropdown with intent below */}
-        <div>
+        {/* Profile dropdown */}
+        <div className="relative">
+          <button
+            onClick={onToggleAnalysisMenu}
+            disabled={isLoading}
+            className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-sm font-semibold transition-all ${
+              isLoading
+                ? "bg-muted text-muted-foreground cursor-not-allowed border-border"
+                : "bg-background hover:bg-secondary border-border hover:border-muted-foreground text-foreground"
+            }`}
+          >
+            <Check className="w-4 h-4 text-emerald-500" />
+            {currentProfileId ? t(`profiles.${currentProfileId}.label`) : analysisLabels[analysisType]}
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          </button>
+          {showAnalysisMenu && (
+            <div className="absolute left-0 top-full mt-2 bg-background border border-border rounded-lg overflow-hidden z-10 shadow-lg min-w-[220px]">
+              {handleProfileSelect && profiles.length > 0 ? (
+                profiles.map((profile) => (
+                  <button
+                    key={profile.id}
+                    onClick={() => {
+                      handleProfileSelect(profile.id)
+                      onToggleAnalysisMenu()
+                    }}
+                    className={`block w-full px-4 py-2.5 text-left transition-colors hover:bg-muted ${
+                      currentProfileId === profile.id ? 'bg-secondary' : ''
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-[13px] font-medium text-foreground">{t(`profiles.${profile.id}.label`)}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">{t(`profiles.${profile.id}.intent`)}</div>
+                      </div>
+                      {currentProfileId === profile.id && (
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                    </div>
+                  </button>
+                ))
+              ) : (
+                (["summary", "action-items", "sentiment"] as const).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      onAnalysisTypeChange(type)
+                      onToggleAnalysisMenu()
+                    }}
+                    className={`block w-full px-4 py-2.5 text-[13px] font-medium text-left transition-colors ${
+                      analysisType === type
+                        ? "bg-secondary text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {analysisLabels[type]}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Model dropdown */}
+        {availableModels.length > 0 && onModelChange && (
           <div className="relative">
             <button
-              onClick={onToggleAnalysisMenu}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-background hover:bg-secondary border border-border hover:border-muted-foreground rounded-lg text-sm font-semibold text-foreground hover:text-foreground transition-all"
+              onClick={() => !isLoading && setShowModelMenu(!showModelMenu)}
+              disabled={isLoading}
+              className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-[12px] font-medium transition-all ${
+                isLoading
+                  ? "bg-muted text-muted-foreground cursor-not-allowed border-border"
+                  : "bg-background hover:bg-secondary border-border hover:border-muted-foreground text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <Check className="w-4 h-4 text-emerald-500" />
-              {currentProfileId ? t(`profiles.${currentProfileId}.label`) : analysisLabels[analysisType]}
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              <span className="max-w-[100px] truncate">{selectedModelName}</span>
+              <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
             </button>
-            {showAnalysisMenu && (
-              <div className="absolute left-0 top-full mt-2 bg-background border border-border rounded-lg overflow-hidden z-10 shadow-lg min-w-[220px]">
-                {handleProfileSelect && profiles.length > 0 ? (
-                  // Show profile options with current profile highlighted
-                  profiles.map((profile) => (
-                    <button
-                      key={profile.id}
-                      onClick={() => {
-                        handleProfileSelect(profile.id)
-                        onToggleAnalysisMenu()
-                      }}
-                      className={`block w-full px-4 py-2.5 text-left transition-colors hover:bg-muted ${
-                        currentProfileId === profile.id ? 'bg-secondary' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-[13px] font-medium text-foreground">{t(`profiles.${profile.id}.label`)}</div>
-                          <div className="text-[11px] text-muted-foreground mt-0.5">{t(`profiles.${profile.id}.intent`)}</div>
-                        </div>
-                        {currentProfileId === profile.id && (
-                          <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                        )}
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  // Fallback to original type selector
-                  (["summary", "action-items", "sentiment"] as const).map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        onAnalysisTypeChange(type)
-                        onToggleAnalysisMenu()
-                      }}
-                      className={`block w-full px-4 py-2.5 text-[13px] font-medium text-left transition-colors ${
-                        analysisType === type
-                          ? "bg-secondary text-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {analysisLabels[type]}
-                    </button>
-                  ))
-                )}
+            {showModelMenu && (
+              <div className="absolute left-0 top-full mt-2 bg-background border border-border rounded-lg overflow-hidden z-10 shadow-lg min-w-[180px]">
+                {availableModels.map((model) => (
+                  <button
+                    key={model.id}
+                    onClick={() => {
+                      onModelChange(model.id)
+                      setShowModelMenu(false)
+                    }}
+                    className={`block w-full px-4 py-2.5 text-left text-[12px] transition-colors hover:bg-muted ${
+                      selectedModel === model.id ? "bg-secondary font-medium" : ""
+                    }`}
+                  >
+                    {model.name}
+                  </button>
+                ))}
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Loading spinner */}
+        {isLoading && (
+          <Loader2 className="w-4 h-4 animate-spin text-primary mt-2" />
+        )}
       </div>
 
       <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">{t('summary')}</h4>

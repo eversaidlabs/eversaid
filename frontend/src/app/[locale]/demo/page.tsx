@@ -28,14 +28,14 @@ import { RecordingModal } from "@/components/demo/recording-modal"
 import { useTranscription } from "@/features/transcription/useTranscription"
 import { useVoiceRecorder } from "@/features/transcription/useVoiceRecorder"
 import { useRateLimits } from "@/features/transcription/useRateLimits"
-import { ApiError } from "@/features/transcription/types"
+import { ApiError, type ModelInfo, type CleanupType } from "@/features/transcription/types"
 import { useFeedback } from "@/features/transcription/useFeedback"
 import { useEntries } from "@/features/transcription/useEntries"
 import { useAudioPlayer } from "@/features/transcription/useAudioPlayer"
 import { useWordHighlight } from "@/features/transcription/useWordHighlight"
 import { useAnalysis } from "@/features/transcription/useAnalysis"
 import { useProcessingStages } from "@/features/transcription/useProcessingStages"
-import { getEntryAudioUrl } from "@/features/transcription/api"
+import { getEntryAudioUrl, getOptions, triggerCleanup } from "@/features/transcription/api"
 import { useDemoCleanupTrigger } from "@/features/transcription/useDemoCleanupTrigger"
 import { ProcessingStages } from "@/components/demo/processing-stages"
 
@@ -97,6 +97,13 @@ function DemoPageContent() {
   // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedSpeakerCount, setSelectedSpeakerCount] = useState(2)
+
+  // LLM Model Selection State
+  const [availableLlmModels, setAvailableLlmModels] = useState<ModelInfo[]>([])
+  const [selectedCleanupModel, setSelectedCleanupModel] = useState<string>('')
+  const [selectedCleanupLevel, setSelectedCleanupLevel] = useState<CleanupType>('corrected')
+  const [selectedAnalysisModel, setSelectedAnalysisModel] = useState<string>('')
+  const [isCleanupReprocessing, setIsCleanupReprocessing] = useState(false)
 
   // Editing State
   const [editingSegmentId, setEditingSegmentId] = useState<string | null>(null)
@@ -520,6 +527,59 @@ function DemoPageContent() {
     // No segment switching - real data comes from API
   }, [])
 
+  // Handler for cleanup model change - auto-triggers re-cleanup
+  const handleCleanupModelChange = useCallback(async (modelId: string) => {
+    setSelectedCleanupModel(modelId)
+    if (!transcription.transcriptionId) return
+
+    setIsCleanupReprocessing(true)
+    try {
+      await triggerCleanup(transcription.transcriptionId, {
+        cleanupType: selectedCleanupLevel,
+        llmModel: modelId,
+      })
+      // Reload entry to get new cleanup results
+      if (transcription.entryId) {
+        await transcription.loadEntry(transcription.entryId)
+      }
+    } catch (err) {
+      console.error('Re-cleanup failed:', err)
+    } finally {
+      setIsCleanupReprocessing(false)
+    }
+  }, [transcription.transcriptionId, transcription.entryId, transcription.loadEntry, selectedCleanupLevel])
+
+  // Handler for cleanup level change - auto-triggers re-cleanup
+  const handleCleanupLevelChange = useCallback(async (level: CleanupType) => {
+    setSelectedCleanupLevel(level)
+    if (!transcription.transcriptionId) return
+
+    setIsCleanupReprocessing(true)
+    try {
+      await triggerCleanup(transcription.transcriptionId, {
+        cleanupType: level,
+        llmModel: selectedCleanupModel || undefined,
+      })
+      // Reload entry to get new cleanup results
+      if (transcription.entryId) {
+        await transcription.loadEntry(transcription.entryId)
+      }
+    } catch (err) {
+      console.error('Re-cleanup failed:', err)
+    } finally {
+      setIsCleanupReprocessing(false)
+    }
+  }, [transcription.transcriptionId, transcription.entryId, transcription.loadEntry, selectedCleanupModel])
+
+  // Handler for analysis model change - auto-triggers re-analysis
+  const handleAnalysisModelChange = useCallback(async (modelId: string) => {
+    setSelectedAnalysisModel(modelId)
+    if (!transcription.cleanupId || !analysisHook.currentProfileId) return
+
+    // Trigger new analysis with selected model
+    await analysisHook.runAnalysis(analysisHook.currentProfileId, modelId)
+  }, [transcription.cleanupId, analysisHook])
+
   const handleTranscribeClick = useCallback(async () => {
     if (!selectedFile) return
     try {
@@ -554,11 +614,22 @@ function DemoPageContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // After session is ready, fetch entries and analysis profiles
+  // After session is ready, fetch entries, analysis profiles, and LLM options
   useEffect(() => {
     if (sessionReady) {
       entriesHook.refresh()
       analysisHook.loadProfiles()
+      // Fetch available LLM models
+      getOptions().then(({ data }) => {
+        setAvailableLlmModels(data.llm.models)
+        // Set default model if available
+        if (data.llm.models.length > 0) {
+          setSelectedCleanupModel(data.llm.models[0].id)
+          setSelectedAnalysisModel(data.llm.models[0].id)
+        }
+      }).catch((err) => {
+        console.error('Failed to fetch options:', err)
+      })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionReady])
@@ -893,6 +964,14 @@ function DemoPageContent() {
                 isExpanded={isEditorExpanded}
                 onExpandToggle={() => setIsEditorExpanded(true)}
                 onClose={() => setIsEditorExpanded(false)}
+                cleanupOptions={availableLlmModels.length > 0 ? {
+                  models: availableLlmModels,
+                  selectedModel: selectedCleanupModel,
+                  selectedLevel: selectedCleanupLevel,
+                  isProcessing: isCleanupReprocessing,
+                  onModelChange: handleCleanupModelChange,
+                  onLevelChange: handleCleanupLevelChange,
+                } : undefined}
               />
             </ExpandableCard>
 
@@ -925,6 +1004,9 @@ function DemoPageContent() {
                       onAnalysisTypeChange={setAnalysisType}
                       onToggleAnalysisMenu={handleToggleAnalysisMenu}
                       onSelectProfile={handleSelectProfile}
+                      availableModels={availableLlmModels}
+                      selectedModel={selectedAnalysisModel}
+                      onModelChange={handleAnalysisModelChange}
                     />
                   </div>
 

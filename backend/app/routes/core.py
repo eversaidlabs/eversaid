@@ -16,8 +16,40 @@ router = APIRouter(tags=["core"])
 
 
 # =============================================================================
+# Options Endpoint (Public)
+# =============================================================================
+
+
+@router.get("/api/options")
+async def get_options(
+    core_api: CoreAPIClient = Depends(get_core_api),
+):
+    """Get available transcription and LLM options from Core API.
+
+    Returns available models, providers, and parameters.
+    No authentication required - public endpoint.
+    """
+    response = await core_api.client.get("/api/v1/options")
+
+    if response.status_code >= 400:
+        raise CoreAPIError(
+            status_code=response.status_code,
+            detail=response.text,
+        )
+
+    return response.json()
+
+
+# =============================================================================
 # Request Models
 # =============================================================================
+
+
+class CleanupRequest(BaseModel):
+    """Request body for triggering cleanup."""
+
+    cleanup_type: Optional[str] = "corrected"  # verbatim, corrected, formal
+    llm_model: Optional[str] = None
 
 
 class UserEditRequest(BaseModel):
@@ -30,6 +62,7 @@ class AnalyzeRequest(BaseModel):
     """Request body for triggering analysis."""
 
     profile_id: str = "generic-summary"
+    llm_model: Optional[str] = None  # Optional LLM model override
 
 
 # =============================================================================
@@ -46,6 +79,11 @@ async def transcribe(
     speaker_count: int = Form(2),
     enable_analysis: bool = Form(True),
     analysis_profile: str = Form("generic-summary"),
+    # Cleanup options
+    cleanup_type: str = Form("corrected"),  # verbatim, corrected, formal
+    llm_model: Optional[str] = Form(None),  # LLM model for cleanup
+    # Analysis options (separate from cleanup)
+    analysis_llm_model: Optional[str] = Form(None),  # LLM model for analysis
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
     _rate_limit: RateLimitResult = Depends(require_rate_limit("transcribe")),
@@ -63,11 +101,19 @@ async def transcribe(
         "language": language,
         "enable_diarization": str(enable_diarization).lower(),
         "speaker_count": str(speaker_count),
+        "cleanup_type": cleanup_type,
     }
+
+    # Add optional LLM model for cleanup
+    if llm_model:
+        data["llm_model"] = llm_model
 
     # Only include analysis params if analysis is enabled
     if enable_analysis:
         data["analysis_profile"] = analysis_profile
+        # Add optional LLM model for analysis (separate from cleanup)
+        if analysis_llm_model:
+            data["analysis_llm_model"] = analysis_llm_model
 
     response = await core_api.client.post(
         "/api/v1/upload-transcribe-cleanup",
@@ -341,6 +387,7 @@ async def get_entry_audio(
 @router.post("/api/transcriptions/{transcription_id}/cleanup", status_code=202)
 async def trigger_cleanup(
     transcription_id: str,
+    body: CleanupRequest = Body(default=CleanupRequest()),
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
 ):
@@ -349,11 +396,16 @@ async def trigger_cleanup(
     Used for entries that have transcription but no cleanup (e.g., demo entries
     created by PostgreSQL trigger).
     """
+    # Build request body with optional params
+    request_body = {"type": body.cleanup_type}
+    if body.llm_model:
+        request_body["llm_model"] = body.llm_model
+
     response = await core_api.request(
         "POST",
         f"/api/v1/transcriptions/{transcription_id}/cleanup",
         session.access_token,
-        json={},
+        json=request_body,
     )
 
     if response.status_code >= 400:
@@ -469,11 +521,12 @@ async def trigger_analysis(
     _rate_limit: RateLimitResult = Depends(require_rate_limit("analyze")),
 ):
     """Trigger analysis on a cleaned entry."""
+    # Exclude None values to avoid sending nulls to Core API
     response = await core_api.request(
         "POST",
         f"/api/v1/cleaned-entries/{cleanup_id}/analyze",
         session.access_token,
-        json=body.model_dump(),
+        json=body.model_dump(exclude_none=True),
     )
 
     if response.status_code >= 400:
