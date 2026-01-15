@@ -82,10 +82,11 @@ src/
 
 ### Key Libraries
 - diff (JsDiff): Segment-level diff computation
-- react-virtuoso: Virtualized scrolling for transcript segments
+- react-virtuoso: Virtualized scrolling for long transcript segment lists
 - Motion.js: Animations
 - Sonner: Toast notifications
 - react-hook-form + Zod: Form validation
+- recharts: Data visualization for analysis results
 
 ## Backend Architecture
 
