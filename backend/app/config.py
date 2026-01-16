@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_LLM_IP_DAY: int = 200
     RATE_LIMIT_LLM_GLOBAL_DAY: int = 10000
 
+    # Audio validation
+    MAX_AUDIO_DURATION_SECONDS: int = 180  # 3 minutes
+
     DATABASE_URL: str = "sqlite:///./data/demo.db"
 
     # CORS origins (comma-separated list)

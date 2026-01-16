@@ -29,6 +29,8 @@ def test_settings() -> Settings:
         RATE_LIMIT_LLM_DAY=200,
         RATE_LIMIT_LLM_IP_DAY=200,
         RATE_LIMIT_LLM_GLOBAL_DAY=10000,
+        # Audio validation
+        MAX_AUDIO_DURATION_SECONDS=180,
         DATABASE_URL="sqlite://",  # in-memory
     )
 

@@ -2,15 +2,17 @@
 
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, Form, Query, Request, UploadFile
+from fastapi import APIRouter, Body, Depends, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from starlette.background import BackgroundTask
 
+from app.config import Settings, get_settings
 from app.core_client import CoreAPIClient, CoreAPIError, get_core_api
 from app.models import Session as SessionModel
 from app.rate_limit import RateLimitResult, require_rate_limit
 from app.session import get_session
+from app.utils.audio import AudioValidationError, validate_audio_duration
 
 router = APIRouter(tags=["core"])
 
@@ -85,6 +87,7 @@ async def transcribe(
     llm_model: Optional[str] = Form(None),  # LLM model for cleanup
     # Analysis options (separate from cleanup)
     analysis_llm_model: Optional[str] = Form(None),  # LLM model for analysis
+    settings: Settings = Depends(get_settings),
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
     _rate_limit: RateLimitResult = Depends(require_rate_limit("transcribe")),
@@ -95,6 +98,16 @@ async def transcribe(
     Poll /api/transcriptions/{id} for status.
     """
     file_content = await file.read()
+
+    # Validate audio duration before consuming rate limit
+    try:
+        validate_audio_duration(
+            file_content=file_content,
+            filename=file.filename or "unknown",
+            max_duration_seconds=settings.MAX_AUDIO_DURATION_SECONDS,
+        )
+    except AudioValidationError as e:
+        raise HTTPException(status_code=422, detail=e.message)
 
     # Build form data for Core API
     files = {"file": (file.filename, file_content, file.content_type)}
