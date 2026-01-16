@@ -68,7 +68,6 @@ export function DemoNavigation({ currentPage = "demo", onWaitlistClick }: DemoNa
       </div>
 
       <div className="flex items-center gap-4">
-        <LanguageSwitcher />
         {onWaitlistClick && (
           <button
             onClick={onWaitlistClick}
@@ -77,6 +76,7 @@ export function DemoNavigation({ currentPage = "demo", onWaitlistClick }: DemoNa
             {t('getEarlyAccess')}
           </button>
         )}
+        <LanguageSwitcher />
       </div>
     </nav>
   )
