@@ -184,10 +184,37 @@ def setup_logging(settings: "Settings") -> None:
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    # Log startup config
-    logger.info(
-        f"Logging configured: level={log_level}, format={log_format}",
-    )
+    # Print startup config in banner format
+    print("=" * 60)
+    print("LOGGING")
+    print("=" * 60)
+    print(f"LOG_LEVEL:            {log_level}")
+    print(f"LOG_FORMAT:           {log_format}")
+    print("=" * 60)
+    print("CORE API")
+    print("=" * 60)
+    print(f"CORE_API_URL:         {settings.CORE_API_URL}")
+    print("=" * 60)
+    print("SESSION")
+    print("=" * 60)
+    print(f"DURATION_DAYS:        {settings.SESSION_DURATION_DAYS}")
+    print("=" * 60)
+    print("RATE LIMITS (TRANSCRIPTION)")
+    print("=" * 60)
+    print(f"SESSION/DAY:          {settings.RATE_LIMIT_DAY}")
+    print(f"IP/DAY:               {settings.RATE_LIMIT_IP_DAY}")
+    print(f"GLOBAL/DAY:           {settings.RATE_LIMIT_GLOBAL_DAY}")
+    print("=" * 60)
+    print("RATE LIMITS (LLM)")
+    print("=" * 60)
+    print(f"SESSION/DAY:          {settings.RATE_LIMIT_LLM_DAY}")
+    print(f"IP/DAY:               {settings.RATE_LIMIT_LLM_IP_DAY}")
+    print(f"GLOBAL/DAY:           {settings.RATE_LIMIT_LLM_GLOBAL_DAY}")
+    print("=" * 60)
+    print("CORS")
+    print("=" * 60)
+    print(f"ORIGINS:              {settings.CORS_ORIGINS}")
+    print("=" * 60)
 
 
 def get_logger(name: str) -> StructuredLogger:
