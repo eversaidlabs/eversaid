@@ -43,7 +43,6 @@ describe('useWaitlist', () => {
       expect(result.current.isSubmitting).toBe(false)
       expect(result.current.isSubmitted).toBe(false)
       expect(result.current.error).toBeNull()
-      expect(result.current.referralCode).toBeNull()
     })
   })
 
@@ -83,7 +82,6 @@ describe('useWaitlist', () => {
       expect(result.current.isSubmitting).toBe(false)
       expect(result.current.isSubmitted).toBe(false)
       expect(result.current.error).toBeNull()
-      expect(result.current.referralCode).toBeNull()
     })
   })
 
@@ -188,7 +186,6 @@ describe('useWaitlist', () => {
         source_page: undefined,
       })
       expect(result.current.isSubmitted).toBe(true)
-      expect(result.current.referralCode).not.toBeNull()
       expect(result.current.error).toBeNull()
       expect(toast.success).toHaveBeenCalledWith("You're on the waitlist!")
     })
@@ -281,7 +278,6 @@ describe('useWaitlist', () => {
       // Should be treated as success
       expect(result.current.isSubmitted).toBe(true)
       expect(result.current.error).toBeNull()
-      expect(result.current.referralCode).toBeNull() // No new code for existing users
       expect(toast.success).toHaveBeenCalledWith("You're already on the waitlist!")
     })
 

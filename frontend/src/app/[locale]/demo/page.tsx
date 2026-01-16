@@ -230,7 +230,6 @@ function DemoPageContent() {
   const [useCase, setUseCase] = useState("")
   const [volume, setVolume] = useState("")
   const [source, setSource] = useState("")
-  const [copied, setCopied] = useState(false)
 
   // Hook for API integration
   const waitlist = useWaitlist({
@@ -965,16 +964,8 @@ function DemoPageContent() {
     setUseCase("")
     setVolume("")
     setSource("")
-    setCopied(false)
     waitlist.reset()
   }, [waitlist])
-
-  const handleWaitlistCopyLink = useCallback(() => {
-    const referralLink = `https://eversaid.ai?ref=${waitlist.referralCode}`
-    navigator.clipboard.writeText(referralLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [waitlist.referralCode])
 
   // Rate limit modal handlers
   const handleRateLimitModalClose = useCallback(() => {
@@ -1360,8 +1351,6 @@ function DemoPageContent() {
         volume={volume}
         source={source}
         isSubmitting={waitlist.isSubmitting}
-        referralCode={waitlist.referralCode || ""}
-        copied={copied}
         onEmailChange={waitlist.setEmail}
         onUseCaseChange={setUseCase}
         onVolumeChange={setVolume}
@@ -1369,7 +1358,6 @@ function DemoPageContent() {
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
         onOpenForm={() => setWaitlistState("form")}
-        onCopyLink={handleWaitlistCopyLink}
         t={t}
       />
 

@@ -157,8 +157,7 @@
       "subtitle": "No sign-up required. See the difference for yourself.",
       "cta": "Try Free Demo",
       "waitlistPrompt": "Want full encryption and higher limits?",
-      "waitlistCta": "Join the waitlist →",
-      "referralNote": "Refer friends, earn free credits when they sign up."
+      "waitlistCta": "Join the waitlist →"
     },
     "footer": {
       "copyright": "© {year} EverSaid",
@@ -407,13 +406,7 @@
     },
     "success": {
       "title": "You're on the list!",
-      "subtitle": "We'll email you when your spot is ready. Move up by referring friends.",
-      "earnCredits": "Earn Free Credits",
-      "shareLink": "Share your referral link",
-      "referralExplain": "For every friend who signs up, you both move up the waitlist and get free transcription hours.",
-      "copyLink": "Copy Link",
-      "copied": "Copied!",
-      "creditsNote": "Credits are awarded when referrals complete signup. Track your progress via email.",
+      "subtitle": "We'll email you when your spot is ready.",
       "done": "Done"
     }
   },

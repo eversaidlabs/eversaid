@@ -1,6 +1,6 @@
 "use client"
 
-import { X, UserPlus, Check, Copy, Upload, Info, AlertCircle } from "lucide-react"
+import { X, UserPlus, Check, AlertCircle } from "lucide-react"
 
 export interface WaitlistFlowProps {
   state: "hidden" | "toast" | "form" | "success"
@@ -10,8 +10,6 @@ export interface WaitlistFlowProps {
   volume?: string
   source?: string
   isSubmitting?: boolean
-  copied?: boolean
-  referralCode: string
   onEmailChange: (email: string) => void
   onUseCaseChange?: (useCase: string) => void
   onVolumeChange?: (volume: string) => void
@@ -19,8 +17,6 @@ export interface WaitlistFlowProps {
   onSubmit: () => void
   onClose: () => void
   onOpenForm?: () => void
-  onCopyCode?: () => void
-  onCopyLink?: () => void
   t: (key: string) => string
 }
 
@@ -32,8 +28,6 @@ export function WaitlistFlow({
   volume,
   source,
   isSubmitting,
-  copied,
-  referralCode,
   onEmailChange,
   onUseCaseChange,
   onVolumeChange,
@@ -41,12 +35,8 @@ export function WaitlistFlow({
   onSubmit,
   onClose,
   onOpenForm: _onOpenForm,
-  onCopyCode: _onCopyCode,
-  onCopyLink,
   t,
 }: WaitlistFlowProps) {
-  const referralLink = `https://eversaid.ai?ref=${referralCode}`
-
   const isExtendedUsage = type === "extended_usage"
   const isApiAccess = type === "api_access"
 
@@ -263,50 +253,10 @@ export function WaitlistFlow({
                 {t("waitlist.success.subtitle")}
               </p>
 
-              {/* Referral Section */}
-              <div className="bg-[linear-gradient(135deg,rgba(56,189,248,0.08)_0%,rgba(168,85,247,0.08)_100%)] border border-[rgba(56,189,248,0.2)] rounded-2xl p-5">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-9 h-9 bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] rounded-[10px] flex items-center justify-center">
-                    <Upload className="w-[18px] h-[18px] stroke-white" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className="text-[15px] font-bold text-[#0F172A]">{t("waitlist.success.earnCredits")}</div>
-                    <div className="text-[13px] text-[#64748B]">{t("waitlist.success.shareLink")}</div>
-                  </div>
-                </div>
-
-                <p className="text-[13px] text-[#64748B] mb-4 leading-relaxed">
-                  {t("waitlist.success.referralExplain")}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={referralLink}
-                    onFocus={(e) => e.target.select()}
-                    className="flex-1 px-3.5 py-2.5 bg-white border border-[#E2E8F0] rounded-[10px] text-[13px] font-mono text-[#0F172A] min-w-0"
-                  />
-                  <button
-                    onClick={() => onCopyLink?.()}
-                    aria-label="Copy referral link to clipboard"
-                    className="px-4 py-2.5 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-[10px] text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap"
-                  >
-                    <Copy className="w-4 h-4" />
-                    {copied ? t("waitlist.success.copied") : t("waitlist.success.copyLink")}
-                  </button>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-[rgba(56,189,248,0.2)] flex items-start gap-2 text-[12px] text-[#64748B]">
-                  <Info className="w-4 h-4 stroke-[#A855F7] flex-shrink-0 mt-0.5" />
-                  <span>{t("waitlist.success.creditsNote")}</span>
-                </div>
-              </div>
-
               {/* Done Button */}
               <button
                 onClick={onClose}
-                className="w-full mt-5 py-3.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[15px] font-semibold rounded-xl transition-all"
+                className="w-full py-3.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[15px] font-semibold rounded-xl transition-all"
               >
                 {t("waitlist.success.done")}
               </button>

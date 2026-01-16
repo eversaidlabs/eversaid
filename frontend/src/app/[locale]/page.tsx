@@ -38,7 +38,6 @@ export default function HomePage() {
   const [useCase, setUseCase] = useState("")
   const [volume, setVolume] = useState("")
   const [source, setSource] = useState("")
-  const [copied, setCopied] = useState(false)
 
   // Hook for API integration
   const waitlist = useWaitlist({
@@ -62,16 +61,8 @@ export default function HomePage() {
     setUseCase("")
     setVolume("")
     setSource("")
-    setCopied(false)
     waitlist.reset()
   }, [waitlist])
-
-  const handleWaitlistCopyLink = useCallback(() => {
-    const referralLink = `https://eversaid.ai?ref=${waitlist.referralCode}`
-    navigator.clipboard.writeText(referralLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [waitlist.referralCode])
 
   return (
     <main className="h-screen overflow-y-scroll snap-y snap-proximity">
@@ -656,9 +647,6 @@ export default function HomePage() {
               >
                 {t('finalCta.waitlistCta')}
               </button>
-              <span className="block mt-2 text-[13px] text-white/40">
-                {t('finalCta.referralNote')}
-              </span>
             </div>
           </MotionDiv>
         </MotionDiv>
@@ -704,15 +692,12 @@ export default function HomePage() {
         volume={volume}
         source={source}
         isSubmitting={waitlist.isSubmitting}
-        referralCode={waitlist.referralCode || ""}
-        copied={copied}
         onEmailChange={waitlist.setEmail}
         onUseCaseChange={setUseCase}
         onVolumeChange={setVolume}
         onSourceChange={setSource}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
-        onCopyLink={handleWaitlistCopyLink}
         t={tRoot}
       />
     </main>

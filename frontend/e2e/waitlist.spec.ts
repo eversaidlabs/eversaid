@@ -86,38 +86,6 @@ test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
     // Success state
     await expect(page.getByText("You're on the list!")).toBeVisible()
     await expect(page.getByText(/We'll email you when your spot is ready/)).toBeVisible()
-
-    // Referral section visible - use exact match for header
-    await expect(page.getByText("Earn Free Credits", { exact: true })).toBeVisible()
-    await expect(page.getByText(/Share your referral link/)).toBeVisible()
-
-    // Referral link input contains the generated link
-    const referralInput = page.getByRole("dialog").locator("input[readonly]")
-    await expect(referralInput).toBeVisible()
-    const referralValue = await referralInput.inputValue()
-    expect(referralValue).toContain("https://eversaid.ai?ref=")
-  })
-
-  test("can copy referral link after signup", async ({ page }) => {
-    // Open waitlist modal
-    await page.getByText("Ready to try smarter transcription?").scrollIntoViewIfNeeded()
-    await page.locator("button").filter({ hasText: "Join the waitlist →" }).click()
-
-    // Fill required fields and submit
-    await page.getByLabel(/Email Address/).fill("copy-test@example.com")
-    await page.getByLabel(/How will you use EverSaid/i).fill("Testing copy functionality")
-    await page.getByRole("dialog").getByRole("button", { name: "Join Waitlist" }).click()
-
-    // Wait for success state
-    await expect(page.getByText("You're on the list!")).toBeVisible()
-
-    // Click copy link button - button has aria-label for accessibility
-    const copyButton = page.getByRole("dialog").getByRole("button", { name: /Copy referral link/i })
-    await expect(copyButton).toBeVisible()
-    await copyButton.click()
-
-    // Should show "Copied!" feedback
-    await expect(page.getByText("Copied!")).toBeVisible()
   })
 
   test("can close modal with Done button after signup", async ({ page }) => {
@@ -199,9 +167,6 @@ test.describe("Waitlist Flow - API Access", () => {
 
     // Success state
     await expect(page.getByText("You're on the list!")).toBeVisible()
-
-    // Referral section
-    await expect(page.getByText("Earn Free Credits")).toBeVisible()
   })
 
   test("API waitlist shows volume dropdown", async ({ page }) => {

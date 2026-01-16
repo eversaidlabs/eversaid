@@ -34,8 +34,6 @@ export interface UseWaitlistReturn {
   isSubmitted: boolean
   /** Error message if submission failed */
   error: string | null
-  /** Referral code received on success */
-  referralCode: string | null
   /** Set email address */
   setEmail: (email: string) => void
   /** Submit the waitlist form with form data from component */
@@ -54,7 +52,6 @@ export interface UseWaitlistReturn {
  *   setEmail,
  *   isSubmitting,
  *   isSubmitted,
- *   referralCode,
  *   submit,
  * } = useWaitlist({ waitlistType: 'extended_usage' })
  *
@@ -76,7 +73,6 @@ export function useWaitlist(options: UseWaitlistOptions): UseWaitlistReturn {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [referralCode, setReferralCode] = useState<string | null>(null)
 
   const submit = useCallback(async (formData: WaitlistFormData) => {
     // Validate email (required)
@@ -97,17 +93,12 @@ export function useWaitlist(options: UseWaitlistOptions): UseWaitlistReturn {
         source_page: sourcePage,
       })
 
-      // Generate a referral code on success
-      // In production this would come from the API response
-      const generatedCode = `REF${Math.random().toString(36).substring(2, 8).toUpperCase()}`
-      setReferralCode(generatedCode)
       setIsSubmitted(true)
       toast.success("You're on the waitlist!")
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 409) {
           // Duplicate email - treat as success (already registered)
-          setReferralCode(null) // No new referral code for existing users
           setIsSubmitted(true)
           toast.success('You\'re already on the waitlist!')
         } else if (err.status === 429) {
@@ -138,7 +129,6 @@ export function useWaitlist(options: UseWaitlistOptions): UseWaitlistReturn {
     setIsSubmitting(false)
     setIsSubmitted(false)
     setError(null)
-    setReferralCode(null)
   }, [])
 
   return {
@@ -146,7 +136,6 @@ export function useWaitlist(options: UseWaitlistOptions): UseWaitlistReturn {
     isSubmitting,
     isSubmitted,
     error,
-    referralCode,
     setEmail,
     submit,
     reset,

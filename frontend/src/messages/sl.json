@@ -157,8 +157,7 @@
       "subtitle": "Brez registracije. Poglejte razliko sami.",
       "cta": "Preizkusite brezplačni demo",
       "waitlistPrompt": "Želite polno šifriranje in višje omejitve?",
-      "waitlistCta": "Pridružite se čakalni listi →",
-      "referralNote": "Povabite prijatelje, prislužite si brezplačne kredite ob njihovi registraciji."
+      "waitlistCta": "Pridružite se čakalni listi →"
     },
     "footer": {
       "copyright": "© {year} EverSaid",
@@ -407,13 +406,7 @@
     },
     "success": {
       "title": "Na seznamu ste!",
-      "subtitle": "Poslali vam bomo e-pošto, ko bo vaše mesto pripravljeno. Napredujte s povabilom prijateljev.",
-      "earnCredits": "Prislužite si brezplačne kredite",
-      "shareLink": "Delite svojo povabilno povezavo",
-      "referralExplain": "Za vsakega prijatelja, ki se registrira, oba napredujeta na čakalni listi in dobita brezplačne ure transkripcije.",
-      "copyLink": "Kopiraj povezavo",
-      "copied": "Kopirano!",
-      "creditsNote": "Krediti so podeljeni, ko povabljenci zaključijo registracijo. Spremljajte napredek po e-pošti.",
+      "subtitle": "Poslali vam bomo e-pošto, ko bo vaše mesto pripravljeno.",
       "done": "Končano"
     }
   },
