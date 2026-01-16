@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { useTranslations } from 'next-intl'
+import { Bell } from "lucide-react"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 
 export interface DemoNavigationProps {
@@ -71,9 +72,11 @@ export function DemoNavigation({ currentPage = "demo", onWaitlistClick }: DemoNa
         {onWaitlistClick && (
           <button
             onClick={onWaitlistClick}
-            className="px-4 py-2 border border-transparent [background:linear-gradient(135deg,#0F172A,#1E3A5F)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] hover:[background:linear-gradient(135deg,#1a2744,#264a6e)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] text-white rounded-lg text-[13px] font-semibold transition-all"
+            className="p-2.5 md:px-4 md:py-2 border border-transparent [background:linear-gradient(135deg,#0F172A,#1E3A5F)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] hover:[background:linear-gradient(135deg,#1a2744,#264a6e)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] text-white rounded-lg text-[13px] font-semibold transition-all"
+            aria-label={t('getEarlyAccess')}
           >
-            {t('getEarlyAccess')}
+            <Bell className="w-5 h-5 md:hidden" />
+            <span className="hidden md:inline">{t('getEarlyAccess')}</span>
           </button>
         )}
         <LanguageSwitcher />
