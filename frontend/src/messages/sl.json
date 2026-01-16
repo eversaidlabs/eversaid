@@ -349,7 +349,7 @@
       },
       "estimated": "Predvideno"
     },
-    "warning": "Demo način: izogibajte se zaupnim ali klientskim posnetkom. Zvok usmerjen preko ZDA za obdelavo (samo demo). Shranjeno v EU. Izbrišite kadarkoli.",
+    "warning": "Demo način: izogibajte se zaupnim posnetkom. Podatki so usmerjeni v ZDA za obdelavo (<bold>samo za demo</bold>). Shranjeno v EU. Podatke lahko izbrišete kadarkoli.",
     "delete": {
       "button": "Izbriši vnos",
       "confirmTitle": "Izbrisati ta vnos?",

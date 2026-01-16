@@ -349,7 +349,7 @@
       },
       "estimated": "Estimated"
     },
-    "warning": "Demo mode: avoid confidential or client recordings. Audio routed through US for processing (demo only). Stored in EU. Delete anytime.",
+    "warning": "Demo mode: avoid confidential or client recordings. Audio routed through US for processing (<bold>demo only</bold>). Stored in EU. Delete anytime.",
     "delete": {
       "button": "Delete entry",
       "confirmTitle": "Delete this entry?",
