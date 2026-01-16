@@ -95,7 +95,7 @@ test.describe("Waitlist Flow - Regular (Extended Usage)", () => {
     const referralInput = page.getByRole("dialog").locator("input[readonly]")
     await expect(referralInput).toBeVisible()
     const referralValue = await referralInput.inputValue()
-    expect(referralValue).toContain("https://eversaid.com?ref=")
+    expect(referralValue).toContain("https://eversaid.ai?ref=")
   })
 
   test("can copy referral link after signup", async ({ page }) => {

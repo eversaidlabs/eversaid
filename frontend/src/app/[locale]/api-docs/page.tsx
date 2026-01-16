@@ -77,7 +77,7 @@ export default function ApiDocsPage() {
   }, [waitlist])
 
   const handleWaitlistCopyLink = useCallback(() => {
-    const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
+    const referralLink = `https://eversaid.ai?ref=${waitlist.referralCode}`
     navigator.clipboard.writeText(referralLink)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -364,7 +364,7 @@ export default function ApiDocsPage() {
               <div className="text-[12px] font-semibold text-[#64748B] mb-2">Base URL</div>
               <div className="flex items-center gap-3">
                 <code className="flex-1 px-4 py-3 bg-[#0F172A] rounded-lg font-mono text-sm text-[#38BDF8]">
-                  https://api.eversaid.com/api/v1
+                  https://api.eversaid.ai/api/v1
                 </code>
               </div>
             </div>
@@ -517,7 +517,7 @@ export default function ApiDocsPage() {
               <div className="p-5 overflow-x-auto">
                 {activeTab.register === "curl" && (
                   <pre className="font-mono text-[13px] leading-relaxed text-[#E2E8F0]">
-                    <span className="text-[#F472B6]">curl</span> -X POST https://api.eversaid.com/api/v1/auth/register{" "}
+                    <span className="text-[#F472B6]">curl</span> -X POST https://api.eversaid.ai/api/v1/auth/register{" "}
                     {"\n"}
                     -H <span className="text-[#86EFAC]">"Content-Type: application/json"</span> {"\n"}
                     -d{" "}
@@ -530,7 +530,7 @@ export default function ApiDocsPage() {
                   <pre className="font-mono text-[13px] leading-relaxed text-[#E2E8F0]">
                     <span className="text-[#F472B6]">import</span> requests{"\n\n"}
                     response = requests.post(
-                    <span className="text-[#86EFAC]">"https://api.eversaid.com/api/v1/auth/register"</span>, {"{"}
+                    <span className="text-[#86EFAC]">"https://api.eversaid.ai/api/v1/auth/register"</span>, {"{"}
                     {"\n"}
                     <span className="text-[#86EFAC]">"email"</span>:{" "}
                     <span className="text-[#86EFAC]">"user@example.com"</span>,{"\n"}
@@ -546,7 +546,7 @@ export default function ApiDocsPage() {
                   <pre className="font-mono text-[13px] leading-relaxed text-[#E2E8F0]">
                     <span className="text-[#F472B6]">const</span> response ={" "}
                     <span className="text-[#F472B6]">await</span> fetch(
-                    <span className="text-[#86EFAC]">'https://api.eversaid.com/api/v1/auth/register'</span>, {"{"}
+                    <span className="text-[#86EFAC]">'https://api.eversaid.ai/api/v1/auth/register'</span>, {"{"}
                     {"\n"}
                     method: <span className="text-[#86EFAC]">'POST'</span>,{"\n"}
                     headers: {"{"} <span className="text-[#86EFAC]">'Content-Type'</span>:{" "}
@@ -985,7 +985,7 @@ export default function ApiDocsPage() {
                   <pre className="text-[13px] leading-relaxed">
                     <code className="text-[#E2E8F0]">
                       <span className="text-[#38BDF8]">curl</span> -X POST
-                      https://api.eversaid.com/api/v1/upload-transcribe-cleanup \{"\n"}
+                      https://api.eversaid.ai/api/v1/upload-transcribe-cleanup \{"\n"}
                       {"  "}-H <span className="text-[#4ADE80]">"Authorization: Bearer YOUR_ACCESS_TOKEN"</span> \{"\n"}
                       {"  "}-F <span className="text-[#4ADE80]">"file=@meeting-recording.mp3"</span> \{"\n"}
                       {"  "}-F <span className="text-[#4ADE80]">"entry_type=meeting"</span> \{"\n"}
@@ -1006,7 +1006,7 @@ export default function ApiDocsPage() {
                       {"    "}response = requests.post({"\n"}
                       {"        "}
                       <span className="text-[#4ADE80]">
-                        "https://api.eversaid.com/api/v1/upload-transcribe-cleanup"
+                        "https://api.eversaid.ai/api/v1/upload-transcribe-cleanup"
                       </span>
                       ,{"\n"}
                       {"        "}headers={"{"}
@@ -1061,7 +1061,7 @@ export default function ApiDocsPage() {
                       <span className="text-[#C084FC]">const</span> response ={" "}
                       <span className="text-[#C084FC]">await</span> <span className="text-[#38BDF8]">fetch</span>(
                       <span className="text-[#4ADE80]">
-                        'https://api.eversaid.com/api/v1/upload-transcribe-cleanup'
+                        'https://api.eversaid.ai/api/v1/upload-transcribe-cleanup'
                       </span>
                       , {"{"}
                       {"\n"}
@@ -1722,7 +1722,7 @@ export default function ApiDocsPage() {
                     {`import requests
 import time
 
-BASE_URL = "https://api.eversaid.com/api/v1"
+BASE_URL = "https://api.eversaid.ai/api/v1"
 
 # 1. Login
 auth = requests.post(f"{BASE_URL}/auth/login", json={
@@ -1770,7 +1770,7 @@ print("Actions:", analysis["result"]["action_items"])}`}
                   </pre>
                 ) : (
                   <pre className="text-[13px] font-mono text-white">
-                    {`const BASE_URL = 'https://api.eversaid.com/api/v1';
+                    {`const BASE_URL = 'https://api.eversaid.ai/api/v1';
 
 // 1. Login
 const auth = await fetch(\`\${BASE_URL}/auth/login\`, {

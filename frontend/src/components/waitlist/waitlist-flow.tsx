@@ -45,7 +45,7 @@ export function WaitlistFlow({
   onCopyLink,
   t,
 }: WaitlistFlowProps) {
-  const referralLink = `https://eversaid.com?ref=${referralCode}`
+  const referralLink = `https://eversaid.ai?ref=${referralCode}`
 
   const isExtendedUsage = type === "extended_usage"
   const isApiAccess = type === "api_access"

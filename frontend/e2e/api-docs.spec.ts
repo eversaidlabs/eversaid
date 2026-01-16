@@ -57,7 +57,7 @@ test.describe("API Docs Page", () => {
     expect(count).toBeGreaterThan(0)
 
     // Verify Base URL code block is visible (use exact text to avoid ambiguity)
-    await expect(page.getByText("https://api.eversaid.com/api/v1", { exact: true })).toBeVisible()
+    await expect(page.getByText("https://api.eversaid.ai/api/v1", { exact: true })).toBeVisible()
   })
 
   test("displays API endpoint documentation", async ({ page }) => {

@@ -970,7 +970,7 @@ function DemoPageContent() {
   }, [waitlist])
 
   const handleWaitlistCopyLink = useCallback(() => {
-    const referralLink = `https://eversaid.com?ref=${waitlist.referralCode}`
+    const referralLink = `https://eversaid.ai?ref=${waitlist.referralCode}`
     navigator.clipboard.writeText(referralLink)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
