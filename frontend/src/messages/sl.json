@@ -287,6 +287,10 @@
       "retention": "Transkripcije se hranijo 7 dni",
       "sampleBadge": "Primer"
     },
+    "attribution": {
+      "label": "Vzorčni posnetek iz",
+      "watchButton": "Poglej"
+    },
     "rateLimit": {
       "remaining": "{count, plural, one {# preostane} two {# preostaneta} few {# preostanejo} other {# preostane}}"
     },
