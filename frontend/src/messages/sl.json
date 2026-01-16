@@ -175,7 +175,7 @@
       "uploadSubtitle": "Naložite zvočno datoteko za začetek transkripcije",
       "dropTitle": "Spustite zvočno datoteko tukaj",
       "clickToUpload": "Kliknite za nalaganje ali povlecite in spustite",
-      "formats": "MP3, WAV, M4A, FLAC · Največ 50MB · Največ 5 minut",
+      "formats": "MP3, WAV, M4A, FLAC · Največ 50MB · Največ 3 minute",
       "browse": "Prebrskaj datoteke",
       "record": "Posnemi zvok",
       "speakerCount": "Število govorcev",

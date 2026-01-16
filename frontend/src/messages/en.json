@@ -175,7 +175,7 @@
       "uploadSubtitle": "Upload an audio file to begin transcription",
       "dropTitle": "Drop your audio file here",
       "clickToUpload": "Click to upload or drag and drop",
-      "formats": "MP3, WAV, M4A, FLAC · Max 50MB · Max 5 minutes",
+      "formats": "MP3, WAV, M4A, FLAC · Max 50MB · Max 3 minutes",
       "browse": "Browse Files",
       "record": "Record Audio",
       "speakerCount": "Number of speakers",
