@@ -6,9 +6,10 @@ import { LanguageSwitcher } from "@/components/ui/language-switcher"
 
 export interface DemoNavigationProps {
   currentPage?: "demo" | "features" | "api"
+  onWaitlistClick?: () => void
 }
 
-export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
+export function DemoNavigation({ currentPage = "demo", onWaitlistClick }: DemoNavigationProps) {
   const t = useTranslations('navigation')
 
   return (
@@ -68,6 +69,14 @@ export function DemoNavigation({ currentPage = "demo" }: DemoNavigationProps) {
 
       <div className="flex items-center gap-4">
         <LanguageSwitcher />
+        {onWaitlistClick && (
+          <button
+            onClick={onWaitlistClick}
+            className="px-4 py-2 border border-transparent [background:linear-gradient(135deg,#0F172A,#1E3A5F)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] hover:[background:linear-gradient(135deg,#1a2744,#264a6e)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] text-white rounded-lg text-[13px] font-semibold transition-all"
+          >
+            {t('getEarlyAccess')}
+          </button>
+        )}
       </div>
     </nav>
   )

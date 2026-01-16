@@ -22,7 +22,8 @@
     "useCases": "Use Cases",
     "howItWorks": "How It Works",
     "apiDocs": "API Docs",
-    "joinWaitlist": "Join Waitlist"
+    "joinWaitlist": "Join Waitlist",
+    "getEarlyAccess": "Get Early Access"
   },
   "landing": {
     "hero": {

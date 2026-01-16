@@ -22,7 +22,8 @@
     "useCases": "Primeri uporabe",
     "howItWorks": "Kako deluje",
     "apiDocs": "API dokumentacija",
-    "joinWaitlist": "Pridruži se čakalni listi"
+    "joinWaitlist": "Pridruži se čakalni listi",
+    "getEarlyAccess": "Pridruži se čakalni listi"
   },
   "landing": {
     "hero": {

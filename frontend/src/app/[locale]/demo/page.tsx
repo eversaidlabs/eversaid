@@ -1113,7 +1113,7 @@ function DemoPageContent() {
         autoCollapseMs={5000}
         onDismiss={transcription.dismissCleanedSegmentsWarning}
       />
-      <DemoNavigation />
+      <DemoNavigation onWaitlistClick={() => setWaitlistState("form")} />
 
       {!isLoadingEntry && (
         <div className="max-w-[1400px] mx-auto px-6 pt-8 pb-4">
