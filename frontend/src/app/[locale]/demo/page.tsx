@@ -265,7 +265,7 @@ function DemoPageContent() {
       // Demo entries detected by "demo-*" ID pattern
       transcription.loadEntry(entryId)
     }
-  }, [sessionReady, searchParams, transcription.entryId, transcription.status, transcription.loadEntry])
+  }, [sessionReady, searchParams, transcription])
 
   // Update URL when entry is loaded (creates browser history entry)
   // Use a ref to track if we've already pushed this entry to avoid loops
@@ -633,7 +633,7 @@ function DemoPageContent() {
       setSelectedCleanupModel(previousModel)
       toast.error(t('demo.cleanup.modelChangeFailed'))
     }
-  }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, t])
+  }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, isEditorExpanded, t])
 
   // Handler for cleanup level change - uses cached cleanup if available
   const handleCleanupLevelChange = useCallback(async (level: CleanupType) => {

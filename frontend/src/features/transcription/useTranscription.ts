@@ -776,6 +776,7 @@ export function useTranscription(
         throw err
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadCleanupData is stable (defined later in file)
     [transcriptionId, entryId, error]
   )
 
