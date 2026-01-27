@@ -69,52 +69,7 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-16 py-5 bg-transparent">
         <Link href="/" className="flex items-center gap-2.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 44" className="h-[39px] w-auto">
-            <g transform="translate(0, 0)">
-              {/* Messy lines (left) */}
-              <line
-                x1="0"
-                y1="10"
-                x2="20"
-                y2="12"
-                stroke="rgba(255,255,255,0.4)"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              <line
-                x1="0"
-                y1="22"
-                x2="18"
-                y2="20"
-                stroke="rgba(255,255,255,0.4)"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              <line
-                x1="0"
-                y1="32"
-                x2="22"
-                y2="34"
-                stroke="rgba(255,255,255,0.4)"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              {/* Arrow */}
-              <path d="M25 22 L38 22" stroke="#38BDF8" strokeWidth="3" strokeLinecap="round" />
-              <path
-                d="M34 16 L40 22 L34 28"
-                stroke="#38BDF8"
-                strokeWidth="3"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* Clean lines (right) */}
-              <line x1="45" y1="10" x2="65" y2="10" stroke="white" strokeWidth="3" strokeLinecap="round" />
-              <line x1="45" y1="22" x2="65" y2="22" stroke="white" strokeWidth="3" strokeLinecap="round" />
-              <line x1="45" y1="34" x2="65" y2="34" stroke="white" strokeWidth="3" strokeLinecap="round" />
-            </g>
-          </svg>
+          <img src="/logo.svg" alt="EverSaid logo" className="h-[39px] w-auto" />
           <span className="font-[family-name:var(--font-comfortaa)] font-bold text-[27px] text-white tracking-[0.01em]">
             EverSaid
           </span>
