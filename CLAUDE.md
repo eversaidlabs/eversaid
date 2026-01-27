@@ -81,12 +81,17 @@ src/
 - Slovenian plurals: 1=one, 2=two, 3-4=few, 5+=other
 
 ### Key Libraries
-- diff (JsDiff): Segment-level diff computation
+- Custom diff utilities (`src/lib/diff-utils.ts`): LCS-based segment-level diff computation
 - react-virtuoso: Virtualized scrolling for long transcript segment lists
 - Motion.js: Animations
 - Sonner: Toast notifications
 - react-hook-form + Zod: Form validation
 - recharts: Data visualization for analysis results
+
+### Testing
+- **Frontend unit tests**: `src/**/*.test.{ts,tsx}` (co-located with source, setup in `src/tests/setup.ts`)
+- **Frontend E2E tests**: `e2e/*.spec.ts` (Playwright, mocks in `e2e/mocks/setup-mocks.ts`)
+- **Backend tests**: `tests/*.py` (pytest)
 
 ## Backend Architecture
 

@@ -104,7 +104,7 @@ Demo project showcasing the backbone transcription API with:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Core API Backend (asr-llm-core, private)                   │
+│  Core API Backend (smart-transcribe-api, private)           │
 │  - Pluggable ASR providers (default: ElevenLabs Scribe v1)  │
 │  - LLM cleanup (Groq)                                       │
 │  - AI analysis with profiles                                │
@@ -135,7 +135,7 @@ This demo project must be created as a NEW, SEPARATE repository - not inside the
 | Component | Name | Visibility |
 |-----------|------|------------|
 | Frontend + Wrapper Backend | `eversaid` | Private |
-| Core Backend API | `asr-llm-core` | Private |
+| Core Backend API | `smart-transcribe-api` | Private |
 
 **User Action Required:**
 1. Create a new GitHub repository `eversaid`
@@ -632,11 +632,17 @@ These are the endpoints the demo frontend uses. They proxy to the Core API.
 | `GET /api/transcriptions/{id}` | GET | Poll transcription status |
 | `GET /api/entries` | GET | List all session entries |
 | `GET /api/entries/{id}` | GET | Entry details with transcription + cleanup + analysis |
+| `GET /api/entries/{id}/cleaned` | GET | List all cleanup records for an entry |
 | `DELETE /api/entries/{id}` | DELETE | Delete an entry |
-| `PUT /api/entries/{id}/segments/{segment_id}` | PUT | Edit or revert cleaned segment |
+| `GET /api/cleaned-entries/{id}` | GET | Get cleanup details with segments |
+| `PUT /api/cleaned-entries/{id}/user-edit` | PUT | Save user edits to cleaned text |
+| `DELETE /api/cleaned-entries/{id}/user-edit` | DELETE | Revert to AI-generated text |
+| `POST /api/cleaned-entries/{id}/analyze` | POST | Trigger analysis on cleaned entry |
+| `GET /api/analyses/{id}` | GET | Get analysis status and results |
 | `POST /api/entries/{id}/feedback` | POST | Submit quality feedback |
 | `GET /api/entries/{id}/feedback` | GET | Get existing feedback for entry |
 | `POST /api/waitlist` | POST | Submit waitlist signup |
+| `GET /api/rate-limits` | GET | Get current rate limit status |
 | `GET /health` | GET | Health check |
 
 **Note:** These are NOT the Core API endpoints. The wrapper backend handles session
@@ -847,7 +853,9 @@ This is the **most important feature** of the product. Must be done to perfectio
 **4. Segment Editing (Cleaned Text Only)**
 - Each cleaned segment has [↩] revert button
 - Click to revert cleaned segment to raw text
-- Uses Core API `PUT /api/v1/cleaned-entries/{id}` with `user_edited_text`
+- Uses wrapper API:
+  - `PUT /api/cleaned-entries/{id}/user-edit` with `edited_data` (words-first format)
+  - `DELETE /api/cleaned-entries/{id}/user-edit` to revert to AI-generated text
 - Raw transcription is ALWAYS immutable
 
 **5. Slovenian Spellcheck**
@@ -1525,25 +1533,25 @@ frontend/
 
 - [x] **Spellcheck feature**: Core API supports Slovenian spellcheck on cleaned entries
 - [x] **Analysis feature**: See `docs/analysis-feature.md` for technical specification
-- [ ] **Diarization**: Ensure Core API returns segment-aligned cleanup for diff comparison
-- [ ] **Segment editing**: Core API `PUT /api/v1/cleaned-entries/{id}` with `user_edited_text`
+- [x] **Diarization**: Core API returns segment-aligned cleanup for diff comparison
+- [x] **Segment editing**: `PUT/DELETE /api/cleaned-entries/{id}/user-edit` with words-first format
 
 ---
 
 ## Key Files to Reference
 
 **Design Reference:**
-- `docs/eversaid//landing-page-mockup-v3.html` - Current v3 landing page design
+- `docs/eversaid/landing-page-mockup-v3.html` - Current v3 landing page design
 
-**Core API (asr-llm-core) files for integration:**
+**Core API (smart-transcribe-api) files for integration:**
 - `app/routes/upload.py` - upload-transcribe-cleanup endpoint
 - `app/routes/auth.py` - JWT auth flow
-- `app/routes/cleaned_entries.py` - cleanup with spellcheck
+- `app/routes/cleanup.py` - cleanup with spellcheck
 - `app/services/provider_registry.py` - provider configuration
-- `docs/analysis-feature.md` - analysis profiles and endpoints
-- `docs/api-reference.md` - complete API documentation
+- `config/analysis_profiles.toml` - analysis profiles configuration
 
 ---
 
 ## Changelog
+- 2026-01-17: Updated API endpoints to match implementation (user-edit endpoints, words-first format), fixed Core API repo name (smart-transcribe-api), marked TODOs as completed
 - 2025-12-29: v3 design update - lowercase "eversaid" branding, dark gradient hero, blue/purple color scheme, Step 4 "Analyze", referral system, footer badge
