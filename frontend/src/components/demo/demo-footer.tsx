@@ -21,7 +21,7 @@ export function DemoFooter() {
           hello@eversaid.ai
         </a>
         <a
-          href="https://github.com/gaspermerela/eversaid"
+          href="https://github.com/eversaidlabs/eversaid"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-[13px] text-white/60 hover:text-white transition-colors"

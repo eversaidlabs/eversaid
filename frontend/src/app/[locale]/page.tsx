@@ -626,7 +626,7 @@ export default function HomePage() {
             hello@eversaid.ai
           </a>
           <a
-            href="https://github.com/gaspermerela/eversaid"
+            href="https://github.com/eversaidlabs/eversaid"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#0F172A] font-medium transition-colors"

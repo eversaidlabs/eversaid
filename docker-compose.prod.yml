@@ -7,12 +7,12 @@
 # This is a complete, self-contained configuration for production.
 #
 # Ports: 3000 (frontend), 8001 (backend)
-# Images: ghcr.io/gaspermerela/eversaid-*:latest (or version tag)
+# Images: ghcr.io/eversaidlabs/eversaid-*:latest (or version tag)
 # =============================================================================
 
 services:
   frontend:
-    image: ghcr.io/gaspermerela/eversaid-frontend:${IMAGE_TAG:-latest}
+    image: ghcr.io/eversaidlabs/eversaid-frontend:${IMAGE_TAG:-latest}
     container_name: eversaid-frontend-prod
     ports:
       - "3000:3000"
@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: ghcr.io/gaspermerela/eversaid-backend:${IMAGE_TAG:-latest}
+    image: ghcr.io/eversaidlabs/eversaid-backend:${IMAGE_TAG:-latest}
     container_name: eversaid-backend-prod
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001
     ports:
