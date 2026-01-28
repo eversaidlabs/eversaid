@@ -16,6 +16,16 @@ services:
     container_name: eversaid-frontend-prod
     ports:
       - "3000:3000"
+    environment:
+      # Runtime config read by Server Components (not baked in at build time)
+      # Demo content attribution
+      DEMO_SL_DISPLAY_NAME: ${DEMO_SL_DISPLAY_NAME:-}
+      DEMO_SL_SOURCE_URL: ${DEMO_SL_SOURCE_URL:-}
+      DEMO_EN_DISPLAY_NAME: ${DEMO_EN_DISPLAY_NAME:-}
+      DEMO_EN_SOURCE_URL: ${DEMO_EN_SOURCE_URL:-}
+      # Feature flags
+      ENABLE_MODEL_SELECTION: ${ENABLE_MODEL_SELECTION:-false}
+      ENABLE_TEMPERATURE_SELECTION: ${ENABLE_TEMPERATURE_SELECTION:-false}
     depends_on:
       - backend
     restart: unless-stopped

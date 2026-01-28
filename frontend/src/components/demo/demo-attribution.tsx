@@ -4,40 +4,37 @@ import { ExternalLink } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { motion } from "@/components/motion"
 import { useState } from "react"
-
-/**
- * Source attribution configuration for demo entries.
- * Maps demo filename patterns to their source info from env vars.
- *
- * - displayName: The episode/content title (e.g., "Svet s superinteligenco - AIDEA Podkast")
- * - url: Link to the original source (YouTube episode URL)
- */
-const DEMO_SOURCES: Record<string, { url?: string; displayName?: string }> = {
-  "demo-sl": {
-    url: process.env.NEXT_PUBLIC_DEMO_SL_SOURCE_URL,
-    displayName: process.env.NEXT_PUBLIC_DEMO_SL_DISPLAY_NAME,
-  },
-  "demo-en": {
-    url: process.env.NEXT_PUBLIC_DEMO_EN_SOURCE_URL,
-    displayName: process.env.NEXT_PUBLIC_DEMO_EN_DISPLAY_NAME,
-  },
-}
+import type { DemoConfig } from "@/lib/app-config"
 
 /**
  * Get source attribution for a demo entry by filename.
  * Returns null if no attribution is configured or entry is not a demo.
  */
-function getDemoSource(filename?: string): { url: string; displayName: string } | null {
+function getDemoSource(
+  filename: string | undefined,
+  demoConfig: DemoConfig
+): { url: string; displayName: string } | null {
   if (!filename) return null
 
   // Match demo-sl.mp3, demo-en.mp3, etc.
   const match = filename.match(/^(demo-\w+)\./)
   if (!match) return null
 
-  const source = DEMO_SOURCES[match[1]]
+  const demoSources: Record<string, { url: string; displayName: string }> = {
+    "demo-sl": {
+      url: demoConfig.sl.sourceUrl,
+      displayName: demoConfig.sl.displayName,
+    },
+    "demo-en": {
+      url: demoConfig.en.sourceUrl,
+      displayName: demoConfig.en.displayName,
+    },
+  }
+
+  const source = demoSources[match[1]]
   if (!source?.url || !source?.displayName) return null
 
-  return { url: source.url, displayName: source.displayName }
+  return source
 }
 
 export interface DemoAttributionProps {
@@ -45,20 +42,22 @@ export interface DemoAttributionProps {
   filename?: string
   /** Whether the entry is a demo entry */
   isDemo?: boolean
+  /** Demo configuration from server */
+  demoConfig: DemoConfig
 }
 
 /**
  * Attribution card for demo content sources (e.g., YouTube podcasts).
  * Only renders when the entry is a demo with configured source attribution.
  */
-export function DemoAttribution({ filename, isDemo }: DemoAttributionProps) {
+export function DemoAttribution({ filename, isDemo, demoConfig }: DemoAttributionProps) {
   const t = useTranslations("demo.attribution")
   const [isHovered, setIsHovered] = useState(false)
 
   // Only show for demo entries with configured source
   if (!isDemo) return null
 
-  const source = getDemoSource(filename)
+  const source = getDemoSource(filename, demoConfig)
   if (!source) return null
 
   return (

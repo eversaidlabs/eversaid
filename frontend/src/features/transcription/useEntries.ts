@@ -4,28 +4,13 @@
  * Fetches entries from the API and transforms them to UI format.
  */
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { getEntries, deleteEntry as deleteEntryApi } from "./api"
 import type { EntrySummary } from "./types"
 import type { HistoryEntry } from "@/components/demo/types"
 import { formatDuration } from "@/lib/time-utils"
-
-/**
- * Mapping of demo filenames to display names from environment variables.
- * Falls back to original filename if env var is not set.
- */
-const DEMO_DISPLAY_NAMES: Record<string, string | undefined> = {
-  "demo-sl.mp3": process.env.NEXT_PUBLIC_DEMO_SL_DISPLAY_NAME,
-  "demo-en.mp3": process.env.NEXT_PUBLIC_DEMO_EN_DISPLAY_NAME,
-}
-
-/**
- * Get display name for a filename, using friendly name for demo entries if configured.
- */
-function getDisplayName(filename: string): string {
-  return DEMO_DISPLAY_NAMES[filename] || filename
-}
+import { getDemoDisplayName, type DemoConfig } from "@/lib/app-config"
 
 export interface UseEntriesOptions {
   /** Auto-fetch on mount (default: true) */
@@ -41,6 +26,8 @@ export interface UseEntriesOptions {
    * @see useDemoEntry for fetching demo data
    */
   demoEntry?: HistoryEntry | null
+  /** Demo configuration for display names (from server) */
+  demoConfig?: DemoConfig
 }
 
 export interface UseEntriesReturn {
@@ -84,10 +71,14 @@ function deriveEntryStatus(
 /**
  * Transform API EntrySummary to UI HistoryEntry
  */
-function transformEntry(entry: EntrySummary): HistoryEntry {
+function transformEntry(entry: EntrySummary, demoConfig?: DemoConfig): HistoryEntry {
+  const displayName = demoConfig
+    ? getDemoDisplayName(entry.original_filename, demoConfig)
+    : entry.original_filename
+
   return {
     id: entry.id,
-    filename: getDisplayName(entry.original_filename),
+    filename: displayName,
     duration: formatDuration(entry.duration_seconds),
     status: deriveEntryStatus(
       entry.primary_transcription?.status,
@@ -112,7 +103,7 @@ function transformEntry(entry: EntrySummary): HistoryEntry {
  * ```
  */
 export function useEntries(options: UseEntriesOptions = {}): UseEntriesReturn {
-  const { autoFetch = true, limit = 10, demoEntry } = options
+  const { autoFetch = true, limit = 10, demoEntry, demoConfig } = options
 
   const [rawEntries, setRawEntries] = useState<EntrySummary[]>([])
   const [total, setTotal] = useState(0)
@@ -176,12 +167,12 @@ export function useEntries(options: UseEntriesOptions = {}): UseEntriesReturn {
   }, [autoFetch, refresh])
 
   // Transform entries for UI, prepending demo entry if available
-  const entries = [
+  const entries = useMemo(() => [
     // Demo entry always comes first (if available)
     ...(demoEntry ? [demoEntry] : []),
     // Then user's entries
-    ...rawEntries.map(transformEntry),
-  ]
+    ...rawEntries.map((entry) => transformEntry(entry, demoConfig)),
+  ], [demoEntry, rawEntries, demoConfig])
 
   return {
     entries,

@@ -17,6 +17,7 @@
 #   - Version tags create clear release history
 #   - Images tagged with SHA enable instant rollback
 #   - Build cache speeds up subsequent builds
+#   - Single build works for all environments (config via runtime env vars)
 #
 # =============================================================================
 
@@ -93,6 +94,11 @@ jobs:
   # ===========================================================================
   # Creates Docker images and stores them in GitHub Container Registry.
   #
+  # Single build for all environments:
+  #   - Environment-specific config (demo content, feature flags) is read
+  #     at runtime via Server Components, not baked in at build time
+  #   - Only NEXT_PUBLIC_API_URL is set at build time (Next.js requirement)
+  #
   # Why ghcr.io?
   #   - Images live next to code (same permissions, same org)
   #   - Free for public repos
@@ -158,12 +164,6 @@ jobs:
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_API_URL=${{ steps.api_url.outputs.url }}
-            NEXT_PUBLIC_DEMO_SL_DISPLAY_NAME=${{ secrets.DEMO_SL_DISPLAY_NAME }}
-            NEXT_PUBLIC_DEMO_EN_DISPLAY_NAME=${{ secrets.DEMO_EN_DISPLAY_NAME }}
-            NEXT_PUBLIC_DEMO_SL_SOURCE_URL=${{ secrets.DEMO_SL_SOURCE_URL }}
-            NEXT_PUBLIC_DEMO_EN_SOURCE_URL=${{ secrets.DEMO_EN_SOURCE_URL }}
-            NEXT_PUBLIC_ENABLE_MODEL_SELECTION=${{ secrets.ENABLE_MODEL_SELECTION }}
-            NEXT_PUBLIC_ENABLE_TEMPERATURE_SELECTION=${{ secrets.ENABLE_TEMPERATURE_SELECTION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -204,7 +204,7 @@ jobs:
             cd ~/eversaid/staging
 
             # Update image tag
-            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=master/' .env
+            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=${{ needs.build.outputs.image_tag }}/' .env
 
             # Login to ghcr.io (use stored credentials)
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -217,7 +217,7 @@ jobs:
             sleep 10
             curl -f http://localhost:9001/health || exit 1
 
-            echo "Staging deployment complete!"
+            echo "Staging deployment complete! Image: ${{ needs.build.outputs.image_tag }}"
 
   # ===========================================================================
   # DEPLOY PRODUCTION

@@ -157,8 +157,8 @@ test.describe("Demo Page - Upload Mode", () => {
     await expect(page.getByText("Your Transcriptions")).toBeVisible()
 
     // 2. Click on entry in history sidebar (simulates real user flow)
-    // Entry card shows filename as text inside the card
-    const entryCard = page.getByText("demo-en.mp3")
+    // Entry card shows display name (configured in playwright.config.ts) or filename as fallback
+    const entryCard = page.getByText("Test Demo EN")
     await expect(entryCard).toBeVisible()
     await entryCard.click()
 
