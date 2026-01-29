@@ -72,6 +72,9 @@ function deriveEntryStatus(
  * Transform API EntrySummary to UI HistoryEntry
  */
 function transformEntry(entry: EntrySummary, demoConfig?: DemoConfig): HistoryEntry {
+  const isDemoEntry = entry.original_filename?.startsWith("demo-") &&
+                      entry.original_filename?.endsWith(".mp3")
+
   const displayName = demoConfig
     ? getDemoDisplayName(entry.original_filename, demoConfig)
     : entry.original_filename
@@ -85,6 +88,7 @@ function transformEntry(entry: EntrySummary, demoConfig?: DemoConfig): HistoryEn
       entry.latest_cleaned_entry?.status
     ),
     timestamp: entry.uploaded_at,
+    isDemo: isDemoEntry || undefined,
   }
 }
 

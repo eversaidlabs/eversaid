@@ -137,7 +137,7 @@ export interface UseTranscriptionReturn {
    * @param file - Audio file to upload
    * @param speakerCount - Number of speakers
    */
-  uploadAudio: (file: File, speakerCount: number) => Promise<void>
+  uploadAudio: (file: File, speakerCount: number, language?: string) => Promise<void>
 
   /**
    * Load an existing entry by ID.
@@ -784,7 +784,7 @@ export function useTranscription(
    * Upload audio and start transcription
    */
   const uploadAudio = useCallback(
-    async (file: File, speakerCount: number): Promise<void> => {
+    async (file: File, speakerCount: number, language?: string): Promise<void> => {
       // Clean up any existing polling
       if (pollingRef.current) {
         clearTimeout(pollingRef.current)
@@ -801,6 +801,7 @@ export function useTranscription(
 
         const { data: response } = await uploadAndTranscribe(file, {
           speakerCount,
+          language,
           enableDiarization: speakerCount > 1,
           enableAnalysis: true,
         })

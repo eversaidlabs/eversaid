@@ -185,7 +185,10 @@
       "transcribing": "Prepis v teku...",
       "selectFile": "Izberite datoteko za prepis",
       "uploading": "Nalaganje... {progress}%",
-      "audioFile": "Zvočna datoteka"
+      "audioFile": "Zvočna datoteka",
+      "audioLanguage": "Jezik posnetka",
+      "languageSlovenian": "Slovenščina",
+      "languageEnglish": "English"
     },
     "recording": {
       "title": "Posnemi zvok",

@@ -122,8 +122,8 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   // Translation hook
   const t = useTranslations()
 
-  // Locale hook - kept for future i18n usage
-  const _locale = useLocale()
+  // Locale hook
+  const locale = useLocale()
 
   // Feedback hook
   const feedbackHook = useFeedback({
@@ -138,6 +138,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedSpeakerCount, setSelectedSpeakerCount] = useState(2)
+  const [selectedAudioLanguage, setSelectedAudioLanguage] = useState<string>(locale)
 
   // LLM Model Selection State
   const [cleanupModels, setCleanupModels] = useState<ModelInfo[]>([])
@@ -609,6 +610,10 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     // No segment switching - real data comes from API
   }, [])
 
+  const handleAudioLanguageChange = useCallback((language: string) => {
+    setSelectedAudioLanguage(language)
+  }, [])
+
   // Handler for cleanup model change - uses cached cleanup if available
   const handleCleanupModelChange = useCallback(async (modelId: string) => {
     const previousModel = selectedCleanupModel
@@ -766,7 +771,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   const handleTranscribeClick = useCallback(async () => {
     if (!selectedFile) return
     try {
-      await transcription.uploadAudio(selectedFile, selectedSpeakerCount)
+      await transcription.uploadAudio(selectedFile, selectedSpeakerCount, selectedAudioLanguage)
     } catch (err) {
       // Check if this is a rate limit error
       if (err instanceof ApiError && err.isRateLimited) {
@@ -776,7 +781,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
       // Other errors are captured in transcription.error
       console.error('Upload failed:', err)
     }
-  }, [selectedFile, selectedSpeakerCount, transcription, rateLimits])
+  }, [selectedFile, selectedSpeakerCount, selectedAudioLanguage, transcription, rateLimits])
 
   // Refresh entry list after upload completes
   useEffect(() => {
@@ -1077,6 +1082,16 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     analysisHook.selectProfile(profileId)
   }, [analysisHook])
 
+  // Filter demo entries to show only the one matching selected audio language
+  const filteredEntries = useMemo(() => {
+    return entriesHook.entries.filter((entry) => {
+      if (!entry.isDemo) return true
+      const rawEntry = entriesHook.rawEntries.find((r) => r.id === entry.id)
+      if (!rawEntry) return true
+      return rawEntry.original_filename === `demo-${selectedAudioLanguage}.mp3`
+    })
+  }, [entriesHook.entries, entriesHook.rawEntries, selectedAudioLanguage])
+
   const editingCount = Array.from(editedTexts.entries()).filter(([id, text]) => {
     const segment = transcription.segments.find((s) => s.id === id)
     return segment && text !== segment.cleanedText
@@ -1178,16 +1193,18 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                 onRecordClick={handleRecordClick}
                 stages={processingStages.stages}
                 currentStageId={processingStages.currentStageId}
+                selectedAudioLanguage={selectedAudioLanguage}
+                onAudioLanguageChange={handleAudioLanguageChange}
               />
             </div>
             <div>
               <EntryHistoryCard
-                entries={entriesHook.entries}
+                entries={filteredEntries}
                 activeId={transcription.entryId}
                 deletingId={entriesHook.deletingId}
                 onSelect={handleEntrySelect}
                 onDelete={handleDeleteEntry}
-                isEmpty={entriesHook.entries.length === 0 && !entriesHook.isLoading}
+                isEmpty={filteredEntries.length === 0 && !entriesHook.isLoading}
               />
             </div>
           </div>

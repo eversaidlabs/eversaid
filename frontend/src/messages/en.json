@@ -185,7 +185,10 @@
       "transcribing": "Transcribing...",
       "selectFile": "Select a file to transcribe",
       "uploading": "Uploading... {progress}%",
-      "audioFile": "Audio file"
+      "audioFile": "Audio file",
+      "audioLanguage": "Audio language",
+      "languageSlovenian": "Slovenščina",
+      "languageEnglish": "English"
     },
     "recording": {
       "title": "Record Audio",

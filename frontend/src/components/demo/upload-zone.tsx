@@ -21,6 +21,10 @@ export interface UploadZoneProps {
   stages?: ProcessingStage[]
   /** Currently active stage ID */
   currentStageId?: StageId | null
+  /** Currently selected audio language code */
+  selectedAudioLanguage: string
+  /** Callback when audio language changes */
+  onAudioLanguageChange: (language: string) => void
 }
 
 function formatFileSize(bytes: number): string {
@@ -43,6 +47,8 @@ export function UploadZone({
   onRecordClick,
   stages,
   currentStageId,
+  selectedAudioLanguage,
+  onAudioLanguageChange,
 }: UploadZoneProps) {
   const t = useTranslations('demo.upload')
   const tCommon = useTranslations('common')
@@ -120,6 +126,26 @@ export function UploadZone({
       )}
 
       <div className="px-6 pb-6">
+        <div className="text-[13px] font-semibold text-[#64748B] mb-3">{t('audioLanguage')}</div>
+        <div className="flex gap-2 mb-4">
+          {[
+            { code: 'sl', label: t('languageSlovenian') },
+            { code: 'en', label: t('languageEnglish') },
+          ].map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => onAudioLanguageChange(lang.code)}
+              className={`px-5 py-2.5 rounded-[10px] text-sm font-semibold transition-all ${
+                selectedAudioLanguage === lang.code
+                  ? "bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] text-white"
+                  : "bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#64748B] hover:text-[#0F172A]"
+              }`}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+
         <div className="text-[13px] font-semibold text-[#64748B] mb-3">{t('speakerCount')}</div>
         <div className="flex gap-2 mb-4">
           {[1, 2, 3, 4, 5].map((num) => (
