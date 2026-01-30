@@ -31,6 +31,17 @@ pytest tests/test_session.py -v              # Run single test file
 pytest tests/ -k "test_name" -v              # Run tests matching pattern
 ```
 
+### Database Migrations (in `backend/`)
+```bash
+alembic revision --autogenerate -m "description"  # Create migration from model changes
+alembic upgrade head                              # Apply all pending migrations
+alembic downgrade -1                              # Roll back one migration
+alembic current                                   # Show current migration version
+alembic history                                   # Show migration history
+```
+
+Migrations run automatically on app startup via `run_migrations()` in `app/main.py`. No separate migration step is needed in Docker or development. SQLite batch mode (`render_as_batch=True`) is enabled for full ALTER TABLE support.
+
 ### Docker
 ```bash
 docker compose up                        # Dev: frontend + backend

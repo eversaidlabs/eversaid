@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -8,7 +9,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import get_settings
 from app.core_client import CoreAPIClient, CoreAPIError
-from app.database import Base, engine
 from app import models  # noqa: F401 - Import models to register them with Base
 from app.middleware.logging import RequestLoggingMiddleware
 from app.rate_limit import RateLimitExceeded
@@ -49,6 +49,21 @@ class RateLimitHeaderMiddleware(BaseHTTPMiddleware):
         return response
 
 
+def run_migrations() -> None:
+    """Run Alembic migrations programmatically (upgrade to head)."""
+    from alembic import command
+    from alembic.config import Config
+
+    # Use absolute paths so this works regardless of working directory
+    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    alembic_ini = os.path.join(backend_dir, "alembic.ini")
+
+    alembic_cfg = Config(alembic_ini)
+    alembic_cfg.set_main_option("script_location", os.path.join(backend_dir, "alembic"))
+
+    command.upgrade(alembic_cfg, "head")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Initialize resources on startup, cleanup on shutdown."""
@@ -56,8 +71,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     settings = get_settings()
     setup_logging(settings)
 
-    # Create database tables
-    Base.metadata.create_all(bind=engine)
+    # Run database migrations
+    run_migrations()
 
     # Initialize Core API client
     app.state.core_api = CoreAPIClient(base_url=settings.CORE_API_URL)

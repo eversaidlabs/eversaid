@@ -98,6 +98,10 @@ def client(test_engine, test_settings: Settings) -> Generator[TestClient, None, 
     original_get_settings = main_module.get_settings
     main_module.get_settings = lambda: test_settings
 
+    # Patch run_migrations to no-op (test_engine already calls create_all)
+    original_run_migrations = main_module.run_migrations
+    main_module.run_migrations = lambda: None
+
     # Start respx mocking with base auth mocks
     with respx.mock:
         # Register endpoint - returns user object
@@ -155,7 +159,8 @@ def client(test_engine, test_settings: Settings) -> Generator[TestClient, None, 
         with TestClient(fastapi_app, raise_server_exceptions=False) as test_client:
             yield test_client
 
-    # Restore original
+    # Restore originals
+    main_module.run_migrations = original_run_migrations
     main_module.get_settings = original_get_settings
     fastapi_app.dependency_overrides.clear()
     get_settings.cache_clear()
