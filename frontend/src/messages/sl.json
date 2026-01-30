@@ -402,6 +402,17 @@
       },
       "sourceLabel": "Kako ste izvedeli za nas?",
       "sourcePlaceholder": "npr. Twitter, prijatelj, iskanje",
+      "languageLabel": "Jezik, ki ga najbolj potrebujete",
+      "languagePlaceholder": "Izberite jezik",
+      "languageOptions": {
+        "en": "Angleščina",
+        "fr": "Francoščina",
+        "de": "Nemščina",
+        "es": "Španščina",
+        "sl": "Slovenščina",
+        "other": "Drugo"
+      },
+      "languageOtherPlaceholder": "npr. japonščina, arabščina, mandarinščina",
       "submit": "Pridruži se čakalni listi",
       "submitting": "Pridruževanje...",
       "privacyNote": "Z oddajo se strinjate z našo",

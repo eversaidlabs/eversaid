@@ -30,6 +30,8 @@ export default function ApiDocsPage() {
   const [useCase, setUseCase] = useState("")
   const [volume, setVolume] = useState("")
   const [source, setSource] = useState("")
+  const [languagePreference, setLanguagePreference] = useState("")
+  const [languagePreferenceOther, setLanguagePreferenceOther] = useState("")
 
   // Hook for API integration (always api_access for this page)
   const waitlist = useWaitlist({
@@ -61,16 +63,21 @@ export default function ApiDocsPage() {
   }
 
   const handleWaitlistSubmit = useCallback(async () => {
-    await waitlist.submit({ useCase, volume, source })
+    const langPref = languagePreference === "other"
+      ? `other: ${languagePreferenceOther}`
+      : languagePreference
+    await waitlist.submit({ useCase, volume, source, languagePreference: langPref })
     // Transition to success state - the hook handles errors internally with toasts
     setWaitlistState("success")
-  }, [waitlist, useCase, volume, source])
+  }, [waitlist, useCase, volume, source, languagePreference, languagePreferenceOther])
 
   const handleWaitlistClose = useCallback(() => {
     setWaitlistState("hidden")
     setUseCase("")
     setVolume("")
     setSource("")
+    setLanguagePreference("")
+    setLanguagePreferenceOther("")
     waitlist.reset()
   }, [waitlist])
 
@@ -118,11 +125,15 @@ export default function ApiDocsPage() {
         useCase={useCase}
         volume={volume}
         source={source}
+        languagePreference={languagePreference}
+        languagePreferenceOther={languagePreferenceOther}
         isSubmitting={waitlist.isSubmitting}
         onEmailChange={waitlist.setEmail}
         onUseCaseChange={setUseCase}
         onVolumeChange={setVolume}
         onSourceChange={setSource}
+        onLanguagePreferenceChange={setLanguagePreference}
+        onLanguagePreferenceOtherChange={setLanguagePreferenceOther}
         onSubmit={handleWaitlistSubmit}
         onClose={handleWaitlistClose}
         t={tRoot}

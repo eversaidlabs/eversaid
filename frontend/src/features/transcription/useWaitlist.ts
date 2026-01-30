@@ -10,6 +10,7 @@ export interface WaitlistFormData {
   useCase: string
   volume: string
   source: string
+  languagePreference: string
 }
 
 /**
@@ -91,6 +92,7 @@ export function useWaitlist(options: UseWaitlistOptions): UseWaitlistReturn {
         use_case: formData.useCase.trim() || undefined,
         waitlist_type: waitlistType,
         source_page: sourcePage,
+        language_preference: formData.languagePreference || undefined,
       })
 
       setIsSubmitted(true)

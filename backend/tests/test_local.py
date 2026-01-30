@@ -276,6 +276,7 @@ class TestWaitlistEndpoints:
                 "use_case": "I'm a therapist",
                 "waitlist_type": "api_access",
                 "source_page": "/demo",
+                "language_preference": "sl",
             },
         )
 
@@ -393,3 +394,42 @@ class TestWaitlistEndpoints:
         )
 
         assert response.status_code == 200
+
+    def test_join_waitlist_with_language_preference(self, client):
+        """Test waitlist signup with language_preference."""
+        response = client.post(
+            "/api/waitlist",
+            json={
+                "email": "lang@example.com",
+                "waitlist_type": "extended_usage",
+                "language_preference": "sl",
+            },
+        )
+
+        assert response.status_code == 200
+
+    def test_join_waitlist_with_language_preference_other(self, client):
+        """Test waitlist signup with 'other' language preference."""
+        response = client.post(
+            "/api/waitlist",
+            json={
+                "email": "lang-other@example.com",
+                "waitlist_type": "extended_usage",
+                "language_preference": "other: Japanese",
+            },
+        )
+
+        assert response.status_code == 200
+
+    def test_join_waitlist_language_preference_too_long(self, client):
+        """Test waitlist signup with language_preference exceeding 20 chars."""
+        response = client.post(
+            "/api/waitlist",
+            json={
+                "email": "lang-long@example.com",
+                "waitlist_type": "extended_usage",
+                "language_preference": "x" * 41,
+            },
+        )
+
+        assert response.status_code == 422

@@ -9,11 +9,15 @@ export interface WaitlistFlowProps {
   useCase?: string
   volume?: string
   source?: string
+  languagePreference?: string
+  languagePreferenceOther?: string
   isSubmitting?: boolean
   onEmailChange: (email: string) => void
   onUseCaseChange?: (useCase: string) => void
   onVolumeChange?: (volume: string) => void
   onSourceChange?: (source: string) => void
+  onLanguagePreferenceChange?: (value: string) => void
+  onLanguagePreferenceOtherChange?: (value: string) => void
   onSubmit: () => void
   onClose: () => void
   onOpenForm?: () => void
@@ -27,11 +31,15 @@ export function WaitlistFlow({
   useCase,
   volume,
   source,
+  languagePreference,
+  languagePreferenceOther,
   isSubmitting,
   onEmailChange,
   onUseCaseChange,
   onVolumeChange,
   onSourceChange,
+  onLanguagePreferenceChange,
+  onLanguagePreferenceOtherChange,
   onSubmit,
   onClose,
   onOpenForm: _onOpenForm,
@@ -145,6 +153,51 @@ export function WaitlistFlow({
                     className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)] placeholder:text-[#94A3B8]"
                   />
                 </div>
+
+                {/* Language Preference Field */}
+                <div className="mb-5">
+                  <label
+                    htmlFor="waitlist-language"
+                    className="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151] mb-2"
+                  >
+                    {t("waitlist.modal.languageLabel")}
+                    <span className="text-[#DC2626]" aria-label="required">
+                      *
+                    </span>
+                  </label>
+                  <select
+                    id="waitlist-language"
+                    required
+                    aria-required="true"
+                    value={languagePreference}
+                    onChange={(e) => onLanguagePreferenceChange?.(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)]"
+                  >
+                    <option value="">{t("waitlist.modal.languagePlaceholder")}</option>
+                    <option value="en">{t("waitlist.modal.languageOptions.en")}</option>
+                    <option value="fr">{t("waitlist.modal.languageOptions.fr")}</option>
+                    <option value="de">{t("waitlist.modal.languageOptions.de")}</option>
+                    <option value="es">{t("waitlist.modal.languageOptions.es")}</option>
+                    <option value="sl">{t("waitlist.modal.languageOptions.sl")}</option>
+                    <option value="other">{t("waitlist.modal.languageOptions.other")}</option>
+                  </select>
+                </div>
+
+                {/* Language Other Input (shown when "other" is selected) */}
+                {languagePreference === "other" && (
+                  <div className="mb-5">
+                    <input
+                      type="text"
+                      id="waitlist-language-other"
+                      required
+                      aria-required="true"
+                      value={languagePreferenceOther}
+                      onChange={(e) => onLanguagePreferenceOtherChange?.(e.target.value)}
+                      placeholder={t("waitlist.modal.languageOtherPlaceholder")}
+                      className="w-full px-4 py-3 border-2 border-[#E2E8F0] rounded-xl text-[15px] bg-[#F8FAFC] transition-all focus:outline-none focus:border-[#38BDF8] focus:bg-white focus:shadow-[0_0_0_4px_rgba(56,189,248,0.1)] placeholder:text-[#94A3B8]"
+                    />
+                  </div>
+                )}
 
                 {/* Use Case Field - now uses prop value and callback */}
                 <div className="mb-5">

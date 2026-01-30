@@ -22,6 +22,7 @@ const defaultFormData: WaitlistFormData = {
   useCase: 'Meeting transcriptions',
   volume: '',
   source: '',
+  languagePreference: '',
 }
 
 describe('useWaitlist', () => {
@@ -126,6 +127,7 @@ describe('useWaitlist', () => {
         use_case: 'Meeting transcriptions',
         waitlist_type: 'extended_usage',
         source_page: undefined,
+        language_preference: undefined,
       })
     })
 
@@ -144,7 +146,7 @@ describe('useWaitlist', () => {
       })
 
       await act(async () => {
-        await result.current.submit({ useCase: '', volume: '', source: '' })
+        await result.current.submit({ useCase: '', volume: '', source: '', languagePreference: '' })
       })
 
       expect(api.joinWaitlist).toHaveBeenCalledWith({
@@ -152,6 +154,7 @@ describe('useWaitlist', () => {
         use_case: undefined,
         waitlist_type: 'extended_usage',
         source_page: undefined,
+        language_preference: undefined,
       })
     })
   })
@@ -184,6 +187,7 @@ describe('useWaitlist', () => {
         use_case: 'Meeting transcriptions',
         waitlist_type: 'extended_usage',
         source_page: undefined,
+        language_preference: undefined,
       })
       expect(result.current.isSubmitted).toBe(true)
       expect(result.current.error).toBeNull()
@@ -205,7 +209,7 @@ describe('useWaitlist', () => {
       })
 
       await act(async () => {
-        await result.current.submit({ useCase: 'API integration', volume: '', source: '' })
+        await result.current.submit({ useCase: 'API integration', volume: '', source: '', languagePreference: 'en' })
       })
 
       expect(api.joinWaitlist).toHaveBeenCalledWith({
@@ -213,6 +217,7 @@ describe('useWaitlist', () => {
         use_case: 'API integration',
         waitlist_type: 'api_access',
         source_page: '/demo',
+        language_preference: 'en',
       })
     })
 
@@ -430,5 +435,71 @@ describe('useWaitlist', () => {
         )
       }
     )
+  })
+
+  // ===========================================================================
+  // Language Preference
+  // ===========================================================================
+
+  describe('language preference', () => {
+    it('includes language_preference when provided in form data', async () => {
+      vi.mocked(api.joinWaitlist).mockResolvedValue({
+        data: { message: 'Success' },
+        rateLimitInfo: null,
+      })
+
+      const { result } = renderHook(() =>
+        useWaitlist({ waitlistType: 'extended_usage' })
+      )
+
+      act(() => {
+        result.current.setEmail('test@example.com')
+      })
+
+      await act(async () => {
+        await result.current.submit({
+          useCase: 'Testing',
+          volume: '',
+          source: '',
+          languagePreference: 'sl',
+        })
+      })
+
+      expect(api.joinWaitlist).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language_preference: 'sl',
+        })
+      )
+    })
+
+    it('omits language_preference when empty string', async () => {
+      vi.mocked(api.joinWaitlist).mockResolvedValue({
+        data: { message: 'Success' },
+        rateLimitInfo: null,
+      })
+
+      const { result } = renderHook(() =>
+        useWaitlist({ waitlistType: 'extended_usage' })
+      )
+
+      act(() => {
+        result.current.setEmail('test@example.com')
+      })
+
+      await act(async () => {
+        await result.current.submit({
+          useCase: 'Testing',
+          volume: '',
+          source: '',
+          languagePreference: '',
+        })
+      })
+
+      expect(api.joinWaitlist).toHaveBeenCalledWith(
+        expect.objectContaining({
+          language_preference: undefined,
+        })
+      )
+    })
   })
 })

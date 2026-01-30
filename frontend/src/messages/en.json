@@ -402,6 +402,17 @@
       },
       "sourceLabel": "How did you hear about us?",
       "sourcePlaceholder": "e.g., Twitter, friend, search",
+      "languageLabel": "Language you need most",
+      "languagePlaceholder": "Select a language",
+      "languageOptions": {
+        "en": "English",
+        "fr": "French",
+        "de": "German",
+        "es": "Spanish",
+        "sl": "Slovenian",
+        "other": "Other"
+      },
+      "languageOtherPlaceholder": "e.g., Japanese, Arabic, Mandarin",
       "submit": "Join Waitlist",
       "submitting": "Joining...",
       "privacyNote": "By submitting, you agree to our",

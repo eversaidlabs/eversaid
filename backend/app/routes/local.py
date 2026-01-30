@@ -88,6 +88,7 @@ class WaitlistRequest(BaseModel):
     use_case: Optional[str] = Field(default=None, max_length=500)
     waitlist_type: Literal["api_access", "extended_usage"]
     source_page: Optional[str] = None
+    language_preference: Optional[str] = Field(default=None, max_length=40)
 
 
 class WaitlistResponse(BaseModel):
@@ -234,6 +235,7 @@ async def join_waitlist(
         use_case=body.use_case,
         waitlist_type=body.waitlist_type,
         source_page=body.source_page,
+        language_preference=body.language_preference,
     )
     db.add(waitlist_entry)
     db.commit()

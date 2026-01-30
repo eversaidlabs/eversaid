@@ -406,6 +406,7 @@ export interface WaitlistPayload {
   use_case?: string
   waitlist_type: WaitlistType
   source_page?: string
+  language_preference?: string
 }
 
 // =============================================================================
