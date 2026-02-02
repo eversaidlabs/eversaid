@@ -10,6 +10,7 @@ import { LiveTranscriptPreview } from "@/components/landing/live-transcript-prev
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { MotionDiv } from "@/components/motion"
 import { SectionDivider, DIVIDER_COLORS } from "@/components/landing/section-divider"
+import { ComingSoonSection } from "@/components/landing/coming-soon-section"
 import {
   heroTitle,
   heroSubtitle,
@@ -275,6 +276,9 @@ export default function HomePage() {
           </MotionDiv>
         </div>
       </section>
+
+      {/* Coming Soon Section */}
+      <ComingSoonSection />
 
       {/* Features Section */}
       <section className="snap-start snap-always min-h-screen flex items-center px-8 md:px-16 py-20" id="features">
