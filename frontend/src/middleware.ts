@@ -11,6 +11,7 @@ export const config = {
   // Match all pathnames except for:
   // - API routes
   // - _next (Next.js internals)
+  // - /ingest (PostHog reverse proxy)
   // - Static files (files with extensions)
-  matcher: ['/', '/(en|sl)/:path*', '/((?!api|_next|.*\\..*).*)']
+  matcher: ['/', '/(en|sl)/:path*', '/((?!api|_next|ingest|.*\\..*).*)']
 }

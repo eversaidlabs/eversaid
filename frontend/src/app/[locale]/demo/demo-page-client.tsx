@@ -44,6 +44,7 @@ import { toast } from "sonner"
 import { useDemoCleanupTrigger } from "@/features/transcription/useDemoCleanupTrigger"
 import { ProcessingStages } from "@/components/demo/processing-stages"
 import type { AppConfig } from "@/lib/app-config"
+import { capture } from "@/lib/analytics"
 
 // Singleton promise for session initialization - prevents concurrent calls
 // from Suspense/hydration remounts while allowing re-init after navigation
@@ -255,6 +256,9 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   // Track deleted entry IDs to prevent reloading from URL after deletion
   const deletedEntryRef = useRef<string | null>(null)
 
+  // Track last completed cleanup to deduplicate cleanup_completed events
+  const lastCompletedRef = useRef<string | null>(null)
+
   // Handle browser back/forward navigation using popstate event
   // This is more reliable than depending on searchParams updates
   useEffect(() => {
@@ -313,6 +317,9 @@ function DemoPageContent({ config }: DemoPageContentProps) {
 
   // Helper to set expanded state and persist it
   const setExpandedAndPersist = useCallback((expanded: boolean) => {
+    if (expanded) {
+      capture('diff_view_opened')
+    }
     setIsEditorExpanded(expanded)
     if (transcription.entryId) {
       const stored = getStoredEntryState()
@@ -599,6 +606,8 @@ function DemoPageContent({ config }: DemoPageContentProps) {
 
   // Upload Handlers
   const handleFileSelect = useCallback((file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'unknown'
+    capture('file_selected', { file_format: ext })
     setSelectedFile(file)
   }, [])
 
@@ -785,13 +794,33 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     }
   }, [selectedFile, selectedSpeakerCount, selectedAudioLanguage, transcription, rateLimits])
 
-  // Refresh entry list after upload completes
+  // Refresh entry list after upload completes + track cleanup_completed
   useEffect(() => {
     if (transcription.status === 'complete' && transcription.entryId) {
       entriesHook.refresh()
+
+      const completionKey = `${transcription.entryId}:${transcription.cleanupId}`
+      if (lastCompletedRef.current !== completionKey) {
+        lastCompletedRef.current = completionKey
+        capture('cleanup_completed', {
+          language: selectedAudioLanguage,
+          source: transcription.isDemo ? 'demo' : 'upload',
+        })
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcription.status, transcription.entryId])
+
+  // Track cleanup failures
+  useEffect(() => {
+    if (transcription.status === 'error' && transcription.error) {
+      capture('cleanup_failed', {
+        error_type: transcription.error,
+        source: transcription.isDemo ? 'demo' : 'upload',
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcription.status])
 
   // Initialize session: fetch rate limits first (establishes session cookie)
   // Then mark session as ready for other API calls
@@ -960,6 +989,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
 
   // Waitlist Handlers
   const handleOpenWaitlist = useCallback((type: "extended_usage" | "api_access" = "extended_usage") => {
+    capture('waitlist_form_opened')
     setWaitlistType(type)
     setWaitlistState("form")
   }, [])
@@ -969,6 +999,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
       ? `other: ${languagePreferenceOther}`
       : languagePreference
     await waitlist.submit({ useCase, volume, source, languagePreference: langPref })
+    capture('waitlist_joined', { user_role: useCase })
     // Transition to success state - the hook handles errors internally with toasts
     setWaitlistState("success")
   }, [waitlist, useCase, volume, source, languagePreference, languagePreferenceOther])
@@ -1000,6 +1031,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
 
   const handleRecordingConfirm = useCallback(() => {
     if (recorder.audioBlob) {
+      capture('record_audio_clicked')
       const file = new File(
         [recorder.audioBlob],
         `recording-${Date.now()}.webm`,
@@ -1058,6 +1090,10 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   }, [audioPlayer])
 
   const handleEntrySelect = useCallback(async (entryId: string) => {
+    const entry = entriesHook.entries.find(e => e.id === entryId)
+    if (entry?.isDemo) {
+      capture('sample_audio_clicked')
+    }
     try {
       // loadEntry handles both demo and real entries
       // Demo entries detected by "demo-*" ID pattern
@@ -1344,7 +1380,10 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                     <FeedbackCard
                       rating={feedbackHook.rating}
                       feedback={feedbackHook.feedbackText}
-                      onRatingChange={feedbackHook.setRating}
+                      onRatingChange={(rating: number) => {
+                        capture('quality_rated', { rating })
+                        feedbackHook.setRating(rating)
+                      }}
                       onFeedbackChange={feedbackHook.setFeedbackText}
                       onSubmit={feedbackHook.submit}
                       isLoading={feedbackHook.isLoading}

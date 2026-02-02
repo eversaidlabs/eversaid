@@ -5,6 +5,7 @@ import type { ModelInfo, CleanupType, CleanupSummary } from "@/features/transcri
 import { Eye, EyeOff, Copy, X, ChevronDown, Loader2, Check, Medal } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+import { capture } from "@/lib/analytics"
 import { CLEANUP_LEVELS, CLEANUP_TEMPERATURES, getDefaultModelForLevel, temperaturesMatch } from "@/lib/level-config"
 
 export interface CleanupOptionsProps {
@@ -69,6 +70,7 @@ export function TranscriptHeader({
   const didFireRef = useRef(false)
 
   const handleCopy = () => {
+    capture('copy_clicked', { side: textKey === 'rawText' ? 'raw' : 'cleaned' })
     const text = segments.map((s) => s[textKey]).join("\n\n")
 
     // Feature flag: add metadata header when copying cleaned text

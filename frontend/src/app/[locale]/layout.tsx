@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Comfortaa } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
+import { PostHogProvider } from "@/app/posthog-provider"
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { locales } from '@/i18n/config'
@@ -57,10 +58,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${_inter.variable} ${_comfortaa.variable}`}>
       <body className={`font-sans antialiased`}>
-        <NextIntlClientProvider messages={messages}>
-          {children}
-          <Toaster />
-        </NextIntlClientProvider>
+        <PostHogProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+            <Toaster />
+          </NextIntlClientProvider>
+        </PostHogProvider>
         <Analytics />
       </body>
     </html>
