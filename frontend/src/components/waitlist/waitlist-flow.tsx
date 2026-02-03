@@ -96,12 +96,12 @@ export function WaitlistFlow({
         }`}
       >
         <div
-          className={`bg-white rounded-3xl w-full max-w-[440px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`bg-white rounded-3xl w-full max-w-[440px] max-h-[90vh] flex flex-col overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             state === "form" || state === "success" ? "scale-100 translate-y-0" : "scale-95 translate-y-5"
           }`}
         >
           {/* Modal Header */}
-          <div className="bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_100%)] px-6 md:px-8 pt-8 pb-7 text-center relative">
+          <div className="bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_100%)] px-6 md:px-8 pt-8 pb-7 text-center relative flex-shrink-0">
             <button
               onClick={onClose}
               aria-label="Close dialog"
@@ -124,7 +124,7 @@ export function WaitlistFlow({
 
           {/* Modal Body - Form */}
           {state === "form" && (
-            <div className="px-6 md:px-8 pt-7 pb-8">
+            <div className="px-6 md:px-8 pt-7 pb-8 overflow-y-auto">
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
@@ -294,7 +294,7 @@ export function WaitlistFlow({
 
           {/* Modal Body - Success */}
           {state === "success" && (
-            <div className="px-6 md:px-8 pt-7 pb-8">
+            <div className="px-6 md:px-8 pt-7 pb-8 overflow-y-auto">
               {/* Success Icon */}
               <div className="w-[72px] h-[72px] bg-[linear-gradient(135deg,#DCFCE7_0%,#BBF7D0_100%)] rounded-full flex items-center justify-center mx-auto mb-6">
                 <Check className="w-9 h-9 stroke-[#16A34A]" strokeWidth={3} aria-hidden="true" />
