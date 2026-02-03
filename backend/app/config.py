@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     # Audio validation
     MAX_AUDIO_DURATION_SECONDS: int = 180  # 3 minutes
 
+    # Cloudflare Turnstile (CAPTCHA)
+    TURNSTILE_ENABLED: bool = False  # Default False for local dev
+    TURNSTILE_SECRET_KEY: str = ""  # Cloudflare secret key (server-side)
+
     DATABASE_URL: str = "sqlite:///./data/demo.db"
 
     # CORS origins (comma-separated list)

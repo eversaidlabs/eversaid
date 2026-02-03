@@ -7,6 +7,7 @@ services:
         # For dev: http://localhost:8001 (browser accesses via host ports)
         # For prod: https://your-domain.com (nginx proxies /api to backend)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
     container_name: eversaid-frontend
     ports:
       - "3000:3000"  # Direct access for dev
@@ -51,6 +52,9 @@ services:
       RATE_LIMIT_LLM_IP_DAY: ${RATE_LIMIT_LLM_IP_DAY:-150}
       RATE_LIMIT_LLM_GLOBAL_DAY: ${RATE_LIMIT_LLM_GLOBAL_DAY:-10000}
       DATABASE_URL: ${DATABASE_URL:-sqlite:///./data/demo.db}
+      # Cloudflare Turnstile (CAPTCHA)
+      TURNSTILE_ENABLED: ${TURNSTILE_ENABLED:-false}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
     volumes:
       - ./backend:/app
       - ./data:/app/data

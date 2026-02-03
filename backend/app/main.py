@@ -12,6 +12,7 @@ from app.core_client import CoreAPIClient, CoreAPIError
 from app import models  # noqa: F401 - Import models to register them with Base
 from app.middleware.logging import RequestLoggingMiddleware
 from app.rate_limit import RateLimitExceeded
+from app.turnstile import TurnstileError
 from app.routes.core import router as core_router
 from app.routes.local import router as local_router
 from app.utils.logger import setup_logging
@@ -143,6 +144,15 @@ async def rate_limit_exceeded_handler(
         status_code=429,
         content=exc.detail,
         headers=headers,
+    )
+
+
+@app.exception_handler(TurnstileError)
+async def turnstile_error_handler(request: Request, exc: TurnstileError) -> JSONResponse:
+    """Convert TurnstileError to HTTP 403 response."""
+    return JSONResponse(
+        status_code=403,
+        content={"error": "captcha_failed", "detail": exc.detail},
     )
 
 

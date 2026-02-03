@@ -73,6 +73,7 @@ interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: FormData | Record<string, unknown>
   headers?: Record<string, string>
+  turnstileToken?: string | null
 }
 
 /**
@@ -82,13 +83,14 @@ async function request<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<{ data: T; rateLimitInfo: RateLimitInfo | null }> {
-  const { method = 'GET', body, headers = {} } = options
+  const { method = 'GET', body, headers = {}, turnstileToken } = options
 
   const fetchOptions: RequestInit = {
     method,
     credentials: 'include', // Include cookies for session
     headers: {
       ...headers,
+      ...(turnstileToken ? { 'X-Turnstile-Token': turnstileToken } : {}),
     },
   }
 
@@ -268,6 +270,7 @@ export async function uploadAndTranscribe(
   return request<TranscribeResponse>('/api/transcribe', {
     method: 'POST',
     body: formData,
+    turnstileToken: options.turnstileToken,
   })
 }
 
@@ -355,6 +358,7 @@ export interface TriggerCleanupOptions {
   cleanupType?: CleanupType
   llmModel?: string
   temperature?: number | null
+  turnstileToken?: string | null
 }
 
 /**
@@ -379,6 +383,7 @@ export async function triggerCleanup(
   return request<{ id: string; status: string }>(`/api/transcriptions/${transcriptionId}/cleanup`, {
     method: 'POST',
     body: Object.keys(body).length > 0 ? body : undefined,
+    turnstileToken: options.turnstileToken,
   })
 }
 

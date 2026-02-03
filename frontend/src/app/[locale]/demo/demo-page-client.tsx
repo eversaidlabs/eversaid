@@ -28,6 +28,7 @@ import { ErrorDisplay } from "@/components/demo/error-display"
 import { RateLimitModal } from "@/components/demo/rate-limit-modal"
 import { RecordingModal } from "@/components/demo/recording-modal"
 import { useTranscription } from "@/features/transcription/useTranscription"
+import { useTurnstile } from "@/features/transcription/useTurnstile"
 import { useVoiceRecorder } from "@/features/transcription/useVoiceRecorder"
 import { useRateLimits } from "@/features/transcription/useRateLimits"
 import { ApiError, type ModelInfo, type CleanupType, type CleanupSummary } from "@/features/transcription/types"
@@ -38,6 +39,7 @@ import { useWordHighlight } from "@/features/transcription/useWordHighlight"
 import { useAnalysis } from "@/features/transcription/useAnalysis"
 import { useProcessingStages } from "@/features/transcription/useProcessingStages"
 import { getEntryAudioUrl, getOptions, getCleanedEntries, getCleanedEntry } from "@/features/transcription/api"
+import { TurnstileWidget } from "@/components/demo/turnstile-widget"
 import { getCleanupModels, getAnalysisModels } from "@/lib/model-config"
 import { DEFAULT_CLEANUP_LEVEL, DEFAULT_CLEANUP_TEMPERATURE, getDefaultModelForLevel, temperaturesMatch } from "@/lib/level-config"
 import { toast } from "sonner"
@@ -119,6 +121,9 @@ function DemoPageContent({ config }: DemoPageContentProps) {
 
   // Transcription hook
   const transcription = useTranscription()
+
+  // Turnstile CAPTCHA hook
+  const turnstile = useTurnstile()
 
   // Translation hook
   const t = useTranslations()
@@ -279,8 +284,11 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   // Load entry from URL query param on mount
   // Wait for sessionReady to avoid race condition where multiple requests
   // with invalid session cookie create separate sessions
+  // When Turnstile is enabled, wait for token before loading (needed for demo entries
+  // that auto-trigger cleanup, which is a protected endpoint)
   useEffect(() => {
     if (!sessionReady) return
+    if (turnstile.isEnabled && !turnstile.token) return
 
     const entryId = searchParams.get('entry')
     // Don't reload if this entry was just deleted
@@ -290,9 +298,9 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     if (entryId && !transcription.entryId && transcription.status === 'idle') {
       // loadEntry handles both demo and real entries
       // Demo entries detected by "demo-*" ID pattern
-      transcription.loadEntry(entryId)
+      transcription.loadEntry(entryId, turnstile.getToken())
     }
-  }, [sessionReady, searchParams, transcription.entryId, transcription.status, transcription.loadEntry])
+  }, [sessionReady, searchParams, transcription.entryId, transcription.status, transcription.loadEntry, turnstile.isEnabled, turnstile.token, turnstile.getToken])
 
   // Update URL when entry is loaded (creates browser history entry)
   // Use a ref to track if we've already pushed this entry to avoid loops
@@ -659,17 +667,20 @@ function DemoPageContent({ config }: DemoPageContentProps) {
         cleanupType: selectedCleanupLevel,
         llmModel: modelId,
         ...(isTemperatureSelectionEnabled && selectedCleanupTemp !== null && { temperature: selectedCleanupTemp }),
+        turnstileToken: turnstile.getToken(),
       })
+      turnstile.resetWidget()
       // Refresh cache after completion
       const { data: updatedCleanups } = await getCleanedEntries(transcription.entryId)
       setCleanupCache(updatedCleanups)
     } catch (err) {
       console.error('Re-cleanup failed:', err)
+      turnstile.resetWidget()
       // Revert to previous model and show error
       setSelectedCleanupModel(previousModel)
       toast.error(t('demo.cleanup.modelChangeFailed'))
     }
-  }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, isEditorExpanded, t])
+  }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, isEditorExpanded, turnstile, t])
 
   // Handler for cleanup level change - uses cached cleanup if available
   const handleCleanupLevelChange = useCallback(async (level: CleanupType) => {
@@ -709,17 +720,20 @@ function DemoPageContent({ config }: DemoPageContentProps) {
         cleanupType: level,
         llmModel: modelToUse,
         ...(isTemperatureSelectionEnabled && selectedCleanupTemp !== null && { temperature: selectedCleanupTemp }),
+        turnstileToken: turnstile.getToken(),
       })
+      turnstile.resetWidget()
       // Refresh cache after completion
       const { data: updatedCleanups } = await getCleanedEntries(transcription.entryId)
       setCleanupCache(updatedCleanups)
     } catch (err) {
       console.error('Re-cleanup failed:', err)
+      turnstile.resetWidget()
       // Revert to previous level and show error
       setSelectedCleanupLevel(previousLevel)
       toast.error(t('demo.cleanup.levelChangeFailed'))
     }
-  }, [transcription, selectedCleanupModel, selectedCleanupLevel, cleanupCache, hasManualCleanupModelSelection, selectedCleanupTemp, t])
+  }, [transcription, selectedCleanupModel, selectedCleanupLevel, cleanupCache, hasManualCleanupModelSelection, selectedCleanupTemp, turnstile, t])
 
   // Handler for temperature change - uses cached cleanup if available
   // Long-press (2s) passes forceRerun=true to bypass cache
@@ -751,17 +765,20 @@ function DemoPageContent({ config }: DemoPageContentProps) {
         cleanupType: selectedCleanupLevel,
         llmModel: selectedCleanupModel,
         ...(temp !== null && { temperature: temp }),
+        turnstileToken: turnstile.getToken(),
       })
+      turnstile.resetWidget()
       // Refresh cache after completion
       const { data: updatedCleanups } = await getCleanedEntries(transcription.entryId)
       setCleanupCache(updatedCleanups)
     } catch (err) {
       console.error('Re-cleanup failed:', err)
+      turnstile.resetWidget()
       // Revert to previous temperature and show error
       setSelectedCleanupTemp(previousTemp)
       toast.error(t('demo.cleanup.temperatureChangeFailed'))
     }
-  }, [transcription, selectedCleanupModel, selectedCleanupLevel, cleanupCache, selectedCleanupTemp, t])
+  }, [transcription, selectedCleanupModel, selectedCleanupLevel, cleanupCache, selectedCleanupTemp, turnstile, t])
 
   // Handler for analysis model change - auto-triggers re-analysis
   const handleAnalysisModelChange = useCallback(async (modelId: string) => {
@@ -782,8 +799,10 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   const handleTranscribeClick = useCallback(async () => {
     if (!selectedFile) return
     try {
-      await transcription.uploadAudio(selectedFile, selectedSpeakerCount, selectedAudioLanguage)
+      await transcription.uploadAudio(selectedFile, selectedSpeakerCount, selectedAudioLanguage, turnstile.getToken())
+      turnstile.resetWidget()
     } catch (err) {
+      turnstile.resetWidget()
       // Check if this is a rate limit error
       if (err instanceof ApiError && err.isRateLimited) {
         rateLimits.updateFromError(err)
@@ -792,7 +811,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
       // Other errors are captured in transcription.error
       console.error('Upload failed:', err)
     }
-  }, [selectedFile, selectedSpeakerCount, selectedAudioLanguage, transcription, rateLimits])
+  }, [selectedFile, selectedSpeakerCount, selectedAudioLanguage, transcription, turnstile, rateLimits])
 
   // Refresh entry list after upload completes + track cleanup_completed
   useEffect(() => {
@@ -1097,7 +1116,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     try {
       // loadEntry handles both demo and real entries
       // Demo entries detected by "demo-*" ID pattern
-      await transcription.loadEntry(entryId)
+      await transcription.loadEntry(entryId, turnstile.getToken())
       // Note: feedbackHook auto-loads existing feedback when entryId changes via its useEffect
       // Note: analysisHook auto-resets when transcription.analysisId changes via its useEffect
     } catch (err) {
@@ -1106,7 +1125,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
         await entriesHook.refresh()
       }
     }
-  }, [transcription, entriesHook])
+  }, [transcription, entriesHook, turnstile])
 
   // Handle entry deletion
   const handleDeleteEntry = useCallback(async (entryId: string) => {
@@ -1201,6 +1220,19 @@ function DemoPageContent({ config }: DemoPageContentProps) {
               />
             </div>
           )}
+        </div>
+      )}
+
+      {/* Turnstile CAPTCHA widget - rendered once, shared across all protected actions */}
+      {turnstile.isEnabled && (
+        <div className="max-w-[1400px] mx-auto px-6">
+          <TurnstileWidget
+            siteKey={turnstile.siteKey}
+            onSuccess={turnstile.onSuccess}
+            onError={turnstile.onError}
+            onExpire={turnstile.onExpire}
+            resetRef={turnstile.widgetResetRef}
+          />
         </div>
       )}
 

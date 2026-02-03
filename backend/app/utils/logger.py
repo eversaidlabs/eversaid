@@ -215,6 +215,13 @@ def setup_logging(settings: "Settings") -> None:
     print("=" * 60)
     print(f"ORIGINS:              {settings.CORS_ORIGINS}")
     print("=" * 60)
+    print("TURNSTILE (CAPTCHA)")
+    print("=" * 60)
+    turnstile_active = settings.TURNSTILE_ENABLED and bool(settings.TURNSTILE_SECRET_KEY)
+    print(f"ENABLED:              {settings.TURNSTILE_ENABLED}")
+    print(f"SECRET_KEY SET:       {bool(settings.TURNSTILE_SECRET_KEY)}")
+    print(f"ACTIVE:               {turnstile_active}")
+    print("=" * 60)
 
 
 def get_logger(name: str) -> StructuredLogger:

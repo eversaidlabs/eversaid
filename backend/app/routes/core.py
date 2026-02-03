@@ -12,6 +12,7 @@ from app.core_client import CoreAPIClient, CoreAPIError, get_core_api
 from app.models import Session as SessionModel
 from app.rate_limit import RateLimitResult, require_rate_limit
 from app.session import get_session
+from app.turnstile import require_turnstile
 from app.utils.audio import AudioValidationError, validate_audio_duration
 
 router = APIRouter(tags=["core"])
@@ -90,6 +91,7 @@ async def transcribe(
     settings: Settings = Depends(get_settings),
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
+    _turnstile: None = Depends(require_turnstile()),
     _rate_limit: RateLimitResult = Depends(require_rate_limit("transcribe")),
 ):
     """Upload audio and start transcription + cleanup + analysis.
@@ -430,6 +432,7 @@ async def trigger_cleanup(
     body: CleanupRequest = Body(default=CleanupRequest()),
     session: SessionModel = Depends(get_session),
     core_api: CoreAPIClient = Depends(get_core_api),
+    _turnstile: None = Depends(require_turnstile()),
 ):
     """Trigger LLM cleanup for a completed transcription.
 

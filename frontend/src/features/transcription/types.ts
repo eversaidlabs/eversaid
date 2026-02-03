@@ -108,6 +108,8 @@ export interface TranscribeOptions {
   llmModel?: string        // LLM model for cleanup
   // Analysis options (separate from cleanup)
   analysisLlmModel?: string // LLM model for analysis (falls back to llmModel if not specified)
+  // Turnstile CAPTCHA token
+  turnstileToken?: string | null
 }
 
 /**

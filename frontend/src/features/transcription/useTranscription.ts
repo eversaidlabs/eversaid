@@ -136,8 +136,10 @@ export interface UseTranscriptionReturn {
    * Upload audio and start transcription
    * @param file - Audio file to upload
    * @param speakerCount - Number of speakers
+   * @param language - Audio language code
+   * @param turnstileToken - Turnstile CAPTCHA token (optional)
    */
-  uploadAudio: (file: File, speakerCount: number, language?: string) => Promise<void>
+  uploadAudio: (file: File, speakerCount: number, language?: string, turnstileToken?: string | null) => Promise<void>
 
   /**
    * Load an existing entry by ID.
@@ -146,8 +148,9 @@ export interface UseTranscriptionReturn {
    * Demo entries are identified by filename pattern (demo-*.mp3) for UI display.
    *
    * @param entryId - UUID of the entry to load
+   * @param turnstileToken - Turnstile CAPTCHA token (optional, needed if auto-triggering cleanup)
    */
-  loadEntry: (entryId: string) => Promise<void>
+  loadEntry: (entryId: string, turnstileToken?: string | null) => Promise<void>
 
   /**
    * Whether current entry is a demo entry.
@@ -188,7 +191,7 @@ export interface UseTranscriptionReturn {
    * Reprocess cleanup with new model, cleanup type, or temperature.
    * Polls for completion and reloads entry when done.
    */
-  reprocessCleanup: (options?: { cleanupType?: CleanupType; llmModel?: string; temperature?: number | null }) => Promise<void>
+  reprocessCleanup: (options?: { cleanupType?: CleanupType; llmModel?: string; temperature?: number | null; turnstileToken?: string | null }) => Promise<void>
 
   /**
    * Load cleanup data directly (for switching to cached cleanup without LLM call)
@@ -715,7 +718,7 @@ export function useTranscription(
    * Sets status to cleaning, triggers new cleanup, polls for completion, then reloads entry.
    */
   const reprocessCleanup = useCallback(
-    async (options: { cleanupType?: CleanupType; llmModel?: string; temperature?: number | null } = {}): Promise<void> => {
+    async (options: { cleanupType?: CleanupType; llmModel?: string; temperature?: number | null; turnstileToken?: string | null } = {}): Promise<void> => {
       if (!transcriptionId || !entryId) {
         console.warn("[reprocessCleanup] Missing transcriptionId or entryId")
         return
@@ -732,7 +735,12 @@ export function useTranscription(
 
       try {
         // Trigger new cleanup
-        const { data: cleanupJob } = await triggerCleanup(transcriptionId, options)
+        const { data: cleanupJob } = await triggerCleanup(transcriptionId, {
+          cleanupType: options.cleanupType,
+          llmModel: options.llmModel,
+          temperature: options.temperature,
+          turnstileToken: options.turnstileToken,
+        })
         setCleanupId(cleanupJob.id)
         setCleanupModelName(null) // Clear until new cleanup completes
         setCleanupTypeName(null)
@@ -784,7 +792,7 @@ export function useTranscription(
    * Upload audio and start transcription
    */
   const uploadAudio = useCallback(
-    async (file: File, speakerCount: number, language?: string): Promise<void> => {
+    async (file: File, speakerCount: number, language?: string, turnstileToken?: string | null): Promise<void> => {
       // Clean up any existing polling
       if (pollingRef.current) {
         clearTimeout(pollingRef.current)
@@ -804,6 +812,7 @@ export function useTranscription(
           language,
           enableDiarization: speakerCount > 1,
           enableAnalysis: true,
+          turnstileToken,
         })
 
         setUploadProgress(100)
@@ -892,7 +901,7 @@ export function useTranscription(
    * Demo entries are identified by filename pattern (demo-*.mp3) for UI display only.
    */
   const loadEntry = useCallback(
-    async (entryIdToLoad: string): Promise<void> => {
+    async (entryIdToLoad: string, turnstileToken?: string | null): Promise<void> => {
       console.log("[loadEntry] Starting to load entry:", entryIdToLoad)
 
       // Clean up any existing polling
@@ -950,7 +959,7 @@ export function useTranscription(
           // Auto-trigger cleanup for entries with completed transcription (e.g., demo entries)
           if (transcription.status === "completed" && transcription.id) {
             try {
-              const { data: cleanupJob } = await triggerCleanup(transcription.id)
+              const { data: cleanupJob } = await triggerCleanup(transcription.id, { turnstileToken })
               setCleanupId(cleanupJob.id)
               console.log("[loadEntry] Cleanup triggered:", cleanupJob.id)
               // Start polling for cleanup completion
