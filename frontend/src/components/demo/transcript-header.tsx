@@ -102,7 +102,7 @@ export function TranscriptHeader({
 
   const selectedLevelLabel = cleanupOptions?.selectedLevel
     ? t(`levels.${cleanupOptions.selectedLevel}`)
-    : t("levels.corrected")
+    : t("levels.edited")
 
   return (
     <div className={`px-6 py-4 border-r border-border last:border-r-0 ${cleanupOptions?.onTemperatureChange ? 'flex flex-col gap-2' : 'flex justify-between items-center'}`}>

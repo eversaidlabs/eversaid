@@ -78,9 +78,9 @@ export interface UseTranscriptionReturn {
   cleanupId: string | null
   /** Model name used for the current cleanup result */
   cleanupModelName: string | null
-  /** Cleanup type of the current cleanup result (e.g., 'corrected', 'corrected-readable') */
+  /** Cleanup type of the current cleanup result (e.g., 'minimal', 'edited') */
   cleanupTypeName: string | null
-  /** Prompt name used for the current cleanup result (e.g., 'sl-corrected-readable-v2-multi-v1') */
+  /** Prompt name used for the current cleanup result (e.g., 'sl-edited-v1') */
   cleanupPromptName: string | null
   /** Temperature used for the current cleanup result */
   cleanupTemperature: number | null

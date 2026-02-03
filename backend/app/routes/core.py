@@ -51,7 +51,7 @@ async def get_options(
 class CleanupRequest(BaseModel):
     """Request body for triggering cleanup."""
 
-    cleanup_type: Optional[str] = "corrected"  # verbatim, corrected, formal
+    cleanup_type: Optional[str] = "edited"  # minimal, edited
     llm_model: Optional[str] = None
     temperature: Optional[float] = None  # 0-2, not sent if None
 
@@ -84,7 +84,7 @@ async def transcribe(
     enable_analysis: bool = Form(True),
     analysis_profile: str = Form("generic-summary"),
     # Cleanup options
-    cleanup_type: str = Form("corrected"),  # verbatim, corrected, formal
+    cleanup_type: str = Form("edited"),  # minimal, edited
     llm_model: Optional[str] = Form(None),  # LLM model for cleanup
     # Analysis options (separate from cleanup)
     analysis_llm_model: Optional[str] = Form(None),  # LLM model for analysis

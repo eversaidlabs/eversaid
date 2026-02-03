@@ -356,12 +356,8 @@
       "openSourceModel": "Open Source Model:",
       "style": "Style:",
       "levels": {
-        "verbatim": "Verbatim",
-        "corrected": "Corrected",
-        "corrected-readable": "Readable",
-        "corrected-readable-v2": "Readable v2",
-        "corrected-readable-v3": "Readable v3",
-        "formal": "Formal"
+        "minimal": "Minimal",
+        "edited": "Edited"
       },
       "copy": "Copy",
       "copySuccess": "Copied to clipboard",

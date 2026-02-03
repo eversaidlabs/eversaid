@@ -257,7 +257,7 @@ export async function uploadAndTranscribe(
   formData.append('analysis_profile', options.analysisProfile ?? 'generic-summary')
 
   // Cleanup options
-  formData.append('cleanup_type', options.cleanupType ?? 'corrected')
+  formData.append('cleanup_type', options.cleanupType ?? 'edited')
   if (options.llmModel) {
     formData.append('llm_model', options.llmModel)
   }
