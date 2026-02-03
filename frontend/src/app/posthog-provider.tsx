@@ -3,9 +3,7 @@
 import { useEffect, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import posthog from 'posthog-js'
-
-const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
-const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || '/ingest'
+import type { PostHogConfig } from '@/lib/app-config'
 
 function PostHogPageView() {
   const pathname = usePathname()
@@ -24,20 +22,25 @@ function PostHogPageView() {
   return null
 }
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+interface PostHogProviderProps {
+  config: PostHogConfig
+  children: React.ReactNode
+}
+
+export function PostHogProvider({ config, children }: PostHogProviderProps) {
   useEffect(() => {
-    if (POSTHOG_KEY) {
-      posthog.init(POSTHOG_KEY, {
-        api_host: POSTHOG_HOST,
+    if (config.key) {
+      posthog.init(config.key, {
+        api_host: config.host,
         ui_host: 'https://eu.posthog.com',
         capture_pageview: false,
         capture_pageleave: true,
         person_profiles: 'identified_only',
       })
     }
-  }, [])
+  }, [config.key, config.host])
 
-  if (!POSTHOG_KEY) {
+  if (!config.key) {
     return <>{children}</>
   }
 

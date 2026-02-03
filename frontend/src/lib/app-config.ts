@@ -15,6 +15,11 @@ export interface FeatureFlags {
   temperatureSelection: boolean
 }
 
+export interface PostHogConfig {
+  key: string
+  host: string
+}
+
 export interface AppConfig {
   demo: DemoConfig
   features: FeatureFlags

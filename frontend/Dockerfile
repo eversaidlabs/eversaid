@@ -21,13 +21,9 @@ COPY . .
 
 # Build arguments for environment variables needed at build time
 # Only NEXT_PUBLIC_API_URL is needed at build time (Next.js bakes it into client JS)
-# Other config (demo content, feature flags) is read at runtime via Server Components
+# Other config (demo content, feature flags, PostHog) is read at runtime via Server Components
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-ARG NEXT_PUBLIC_POSTHOG_KEY
-ENV NEXT_PUBLIC_POSTHOG_KEY=${NEXT_PUBLIC_POSTHOG_KEY}
-ARG NEXT_PUBLIC_POSTHOG_HOST
-ENV NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
 
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1

@@ -7,6 +7,7 @@ import { PostHogProvider } from "@/app/posthog-provider"
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { locales } from '@/i18n/config'
+import type { PostHogConfig } from '@/lib/app-config'
 import "../globals.css"
 
 // Font definitions kept for potential future use
@@ -55,10 +56,15 @@ export default async function LocaleLayout({
 
   const messages = await getMessages()
 
+  const posthogConfig: PostHogConfig = {
+    key: process.env.POSTHOG_KEY || '',
+    host: process.env.POSTHOG_HOST || '/ingest',
+  }
+
   return (
     <html lang={locale} className={`${_inter.variable} ${_comfortaa.variable}`}>
       <body className={`font-sans antialiased`}>
-        <PostHogProvider>
+        <PostHogProvider config={posthogConfig}>
           <NextIntlClientProvider messages={messages}>
             {children}
             <Toaster />

@@ -7,8 +7,6 @@ services:
         # For dev: http://localhost:8001 (browser accesses via host ports)
         # For prod: https://your-domain.com (nginx proxies /api to backend)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
-        NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY:-}
-        NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-/ingest}
     container_name: eversaid-frontend
     ports:
       - "3000:3000"  # Direct access for dev
@@ -22,6 +20,9 @@ services:
       # Feature flags
       ENABLE_MODEL_SELECTION: ${ENABLE_MODEL_SELECTION:-false}
       ENABLE_TEMPERATURE_SELECTION: ${ENABLE_TEMPERATURE_SELECTION:-false}
+      # Analytics
+      POSTHOG_KEY: ${POSTHOG_KEY:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-/ingest}
     depends_on:
       - backend
     restart: unless-stopped
