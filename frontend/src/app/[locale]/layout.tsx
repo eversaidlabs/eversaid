@@ -20,6 +20,9 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
 }
 
+// Force dynamic rendering so runtime env vars (POSTHOG_KEY, etc.) are read at request time
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "eversaid | Smart transcription. AI listens. You decide.",
   description:
