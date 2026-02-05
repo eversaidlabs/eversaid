@@ -19,9 +19,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build arguments for environment variables needed at build time
-# Only NEXT_PUBLIC_API_URL is needed at build time (Next.js bakes it into client JS)
-# Other config (demo content, feature flags, PostHog) is read at runtime via Server Components
+# Optional: API URL for dev builds (defaults to empty for relative URLs in prod)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 

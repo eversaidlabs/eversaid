@@ -3,9 +3,7 @@ services:
     build:
       context: ./frontend
       args:
-        # Build-time variable: where browser should call the API
-        # For dev: http://localhost:8001 (browser accesses via host ports)
-        # For prod: https://your-domain.com (nginx proxies /api to backend)
+        # Build-time: browser calls backend directly in dev (no reverse proxy)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
         NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
     container_name: eversaid-frontend

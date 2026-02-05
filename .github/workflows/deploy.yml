@@ -95,9 +95,8 @@ jobs:
   # Creates Docker images and stores them in GitHub Container Registry.
   #
   # Single build for all environments:
-  #   - Environment-specific config (demo content, feature flags) is read
-  #     at runtime via Server Components, not baked in at build time
-  #   - Only NEXT_PUBLIC_API_URL is set at build time (Next.js requirement)
+  #   - All config (API URL, demo content, feature flags) uses relative paths
+  #     or is read at runtime via Server Components, not baked in at build time
   #
   # Why ghcr.io?
   #   - Images live next to code (same permissions, same org)
@@ -108,9 +107,6 @@ jobs:
   #   - Every build is addressable: ghcr.io/.../frontend:abc123
   #   - Instant rollback: just deploy previous SHA
   #   - Never lose a build
-  #
-  # Why build cache?
-  #   - Unchanged layers are reused
   # ===========================================================================
   build:
     needs: test
@@ -144,16 +140,6 @@ jobs:
             type=semver,pattern=v{{major}}.{{minor}}
             type=sha,prefix=
 
-      # Frontend needs API URL baked in at build time (Next.js limitation)
-      - name: Set API URL
-        id: api_url
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "url=https://eversaid.ai" >> $GITHUB_OUTPUT
-          else
-            echo "url=https://staging.eversaid.ai" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build and push frontend
         uses: docker/build-push-action@v5
         with:
@@ -162,8 +148,6 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:${{ steps.meta.outputs.version }}
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          build-args: |
-            NEXT_PUBLIC_API_URL=${{ steps.api_url.outputs.url }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

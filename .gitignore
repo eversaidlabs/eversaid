@@ -87,3 +87,5 @@ backend/data/demo/
 credentials.json
 
 docs-local/
+
+infrastructure/
