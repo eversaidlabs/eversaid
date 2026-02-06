@@ -462,37 +462,24 @@ export default function HomePage() {
             viewport={{ once: true, amount: 0.2 }}
             variants={staggerContainer}
           >
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-white border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[100px] h-[100px] bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] rounded-[24px] flex items-center justify-center text-[44px] mx-auto mb-5">
-                🧠
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('useCases.therapists.title')}</h3>
-              <p className="text-sm text-[#64748B] leading-relaxed">{t('useCases.therapists.description')}</p>
-            </MotionDiv>
-
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-white border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[100px] h-[100px] bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] rounded-[24px] flex items-center justify-center text-[44px] mx-auto mb-5">
-                🎤
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('useCases.journalists.title')}</h3>
-              <p className="text-sm text-[#64748B] leading-relaxed">{t('useCases.journalists.description')}</p>
-            </MotionDiv>
-
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-white border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[100px] h-[100px] bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] rounded-[24px] flex items-center justify-center text-[44px] mx-auto mb-5">
-                💼
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('useCases.meetings.title')}</h3>
-              <p className="text-sm text-[#64748B] leading-relaxed">{t('useCases.meetings.description')}</p>
-            </MotionDiv>
-
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-white border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[100px] h-[100px] bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] rounded-[24px] flex items-center justify-center text-[44px] mx-auto mb-5">
-                👂
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('useCases.accessibility.title')}</h3>
-              <p className="text-sm text-[#64748B] leading-relaxed">{t('useCases.accessibility.description')}</p>
-            </MotionDiv>
+            {([
+              { icon: '🧠', key: 'therapists' },
+              { icon: '💼', key: 'sales' },
+              { icon: '🎤', key: 'journalists' },
+              { icon: '🔬', key: 'uxResearch' },
+              { icon: '👥', key: 'hr' },
+              { icon: '⚖️', key: 'lawyers' },
+              { icon: '📝', key: 'meetings' },
+              { icon: '👂', key: 'accessibility' },
+            ] as const).map(({ icon, key }) => (
+              <MotionDiv key={key} variants={cardItem} whileHover={{ y: -4 }} className="bg-white border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
+                <div className="w-[100px] h-[100px] bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] rounded-[24px] flex items-center justify-center text-[44px] mx-auto mb-5">
+                  {icon}
+                </div>
+                <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t(`useCases.${key}.title`)}</h3>
+                <p className="text-sm text-[#64748B] leading-relaxed">{t(`useCases.${key}.description`)}</p>
+              </MotionDiv>
+            ))}
           </MotionDiv>
         </div>
       </section>

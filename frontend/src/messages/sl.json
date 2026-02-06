@@ -118,9 +118,25 @@
         "title": "Terapevti in mentorji",
         "description": "Dokumentirajte seje z označenimi govorci."
       },
+      "sales": {
+        "title": "Prodajne ekipe",
+        "description": "Preglejte klice, sledite dogovorom, hitreje zaključite."
+      },
       "journalists": {
         "title": "Novinarji",
         "description": "Prepišite intervjuje s preverljivimi citati."
+      },
+      "uxResearch": {
+        "title": "UX raziskave",
+        "description": "Analizirajte uporabniške intervjuje s polnim kontekstom."
+      },
+      "hr": {
+        "title": "HR in zaposlovanje",
+        "description": "Zabeležite razgovore pošteno in dosledno."
+      },
+      "lawyers": {
+        "title": "Odvetniki",
+        "description": "Ohranite pričevanja z besedno natančnostjo."
       },
       "meetings": {
         "title": "Zapiski sestankov",

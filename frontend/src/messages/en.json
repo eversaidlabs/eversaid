@@ -118,9 +118,25 @@
         "title": "Therapists & Coaches",
         "description": "Document sessions with speaker attribution."
       },
+      "sales": {
+        "title": "Sales Teams",
+        "description": "Review calls, track commitments, close faster."
+      },
       "journalists": {
         "title": "Journalists",
         "description": "Transcribe interviews with verifiable quotes."
+      },
+      "uxResearch": {
+        "title": "UX Research",
+        "description": "Analyze user interviews with full context."
+      },
+      "hr": {
+        "title": "HR & Recruiting",
+        "description": "Capture interviews fairly and consistently."
+      },
+      "lawyers": {
+        "title": "Lawyers",
+        "description": "Preserve testimony with word-level accuracy."
       },
       "meetings": {
         "title": "Meeting Notes",
