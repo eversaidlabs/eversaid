@@ -336,6 +336,12 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-base font-bold text-[#0F172A] mb-3">{t('features.speakerLabels.title')}</h3>
                 <p className="text-sm text-[#64748B] leading-relaxed">{t('features.speakerLabels.description')}</p>
+                <span className="inline-flex items-center gap-1.5 bg-[#fef3c7] text-[#92400e] text-xs font-medium px-3 py-1.5 rounded-full mt-3">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4"/>
+                  </svg>
+                  {t('features.speakerLabels.comingSoon')}
+                </span>
               </MotionDiv>
 
               <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[20px] p-7 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
@@ -352,6 +358,12 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-base font-bold text-[#0F172A] mb-3">{t('features.editRevert.title')}</h3>
                 <p className="text-sm text-[#64748B] leading-relaxed">{t('features.editRevert.description')}</p>
+                <span className="inline-flex items-center gap-1.5 bg-[#fef3c7] text-[#92400e] text-xs font-medium px-3 py-1.5 rounded-full mt-3">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4"/>
+                  </svg>
+                  {t('features.editRevert.comingSoon')}
+                </span>
               </MotionDiv>
             </MotionDiv>
           </div>

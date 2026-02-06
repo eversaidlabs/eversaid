@@ -81,7 +81,8 @@
       },
       "speakerLabels": {
         "title": "Oznake govorcev",
-        "description": "Barvno označeni govorci."
+        "description": "Barvno označeni govorci.",
+        "comingSoon": "Preimenovanje govorcev"
       },
       "audioLinked": {
         "title": "Povezano z zvokom",
@@ -89,7 +90,8 @@
       },
       "editRevert": {
         "title": "Urejanje in povrnitev",
-        "description": "Uredite ali povrnite vsak segment."
+        "description": "Uredite ali povrnite vsak segment.",
+        "comingSoon": "Premikanje besedila med segmenti"
       },
       "gdpr": {
         "title": "GDPR",

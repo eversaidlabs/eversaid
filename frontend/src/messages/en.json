@@ -81,7 +81,8 @@
       },
       "speakerLabels": {
         "title": "Speaker Labels",
-        "description": "Color-coded speaker attribution."
+        "description": "Color-coded speaker attribution.",
+        "comingSoon": "Speaker renaming"
       },
       "audioLinked": {
         "title": "Audio-Linked",
@@ -89,7 +90,8 @@
       },
       "editRevert": {
         "title": "Edit & Revert",
-        "description": "Edit text with spellcheck."
+        "description": "Edit text with spellcheck.",
+        "comingSoon": "Move text between segments"
       },
       "gdpr": {
         "title": "GDPR",
