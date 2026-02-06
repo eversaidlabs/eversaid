@@ -26,9 +26,6 @@ services:
       # Feature flags
       ENABLE_MODEL_SELECTION: ${ENABLE_MODEL_SELECTION:-false}
       ENABLE_TEMPERATURE_SELECTION: ${ENABLE_TEMPERATURE_SELECTION:-false}
-      # Analytics
-      POSTHOG_KEY: ${POSTHOG_KEY:-}
-      POSTHOG_HOST: ${POSTHOG_HOST:-https://eu.i.posthog.com}
     depends_on:
       - backend
     restart: unless-stopped
@@ -57,6 +54,11 @@ services:
       RATE_LIMIT_LLM_IP_DAY: ${RATE_LIMIT_LLM_IP_DAY:-200}
       RATE_LIMIT_LLM_GLOBAL_DAY: ${RATE_LIMIT_LLM_GLOBAL_DAY:-10000}
       DATABASE_URL: ${DATABASE_URL:-sqlite:///./data/demo.db}
+      # CORS - allow production domains
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://eversaid.ai,https://www.eversaid.ai}
+      # Analytics (PostHog) - served via /api/config
+      POSTHOG_KEY: ${POSTHOG_KEY:-}
+      POSTHOG_HOST: ${POSTHOG_HOST:-/ingest}
     volumes:
       - ./data:/app/data
     healthcheck:

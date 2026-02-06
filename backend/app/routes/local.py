@@ -23,6 +23,29 @@ router = APIRouter(tags=["local"])
 
 
 # =============================================================================
+# Runtime Config Endpoint
+# =============================================================================
+
+
+@router.get("/api/config")
+async def get_config(
+    settings: Settings = Depends(get_settings),
+):
+    """Get runtime configuration for the frontend.
+
+    Returns public configuration that the frontend needs at runtime.
+    This supports the single Docker image pattern where the same build
+    is used across staging/production with different env vars.
+    """
+    return {
+        "posthog": {
+            "key": settings.POSTHOG_KEY,
+            "host": settings.POSTHOG_HOST,
+        },
+    }
+
+
+# =============================================================================
 # Rate Limit Endpoint
 # =============================================================================
 

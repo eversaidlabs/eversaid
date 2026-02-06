@@ -19,9 +19,6 @@ services:
       # Feature flags
       ENABLE_MODEL_SELECTION: ${ENABLE_MODEL_SELECTION:-false}
       ENABLE_TEMPERATURE_SELECTION: ${ENABLE_TEMPERATURE_SELECTION:-false}
-      # Analytics
-      POSTHOG_KEY: ${POSTHOG_KEY:-}
-      POSTHOG_HOST: ${POSTHOG_HOST:-/ingest}
     depends_on:
       - backend
     restart: unless-stopped

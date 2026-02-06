@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     # CORS origins (comma-separated list)
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    # Analytics (PostHog) - served via /api/config for runtime configuration
+    POSTHOG_KEY: str = ""
+    POSTHOG_HOST: str = "/ingest"
+
     model_config = SettingsConfigDict(env_file=".env")
 
     @property

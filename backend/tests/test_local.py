@@ -433,3 +433,34 @@ class TestWaitlistEndpoints:
         )
 
         assert response.status_code == 422
+
+
+class TestConfigEndpoint:
+    """Tests for runtime config endpoint."""
+
+    def test_get_config_returns_posthog_settings(self, client, test_settings):
+        """Test that /api/config returns PostHog configuration."""
+        response = client.get("/api/config")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "posthog" in data
+        assert "key" in data["posthog"]
+        assert "host" in data["posthog"]
+
+    def test_get_config_returns_empty_key_when_not_set(self, client):
+        """Test that /api/config returns empty key when POSTHOG_KEY not set."""
+        response = client.get("/api/config")
+
+        assert response.status_code == 200
+        data = response.json()
+        # Default is empty string
+        assert data["posthog"]["key"] == ""
+
+    def test_get_config_returns_default_host(self, client):
+        """Test that /api/config returns default host /ingest when not set."""
+        response = client.get("/api/config")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["posthog"]["host"] == "/ingest"
