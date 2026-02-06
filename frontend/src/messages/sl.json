@@ -19,6 +19,7 @@
     "home": "Domov",
     "demo": "Demo",
     "features": "Funkcije",
+    "insights": "AI analiza",
     "useCases": "Primeri uporabe",
     "howItWorks": "Kako deluje",
     "apiDocs": "API dokumentacija",
@@ -109,13 +110,12 @@
         "title": "Brez učenja",
         "description": "Nikoli uporabljeno za učenje AI."
       },
-      "disclaimerDemo": "Brezplačni demo uporablja varno povezavo. Polno šifriranje, obdelava samo v EU in GDPR skladnost so vključeni z računi.",
-      "spellcheck": "Slovenski črkovalec kmalu."
+      "disclaimerDemo": "Brezplačni demo uporablja varno povezavo. Polno šifriranje, obdelava samo v EU in GDPR skladnost so vključeni z računi."
     },
     "useCases": {
       "sectionLabel": "Primeri uporabe",
       "title": "Za koga je namenjeno",
-      "subtitle": "Strokovnjaki, ki potrebujejo natančne, preverljive prepise",
+      "subtitle": "Strokovnjaki, ki potrebujejo prepise, ki jim lahko zaupajo, in vpoglede, ki jih lahko uporabijo",
       "therapists": {
         "title": "Terapevti in mentorji",
         "description": "Dokumentirajte seje z označenimi govorci."

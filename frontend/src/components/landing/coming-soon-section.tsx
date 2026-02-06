@@ -119,7 +119,7 @@ export function ComingSoonSection() {
   const t = useTranslations("landing.comingSoon")
 
   return (
-    <section className="snap-start snap-always px-8 md:px-16 py-20">
+    <section id="coming-soon" className="snap-start snap-always px-8 md:px-16 py-20">
       <style dangerouslySetInnerHTML={{ __html: typingStyles }} />
 
       <div className="max-w-[960px] mx-auto w-full flex flex-col items-center">

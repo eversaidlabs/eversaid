@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/routing"
 import { Shield } from "lucide-react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 import { useWaitlist } from "@/features/transcription/useWaitlist"
@@ -30,6 +30,23 @@ export default function HomePage() {
   const t = useTranslations('landing')
   const tNav = useTranslations('navigation')
   const tRoot = useTranslations()
+
+  // Header scroll state
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    // The main element has overflow-y-scroll, so we need to listen on it
+    const mainElement = document.querySelector('main')
+    if (!mainElement) return
+
+    const handleScroll = () => {
+      // Add background after scrolling past 100px
+      setIsScrolled(mainElement.scrollTop > 100)
+    }
+
+    mainElement.addEventListener('scroll', handleScroll, { passive: true })
+    return () => mainElement.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Waitlist modal state
   const [waitlistState, setWaitlistState] = useState<"hidden" | "toast" | "form" | "success">("hidden")
@@ -75,7 +92,7 @@ export default function HomePage() {
   return (
     <main className="h-screen overflow-y-scroll snap-y snap-proximity">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-16 py-5 bg-transparent">
+      <nav className={`fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-8 md:px-16 py-5 transition-all duration-300 ${isScrolled ? 'bg-[#0F172A]/95 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
         <Link href="/" className="flex items-center gap-2.5">
           <img src="/logo.svg" alt="EverSaid logo" className="h-[39px] w-auto" />
           <span className="font-[family-name:var(--font-comfortaa)] font-bold text-[27px] text-white tracking-[0.01em]">
@@ -86,6 +103,9 @@ export default function HomePage() {
           <Link href="#features" className="text-white/80 hover:text-white text-[15px] font-medium transition-colors">
             {tNav('features')}
           </Link>
+          <Link href="#insights" className="text-white/80 hover:text-white text-[15px] font-medium transition-colors">
+            {tNav('insights')}
+          </Link>
           <Link href="#use-cases" className="text-white/80 hover:text-white text-[15px] font-medium transition-colors">
             {tNav('useCases')}
           </Link>
@@ -95,13 +115,6 @@ export default function HomePage() {
           >
             {tNav('howItWorks')}
           </Link>
-          {/* TODO: Enable when API docs are ready */}
-          <span
-            className="text-white/40 text-[15px] font-medium cursor-not-allowed"
-            title="Coming soon"
-          >
-            {tNav('apiDocs')}
-          </span>
           <button
             onClick={() => handleWaitlistClick("extended_usage")}
             className="px-4 py-2 border border-transparent [background:linear-gradient(135deg,#0F172A,#1E3A5F)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] hover:[background:linear-gradient(135deg,#1a2744,#264a6e)_padding-box,linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)_border-box] text-white rounded-lg text-[13px] font-semibold transition-all"
@@ -199,86 +212,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Divider: Proof Visual → AI Insights */}
+      {/* Divider: Proof Visual → Features */}
       <SectionDivider fillColor={DIVIDER_COLORS.white} />
-
-      {/* AI Insights Section */}
-      <section className="snap-start snap-always min-h-screen flex items-center px-8 md:px-16 py-20" id="insights">
-        <div className="max-w-[1200px] mx-auto w-full">
-          <MotionDiv
-            className="text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            <MotionDiv variants={sectionHeader}>
-              <div className="text-[13px] font-semibold text-[#38BDF8] uppercase tracking-[2px] mb-4">
-                {t('insights.sectionLabel')}
-              </div>
-              <h2 className="text-[32px] md:text-[40px] font-extrabold text-[#0F172A] mb-4 tracking-[-0.02em]">
-                {t('insights.title')}
-              </h2>
-            </MotionDiv>
-            <MotionDiv variants={sectionSubtitle}>
-              <p className="text-lg text-[#64748B] mb-12 max-w-[600px] mx-auto">
-                {t('insights.subtitle')}
-              </p>
-            </MotionDiv>
-          </MotionDiv>
-
-          <MotionDiv
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainer}
-          >
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] border border-[rgba(56,189,248,0.3)] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[84px] h-[84px] bg-white rounded-[20px] flex items-center justify-center text-[40px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                📋
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('insights.summary.title')}</h3>
-              <p className="text-[15px] text-[#64748B] leading-relaxed">
-                {t('insights.summary.description')}
-              </p>
-            </MotionDiv>
-
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[84px] h-[84px] bg-white rounded-[20px] flex items-center justify-center text-[40px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                ✅
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('insights.actionItems.title')}</h3>
-              <p className="text-[15px] text-[#64748B] leading-relaxed">
-                {t('insights.actionItems.description')}
-              </p>
-            </MotionDiv>
-
-            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              <div className="w-[84px] h-[84px] bg-white rounded-[20px] flex items-center justify-center text-[40px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                💭
-              </div>
-              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('insights.reflection.title')}</h3>
-              <p className="text-[15px] text-[#64748B] leading-relaxed">
-                {t('insights.reflection.description')}
-              </p>
-            </MotionDiv>
-          </MotionDiv>
-
-          <MotionDiv
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-          >
-            <p className="text-center text-sm text-[#94A3B8] mt-8">
-              {t('insights.comingSoon')}
-            </p>
-          </MotionDiv>
-        </div>
-      </section>
-
-      {/* Coming Soon Section */}
-      <ComingSoonSection />
 
       {/* Features Section */}
       <section className="snap-start snap-always min-h-screen flex items-center px-8 md:px-16 py-20" id="features">
@@ -430,14 +365,79 @@ export default function HomePage() {
             </MotionDiv>
           </div>
 
+        </div>
+      </section>
+
+      {/* AI Insights Section */}
+      <section className="snap-start snap-always min-h-screen flex items-center px-8 md:px-16 py-20" id="insights">
+        <div className="max-w-[1200px] mx-auto w-full">
+          <MotionDiv
+            className="text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <MotionDiv variants={sectionHeader}>
+              <div className="text-[13px] font-semibold text-[#38BDF8] uppercase tracking-[2px] mb-4">
+                {t('insights.sectionLabel')}
+              </div>
+              <h2 className="text-[32px] md:text-[40px] font-extrabold text-[#0F172A] mb-4 tracking-[-0.02em]">
+                {t('insights.title')}
+              </h2>
+            </MotionDiv>
+            <MotionDiv variants={sectionSubtitle}>
+              <p className="text-lg text-[#64748B] mb-12 max-w-[600px] mx-auto">
+                {t('insights.subtitle')}
+              </p>
+            </MotionDiv>
+          </MotionDiv>
+
+          <MotionDiv
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainer}
+          >
+            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] border border-[rgba(56,189,248,0.3)] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
+              <div className="w-[84px] h-[84px] bg-white rounded-[20px] flex items-center justify-center text-[40px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                📋
+              </div>
+              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('insights.summary.title')}</h3>
+              <p className="text-[15px] text-[#64748B] leading-relaxed">
+                {t('insights.summary.description')}
+              </p>
+            </MotionDiv>
+
+            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
+              <div className="w-[84px] h-[84px] bg-white rounded-[20px] flex items-center justify-center text-[40px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                ✅
+              </div>
+              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('insights.actionItems.title')}</h3>
+              <p className="text-[15px] text-[#64748B] leading-relaxed">
+                {t('insights.actionItems.description')}
+              </p>
+            </MotionDiv>
+
+            <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
+              <div className="w-[84px] h-[84px] bg-white rounded-[20px] flex items-center justify-center text-[40px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                💭
+              </div>
+              <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t('insights.reflection.title')}</h3>
+              <p className="text-[15px] text-[#64748B] leading-relaxed">
+                {t('insights.reflection.description')}
+              </p>
+            </MotionDiv>
+          </MotionDiv>
+
           <MotionDiv
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
           >
-            <p className="text-center text-sm text-[#10B981] font-medium mt-6">
-              ✓ {t('features.spellcheck')}
+            <p className="text-center text-sm text-[#94A3B8] mt-8">
+              {t('insights.comingSoon')}
             </p>
           </MotionDiv>
         </div>
@@ -481,15 +481,17 @@ export default function HomePage() {
               { icon: '🔬', key: 'uxResearch' },
               { icon: '👥', key: 'hr' },
               { icon: '⚖️', key: 'lawyers' },
-              { icon: '📝', key: 'meetings' },
-              { icon: '👂', key: 'accessibility' },
-            ] as const).map(({ icon, key }) => (
+              { icon: '📝', key: 'meetings', hasDescription: true },
+              { icon: '👂', key: 'accessibility', hasDescription: true },
+            ] as const).map(({ icon, key, hasDescription }) => (
               <MotionDiv key={key} variants={cardItem} whileHover={{ y: -4 }} className="bg-white border border-[#E2E8F0] rounded-[20px] p-8 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
                 <div className="w-[100px] h-[100px] bg-[linear-gradient(135deg,rgba(56,189,248,0.1)_0%,rgba(168,85,247,0.1)_100%)] rounded-[24px] flex items-center justify-center text-[44px] mx-auto mb-5">
                   {icon}
                 </div>
-                <h3 className="text-lg font-bold text-[#0F172A] mb-3">{t(`useCases.${key}.title`)}</h3>
-                <p className="text-sm text-[#64748B] leading-relaxed">{t(`useCases.${key}.description`)}</p>
+                <h3 className={`text-lg font-bold text-[#0F172A] ${hasDescription ? 'mb-3' : ''}`}>{t(`useCases.${key}.title`)}</h3>
+                {hasDescription && (
+                  <p className="text-sm text-[#64748B] leading-relaxed">{t(`useCases.${key}.description`)}</p>
+                )}
               </MotionDiv>
             ))}
           </MotionDiv>
@@ -574,7 +576,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Divider: How It Works → Final CTA */}
+      {/* Divider: How It Works → Coming Soon */}
+      <SectionDivider fillColor={DIVIDER_COLORS.white} />
+
+      {/* Coming Soon Section */}
+      <ComingSoonSection />
+
+      {/* Divider: Coming Soon → Final CTA */}
       <SectionDivider fillColor={DIVIDER_COLORS.dark} />
 
       {/* Final CTA Section */}

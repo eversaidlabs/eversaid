@@ -19,6 +19,7 @@
     "home": "Home",
     "demo": "Demo",
     "features": "Features",
+    "insights": "AI Insights",
     "useCases": "Use Cases",
     "howItWorks": "How It Works",
     "apiDocs": "API Docs",
@@ -90,7 +91,7 @@
       },
       "editRevert": {
         "title": "Edit & Revert",
-        "description": "Edit text with spellcheck.",
+        "description": "Edit or revert each segment.",
         "comingSoon": "Move text between segments"
       },
       "gdpr": {
@@ -109,13 +110,12 @@
         "title": "No Training",
         "description": "Never used for AI training."
       },
-      "disclaimerDemo": "Free demo uses secure connection. Full encryption, EU-only processing & GDPR compliance included with accounts.",
-      "spellcheck": "Slovenian spellcheck coming soon."
+      "disclaimerDemo": "Free demo uses secure connection. Full encryption, EU-only processing & GDPR compliance included with accounts."
     },
     "useCases": {
       "sectionLabel": "Use Cases",
       "title": "Who It's For",
-      "subtitle": "Professionals who need accurate, verifiable transcripts",
+      "subtitle": "Professionals who need transcripts they can trust and insights they can use",
       "therapists": {
         "title": "Therapists & Coaches",
         "description": "Document sessions with speaker attribution."
