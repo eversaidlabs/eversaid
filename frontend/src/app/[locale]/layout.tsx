@@ -7,7 +7,6 @@ import { PostHogProvider } from "@/app/posthog-provider"
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { locales } from '@/i18n/config'
-import type { PostHogConfig } from '@/lib/app-config'
 import "../globals.css"
 
 // Font definitions kept for potential future use
@@ -19,9 +18,6 @@ const _comfortaa = Comfortaa({ weight: "700", subsets: ["latin"], variable: "--f
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
 }
-
-// Force dynamic rendering so runtime env vars (POSTHOG_KEY, etc.) are read at request time
-export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: "eversaid | Smart transcription. AI listens. You decide.",
@@ -59,15 +55,10 @@ export default async function LocaleLayout({
 
   const messages = await getMessages()
 
-  const posthogConfig: PostHogConfig = {
-    key: process.env.POSTHOG_KEY || '',
-    host: process.env.POSTHOG_HOST || '/ingest',
-  }
-
   return (
     <html lang={locale} className={`${_inter.variable} ${_comfortaa.variable}`}>
       <body className={`font-sans antialiased`}>
-        <PostHogProvider config={posthogConfig}>
+        <PostHogProvider>
           <NextIntlClientProvider messages={messages}>
             {children}
             <Toaster />

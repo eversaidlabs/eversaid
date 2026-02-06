@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import posthog from 'posthog-js'
-import type { PostHogConfig } from '@/lib/app-config'
 
 function PostHogPageView() {
   const pathname = usePathname()
@@ -23,32 +22,46 @@ function PostHogPageView() {
 }
 
 interface PostHogProviderProps {
-  config: PostHogConfig
   children: React.ReactNode
 }
 
-export function PostHogProvider({ config, children }: PostHogProviderProps) {
-  useEffect(() => {
-    if (config.key) {
-      posthog.init(config.key, {
-        api_host: config.host,
-        ui_host: 'https://eu.posthog.com',
-        capture_pageview: false,
-        capture_pageleave: true,
-        person_profiles: 'identified_only',
-      })
-    }
-  }, [config.key, config.host])
+/**
+ * PostHog analytics provider.
+ *
+ * Fetches config from /api/config at runtime to support the single Docker
+ * image pattern (same build across staging/production with different env vars).
+ */
+export function PostHogProvider({ children }: PostHogProviderProps) {
+  const [initialized, setInitialized] = useState(false)
 
-  if (!config.key) {
-    return <>{children}</>
-  }
+  useEffect(() => {
+    // Fetch runtime config and initialize PostHog
+    fetch('/api/config')
+      .then((res) => res.json())
+      .then((config) => {
+        if (config.posthog?.key) {
+          posthog.init(config.posthog.key, {
+            api_host: config.posthog.host,
+            ui_host: 'https://eu.posthog.com',
+            capture_pageview: false,
+            capture_pageleave: true,
+            person_profiles: 'identified_only',
+          })
+          setInitialized(true)
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load PostHog config:', err)
+      })
+  }, [])
 
   return (
     <>
-      <Suspense fallback={null}>
-        <PostHogPageView />
-      </Suspense>
+      {initialized && (
+        <Suspense fallback={null}>
+          <PostHogPageView />
+        </Suspense>
+      )}
       {children}
     </>
   )

@@ -1,6 +1,10 @@
 import { DemoPage } from "./demo-page-client"
 import type { AppConfig } from "@/lib/app-config"
 
+// Force dynamic rendering so runtime env vars are read at request time
+// This allows a single Docker image to work across environments
+export const dynamic = 'force-dynamic'
+
 /**
  * Demo page Server Component.
  *
