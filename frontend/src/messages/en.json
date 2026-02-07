@@ -34,6 +34,19 @@
       "cta": "Try Free Demo",
       "noSignup": "No sign-up required · Free demo available"
     },
+    "heroTranscript": {
+      "so": "So",
+      "I": "I",
+      "think": "think",
+      "youKnow": "you know",
+      "um": "um",
+      "the": "the",
+      "mainPointHereIs": "main point here is",
+      "basically": "basically",
+      "weNeedTo": "we need to",
+      "like": "im-",
+      "improveTheUserExperience": "improve the user experience significantly..."
+    },
     "proofVisual": {
       "sectionLabel": "See the Difference",
       "title": "Every edit visible. Every word verifiable."

@@ -34,6 +34,19 @@
       "cta": "Preizkusite brezplačni demo",
       "noSignup": "Brez registracije · Brezplačni demo na voljo"
     },
+    "heroTranscript": {
+      "so": "No",
+      "I": "jaz",
+      "think": "mislim,",
+      "youKnow": "da je",
+      "um": "um,",
+      "the": "ta",
+      "mainPointHereIs": "da je glavna poanta",
+      "basically": "v bistvu",
+      "weNeedTo": "da moramo",
+      "like": "pač",
+      "improveTheUserExperience": "bistveno izboljšati uporabniško izkušnjo..."
+    },
     "proofVisual": {
       "sectionLabel": "Poglejte razliko",
       "title": "Vsaka sprememba vidna. Vsaka beseda preverljiva."

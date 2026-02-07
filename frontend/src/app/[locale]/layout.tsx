@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Comfortaa } from "next/font/google"
+import { Inter, Comfortaa, DM_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
 import { PostHogProvider } from "@/app/posthog-provider"
@@ -11,6 +11,7 @@ import { BASE_URL, getAlternates } from '@/lib/seo'
 import "../globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", weight: ["400", "500", "600", "700"] })
 
 function OrganizationSchema() {
   const jsonLd = {
@@ -137,7 +138,7 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className={`${inter.variable} ${comfortaa.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${comfortaa.variable} ${dmSans.variable}`}>
       <head>
         <OrganizationSchema />
         <SoftwareApplicationSchema />

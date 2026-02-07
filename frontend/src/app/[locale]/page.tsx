@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 import { useWaitlist } from "@/features/transcription/useWaitlist"
 import { LiveTranscriptPreview } from "@/components/landing/live-transcript-preview"
+import { HeroTranscript } from "@/components/landing/hero-transcript"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { MotionDiv } from "@/components/motion"
 import { SectionDivider, DIVIDER_COLORS } from "@/components/landing/section-divider"
@@ -126,56 +127,69 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="snap-start snap-always relative min-h-screen flex flex-col justify-center items-center px-8 md:px-16 pt-40 pb-[120px] overflow-hidden bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_50%,#0F172A_100%)]">
+      <section className="snap-start snap-always relative min-h-screen flex items-center px-8 md:px-16 pt-[120px] pb-20 overflow-hidden bg-[linear-gradient(135deg,#0F172A_0%,#1E3A5F_50%,#0F172A_100%)]">
         {/* Background gradients */}
-        <div className="absolute top-[-50%] right-[-20%] w-[80%] h-[200%] bg-[radial-gradient(ellipse,rgba(56,189,248,0.15)_0%,transparent_60%)] pointer-events-none" />
+        <div className="absolute top-[-50%] right-[-20%] w-[80%] h-[200%] bg-[radial-gradient(ellipse,rgba(56,189,248,0.12)_0%,transparent_60%)] pointer-events-none" />
         <div className="absolute bottom-[-50%] left-[-20%] w-[60%] h-[150%] bg-[radial-gradient(ellipse,rgba(168,85,247,0.1)_0%,transparent_60%)] pointer-events-none" />
 
-        <div className="relative z-10 max-w-[900px] mx-auto text-center">
-          <MotionDiv
-            variants={heroTitle}
-            initial="hidden"
-            animate="visible"
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-[64px] font-extrabold text-white mb-6 leading-[1.05] tracking-[-0.03em]">
-              {t('hero.title')}
-              <br />
-              <span className="bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] bg-clip-text text-transparent">
-                {t('hero.titleAccent')}
-              </span>
-            </h1>
-          </MotionDiv>
-          <MotionDiv
-            variants={heroSubtitle}
-            initial="hidden"
-            animate="visible"
-          >
-            <p className="text-lg md:text-[22px] text-white/75 mb-12 max-w-[650px] mx-auto leading-relaxed font-normal">
-              {t('hero.subtitle')}
-            </p>
-          </MotionDiv>
-          <MotionDiv
-            variants={heroCta}
-            initial="hidden"
-            animate="visible"
-            className="flex gap-4 justify-center flex-wrap"
-          >
-            <Link
-              href="/demo"
-              className="bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] text-white px-10 py-[18px] rounded-xl font-bold text-[17px] transition-all hover:-translate-y-0.5 shadow-[0_8px_32px_rgba(56,189,248,0.3)] hover:shadow-[0_12px_40px_rgba(56,189,248,0.4)]"
+        <div className="relative z-10 max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row items-center gap-[60px]">
+          {/* Left column - Text */}
+          <div className="flex-1 text-center lg:text-left">
+            <MotionDiv
+              variants={heroTitle}
+              initial="hidden"
+              animate="visible"
             >
-              {t('hero.cta')}
-            </Link>
-          </MotionDiv>
-          <MotionDiv
-            variants={heroNote}
-            initial="hidden"
-            animate="visible"
-            className="mt-8 flex items-center justify-center gap-2 text-sm text-white/60"
-          >
-            <Shield className="w-4 h-4 opacity-70" />
-            {t('hero.noSignup')}
-          </MotionDiv>
+              <h1 className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-white mb-6 leading-[1.05] tracking-[-0.03em]">
+                {t('hero.title')}
+                <br />
+                <span className="bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] bg-clip-text text-transparent">
+                  {t('hero.titleAccent')}
+                </span>
+              </h1>
+            </MotionDiv>
+            <MotionDiv
+              variants={heroSubtitle}
+              initial="hidden"
+              animate="visible"
+            >
+              <p className="text-lg md:text-[20px] text-white/75 mb-10 leading-relaxed font-normal">
+                {t('hero.subtitle')}
+              </p>
+            </MotionDiv>
+            <MotionDiv
+              variants={heroCta}
+              initial="hidden"
+              animate="visible"
+            >
+              <Link
+                href="/demo"
+                className="inline-block bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] text-white px-10 py-[18px] rounded-xl font-bold text-[17px] transition-all hover:-translate-y-0.5 shadow-[0_8px_32px_rgba(56,189,248,0.3)] hover:shadow-[0_12px_40px_rgba(56,189,248,0.4)]"
+              >
+                {t('hero.cta')}
+              </Link>
+            </MotionDiv>
+            <MotionDiv
+              variants={heroNote}
+              initial="hidden"
+              animate="visible"
+              className="mt-6 flex items-center justify-center lg:justify-start gap-2 text-sm text-white/60"
+            >
+              <Shield className="w-4 h-4 opacity-70" />
+              {t('hero.noSignup')}
+            </MotionDiv>
+          </div>
+
+          {/* Right column - Animated transcript */}
+          <div className="flex-[0_0_50%] max-w-full lg:max-w-[50%]">
+            <MotionDiv
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <HeroTranscript />
+            </MotionDiv>
+          </div>
         </div>
       </section>
 
