@@ -3,15 +3,17 @@ import type { CleanupType } from '@/features/transcription/types'
 // Cleanup levels shown in the UI (order matters for dropdown)
 export const CLEANUP_LEVELS: CleanupType[] = [
   'minimal',
+  'clean',
   'edited',
 ]
 
 // Default cleanup level for new entries
-export const DEFAULT_CLEANUP_LEVEL: CleanupType = 'edited'
+export const DEFAULT_CLEANUP_LEVEL: CleanupType = 'clean'
 
 // Default LLM model for each cleanup level
 export const CLEANUP_LEVEL_DEFAULT_MODELS: Partial<Record<CleanupType, string>> = {
   'minimal': 'llama-3.3-70b-versatile',
+  'clean': 'llama-3.3-70b-versatile',
   'edited': 'llama-3.3-70b-versatile',
 }
 

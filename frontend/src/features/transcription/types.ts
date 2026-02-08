@@ -78,7 +78,7 @@ export type { Segment, SpellcheckError, HistoryEntry, SegmentEditState } from "@
 /**
  * Cleanup type options for LLM text cleanup
  */
-export type CleanupType = 'minimal' | 'edited'
+export type CleanupType = 'minimal' | 'clean' | 'edited'
 
 /**
  * Summary of a cleanup record (for cache indicator)

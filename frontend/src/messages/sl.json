@@ -388,6 +388,7 @@
       "style": "Slog:",
       "levels": {
         "minimal": "Minimalno",
+        "clean": "Čisto",
         "edited": "Urejeno"
       },
       "copy": "Kopiraj",
