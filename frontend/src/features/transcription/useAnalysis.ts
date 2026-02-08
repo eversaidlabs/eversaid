@@ -225,12 +225,15 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
    * Start polling for analysis results
    */
   const startPolling = useCallback((id: string) => {
+    // Clear any existing interval first to prevent orphaned intervals
+    // (can happen if startPolling is called from multiple sources)
+    clearPolling()
     setIsPolling(true)
     // Poll immediately
     pollAnalysis(id)
     // Then poll every 2 seconds
     pollIntervalRef.current = setInterval(() => pollAnalysis(id), 2000)
-  }, [pollAnalysis])
+  }, [pollAnalysis, clearPolling])
 
   /**
    * Trigger analysis (always triggers new LLM call)
