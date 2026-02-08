@@ -2,11 +2,12 @@
 import { useState, useRef } from "react"
 import type { Segment } from "@/components/demo/types"
 import type { ModelInfo, CleanupType, CleanupSummary } from "@/features/transcription/types"
-import { Eye, EyeOff, Copy, X, ChevronDown, Loader2, Check, Medal } from "lucide-react"
+import { Eye, EyeOff, Copy, X, ChevronDown, Loader2, Check, Medal, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { capture } from "@/lib/analytics"
-import { CLEANUP_LEVELS, CLEANUP_TEMPERATURES, getDefaultModelForLevel, temperaturesMatch } from "@/lib/level-config"
+import { CLEANUP_LEVELS, CLEANUP_TEMPERATURES, getDefaultModelForLevel, temperaturesMatch, DEFAULT_CLEANUP_LEVEL } from "@/lib/level-config"
+import { CleanupCompareModal } from "./cleanup-compare-modal"
 
 export interface CleanupOptionsProps {
   /** Available LLM models */
@@ -33,6 +34,8 @@ export interface CleanupOptionsProps {
   currentPromptName?: string | null
   /** Temperature of the currently displayed cleanup (for copy metadata) */
   currentTemperature?: number | null
+  /** Callback when user clicks "Share feedback" link (exits fullscreen and focuses feedback textarea) */
+  onShareFeedback?: () => void
 }
 
 export interface TranscriptHeaderProps {
@@ -64,6 +67,7 @@ export function TranscriptHeader({
   const t = useTranslations("demo.cleanup")
   const [showModelMenu, setShowModelMenu] = useState(false)
   const [showLevelMenu, setShowLevelMenu] = useState(false)
+  const [showCompareModal, setShowCompareModal] = useState(false)
   // Long-press state for temperature chips
   const [holdingTemp, setHoldingTemp] = useState<number | null | 'none'>('none')
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -100,13 +104,26 @@ export function TranscriptHeader({
     || cleanupOptions?.selectedModel
     || "Default"
 
-  const selectedLevelLabel = cleanupOptions?.selectedLevel
-    ? t(`levels.${cleanupOptions.selectedLevel}`)
-    : t("levels.edited")
-
   return (
-    <div className={`px-6 py-4 border-r border-border last:border-r-0 ${cleanupOptions?.onTemperatureChange ? 'flex flex-col gap-2' : 'flex justify-between items-center'}`}>
-      {/* First row: Title, Model, Style, and action buttons */}
+    <div className={`px-6 py-4 border-r border-border last:border-r-0 ${cleanupOptions ? 'flex flex-col gap-2' : 'flex justify-between items-center'}`}>
+      {/* Beta notice banner - shown when cleanup options are available */}
+      {cleanupOptions && (
+        <div className="text-[11px] pl-3 py-1.5 border-l-2 border-l-violet-400 bg-gradient-to-r from-violet-50/50 to-transparent rounded-r">
+          <span className="text-muted-foreground">
+            <span className="font-medium text-violet-600">{t("betaLabel")}</span>
+            <span className="mx-1.5">·</span>
+            {t("betaNotice")}
+            <button
+              onClick={cleanupOptions.onShareFeedback}
+              className="text-violet-600 hover:text-violet-700 font-medium ml-1.5 hover:underline"
+            >
+              {t("shareFeedback")}
+            </button>
+          </span>
+        </div>
+      )}
+
+      {/* Main row: Title, Model, Style, and action buttons */}
       <div className="flex justify-between items-center w-full">
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-[1px]">{title}</span>
@@ -177,37 +194,50 @@ export function TranscriptHeader({
               </div>
             )}
 
-            {/* Level dropdown */}
-            <div className="flex items-center">
-              <span className="text-xs font-semibold text-foreground/70 mr-1.5">{t("style")}</span>
+            {/* Level dropdown with subtitles */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-foreground/70">{t("style")}</span>
               <div className="relative">
                 <button
                   onClick={() => !cleanupOptions.isProcessing && setShowLevelMenu(!showLevelMenu)}
                   disabled={cleanupOptions.isProcessing}
-                  className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-left transition-all min-w-[120px] ${
                     cleanupOptions.isProcessing
                       ? "bg-muted text-muted-foreground cursor-not-allowed"
-                      : "bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground"
+                      : "bg-secondary hover:bg-muted"
                   }`}
                 >
-                  {selectedLevelLabel}
-                  <ChevronDown className="w-3 h-3" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[11px] font-medium text-foreground">
+                        {t(`levels.${cleanupOptions.selectedLevel}`)}
+                      </span>
+                      {cleanupOptions.selectedLevel === DEFAULT_CLEANUP_LEVEL && (
+                        <span className="text-[8px] bg-primary text-primary-foreground px-1 rounded">
+                          {t("temperatureDefault")}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-muted-foreground block">
+                      {t(`hints.${cleanupOptions.selectedLevel}`)}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                 </button>
                 {showLevelMenu && (
-                  <div className="absolute left-0 top-full mt-1 bg-background border border-border rounded-md overflow-hidden z-20 shadow-lg min-w-[100px]">
+                  <div className="absolute left-0 top-full mt-1 bg-background border border-border rounded-md overflow-hidden z-20 shadow-lg min-w-[160px]">
                     {CLEANUP_LEVELS.map((levelId) => {
-                      // When user has manually selected a model, check cache for that model
-                      // Otherwise, check cache for the level's default model
                       const modelToCheck = cleanupOptions.hasManualSelection
                         ? cleanupOptions.selectedModel
                         : getDefaultModelForLevel(levelId)
                       const isCached = cleanupOptions.cachedCleanups?.some(c =>
                         c.llm_model === modelToCheck &&
                         c.cleanup_type === levelId &&
-                        // Only match temperature when temperature selection is enabled
                         (cleanupOptions.onTemperatureChange === undefined || temperaturesMatch(c.temperature, cleanupOptions.selectedTemperature)) &&
                         c.status === 'completed'
                       )
+                      const isSelected = cleanupOptions.selectedLevel === levelId
+                      const isDefault = levelId === DEFAULT_CLEANUP_LEVEL
                       return (
                         <button
                           key={levelId}
@@ -215,15 +245,42 @@ export function TranscriptHeader({
                             cleanupOptions.onLevelChange(levelId)
                             setShowLevelMenu(false)
                           }}
-                          className={`flex items-center justify-between w-full px-3 py-2 text-left text-[11px] transition-colors hover:bg-muted ${
-                            cleanupOptions.selectedLevel === levelId ? "bg-secondary font-medium" : ""
+                          className={`flex items-start justify-between w-full px-3 py-2 text-left transition-colors hover:bg-muted ${
+                            isSelected ? "bg-secondary" : ""
                           }`}
                         >
-                          <span>{t(`levels.${levelId}`)}</span>
-                          {isCached && <Check className="w-3 h-3 text-green-500 flex-shrink-0" />}
+                          <div>
+                            <div className="flex items-center gap-1">
+                              <span className={`text-[11px] font-medium ${isSelected ? "text-primary" : "text-foreground"}`}>
+                                {t(`levels.${levelId}`)}
+                              </span>
+                              {isDefault && (
+                                <span className="text-[8px] bg-primary/10 text-primary px-1 rounded">
+                                  {t("temperatureDefault")}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-muted-foreground block">
+                              {t(`hints.${levelId}`)}
+                            </span>
+                          </div>
+                          {isCached && <Check className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />}
                         </button>
                       )
                     })}
+                    {/* Compare all link in dropdown */}
+                    <div className="border-t border-border">
+                      <button
+                        onClick={() => {
+                          setShowLevelMenu(false)
+                          setShowCompareModal(true)
+                        }}
+                        className="w-full px-3 py-2 text-left text-[10px] text-primary hover:bg-muted flex items-center gap-1"
+                      >
+                        <Info className="w-3 h-3" />
+                        {t("compareAll")}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -330,6 +387,14 @@ export function TranscriptHeader({
           </div>
           <span className="text-[10px] text-muted-foreground">{t("creativityCreative")}</span>
         </div>
+      )}
+
+      {/* Cleanup comparison modal */}
+      {cleanupOptions && (
+        <CleanupCompareModal
+          isOpen={showCompareModal}
+          onClose={() => setShowCompareModal(false)}
+        />
       )}
     </div>
   )

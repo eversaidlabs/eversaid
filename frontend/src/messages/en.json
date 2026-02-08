@@ -368,7 +368,10 @@
           "intent": "self-discovery"
         }
       },
-      "modelChangeFailed": "Failed to rerun analysis with selected model. Please try again."
+      "modelChangeFailed": "Failed to rerun analysis with selected model. Please try again.",
+      "betaLabel": "Beta",
+      "betaNotice": "We're refining analysis quality. Your feedback helps!",
+      "shareFeedback": "Share feedback"
     },
     "history": {
       "title": "Your Transcriptions",
@@ -391,6 +394,44 @@
         "clean": "Clean",
         "edited": "Edited"
       },
+      "hints": {
+        "minimal": "Keep all",
+        "clean": "Remove noise",
+        "edited": "+ Fix grammar"
+      },
+      "compareAll": "Compare all",
+      "betaLabel": "Beta",
+      "betaNotice": "We're refining cleanup quality. Your feedback helps!",
+      "shareFeedback": "Share feedback",
+      "compare": {
+        "title": "Compare Cleanup Styles",
+        "gotIt": "Got it",
+        "features": {
+          "punctuation": "Punctuation & ASR fixes",
+          "fillers": "Remove fillers (um, uh, aa)",
+          "discourseMarkers": "Remove discourse markers (you know, like)",
+          "stutters": "Remove stutters & false starts",
+          "grammar": "Fix grammar (agreement, verb forms)",
+          "sentences": "Split run-on sentences"
+        },
+        "example": {
+          "title": "Example",
+          "raw": "Raw transcription",
+          "rawText": "so I I think um you know we need to like improve the userexperience...., and we should also fix the bugs",
+          "rawNote": "No punctuation, word boundary error, artifact",
+          "minimalText": "So, I, I think, um, you know, we need to, like, improve the user experience, and we should also fix the bugs.",
+          "minimalNote": "+ Punctuation, capitalization, fix ASR glitches",
+          "cleanText": "So I think we need to improve the user experience and we should also fix the bugs.",
+          "cleanNote": "+ Removed fillers, stutters, discourse markers",
+          "editedText": "I think we need to improve the user experience. We should also fix the bugs.",
+          "editedNote": "+ Fixed grammar, split long sentence"
+        },
+        "useCases": {
+          "minimal": "Legal, research, therapy documentation",
+          "clean": "Business meetings, podcasts, general use",
+          "edited": "Articles, reports, client documents"
+        }
+      },
       "copy": "Copy",
       "copySuccess": "Copied to clipboard",
       "modelChangeFailed": "Failed to reprocess with selected model. Please try again.",
@@ -403,7 +444,7 @@
     },
     "feedback": {
       "title": "How was the quality?",
-      "placeholder": "What went wrong? Your feedback helps us improve.",
+      "placeholder": "Share your thoughts on the results...",
       "placeholderPositive": "What did you find most useful?",
       "submit": "Submit Feedback",
       "update": "Update Feedback",

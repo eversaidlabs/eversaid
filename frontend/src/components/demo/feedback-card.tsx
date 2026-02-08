@@ -1,5 +1,6 @@
 "use client"
 
+import { forwardRef, useState, useImperativeHandle, useRef } from "react"
 import { Sparkles } from "lucide-react"
 import { useTranslations } from 'next-intl'
 
@@ -16,12 +17,41 @@ export interface FeedbackCardProps {
   disabled?: boolean
 }
 
-export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChange, onSubmit, isLoading, isSubmitting, isSubmitted, hasExisting, disabled }: FeedbackCardProps) {
+export interface FeedbackCardRef {
+  focusAndHighlight: () => void
+}
+
+export const FeedbackCard = forwardRef<FeedbackCardRef, FeedbackCardProps>(function FeedbackCard(
+  { rating, feedback, onRatingChange, onFeedbackChange, onSubmit, isLoading, isSubmitting, isSubmitted, hasExisting, disabled },
+  ref
+) {
   const t = useTranslations('demo.feedback')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isTextareaHighlighted, setIsTextareaHighlighted] = useState(false)
+  const [isTextareaForced, setIsTextareaForced] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    focusAndHighlight: () => {
+      if (rating === 0) {
+        // No rating selected - show textarea and focus it
+        setIsTextareaForced(true)
+        setTimeout(() => {
+          textareaRef.current?.focus()
+          setIsTextareaHighlighted(true)
+          setTimeout(() => setIsTextareaHighlighted(false), 1500)
+        }, 50)
+      } else {
+        // Rating selected - focus and highlight textarea
+        textareaRef.current?.focus()
+        setIsTextareaHighlighted(true)
+        setTimeout(() => setIsTextareaHighlighted(false), 1500)
+      }
+    }
+  }))
   const isDisabled = disabled || isSubmitted
 
-  // Show textarea for all ratings once selected
-  const showTextArea = !isSubmitted && rating > 0
+  // Show textarea when rating selected OR when forced open via "Share feedback"
+  const showTextArea = !isSubmitted && (rating > 0 || isTextareaForced)
   // Different placeholder based on rating sentiment
   const placeholder = rating >= 4 ? t('placeholderPositive') : t('placeholder')
 
@@ -61,6 +91,7 @@ export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChang
       {showTextArea && (
         <>
           <textarea
+            ref={textareaRef}
             placeholder={placeholder}
             value={feedback}
             onChange={(e) => onFeedbackChange(e.target.value)}
@@ -71,12 +102,16 @@ export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChang
               }
             }}
             disabled={isDisabled}
-            className="w-full px-3 py-2.5 bg-secondary border border-border focus:border-primary focus:outline-none rounded-[10px] text-[13px] resize-none mb-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full px-3 py-2.5 bg-secondary border focus:border-primary focus:outline-none rounded-[10px] text-[13px] resize-none mb-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+              isTextareaHighlighted
+                ? "border-amber-400 ring-2 ring-amber-200 shadow-[0_0_12px_rgba(251,191,36,0.4)]"
+                : "border-border"
+            }`}
             rows={3}
           />
           <button
             onClick={onSubmit}
-            disabled={isSubmitting || isDisabled}
+            disabled={isSubmitting || isDisabled || rating === 0}
             className="w-full py-2.5 bg-primary hover:bg-primary text-primary-foreground text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? t('submitting') : hasExisting ? t('update') : t('submit')}
@@ -85,4 +120,4 @@ export function FeedbackCard({ rating, feedback, onRatingChange, onFeedbackChang
       )}
     </div>
   )
-}
+})

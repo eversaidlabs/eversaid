@@ -7,7 +7,7 @@ import { DemoAttribution } from "@/components/demo/demo-attribution"
 import { AnalysisSection } from "@/components/demo/analysis-section"
 import { DemoWarningBanner } from "@/components/demo/demo-warning-banner"
 import { EntryHistoryCard } from "@/components/demo/entry-history-card"
-import { FeedbackCard } from "@/components/demo/feedback-card"
+import { FeedbackCard, type FeedbackCardRef } from "@/components/demo/feedback-card"
 // TextMoveToolbar temporarily disabled - kept for future use
 // import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
@@ -136,6 +136,9 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     entryId: transcription.entryId ?? '',
     feedbackType: 'transcription'
   })
+
+  // Feedback card ref for focus/highlight from beta banner
+  const feedbackCardRef = useRef<FeedbackCardRef>(null)
 
   // UI State
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null)
@@ -339,6 +342,20 @@ function DemoPageContent({ config }: DemoPageContentProps) {
       })
     }
   }, [transcription.entryId, selectedCleanupModel, hasManualCleanupModelSelection])
+
+  // Handler for "Share feedback" link in beta banner
+  const handleShareFeedback = useCallback(() => {
+    capture('share_feedback_clicked')
+    if (isEditorExpanded) {
+      // Exit fullscreen first, then focus feedback after animation
+      setExpandedAndPersist(false)
+      setTimeout(() => {
+        feedbackCardRef.current?.focusAndHighlight()
+      }, 400) // Wait for exit animation
+    } else {
+      feedbackCardRef.current?.focusAndHighlight()
+    }
+  }, [isEditorExpanded, setExpandedAndPersist])
 
   // ESC key handler to collapse editor
   useEffect(() => {
@@ -1358,6 +1375,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                   hasManualSelection: hasManualCleanupModelSelection,
                   currentPromptName: transcription.cleanupPromptName,
                   currentTemperature: transcription.cleanupTemperature,
+                  onShareFeedback: handleShareFeedback,
                   ...(isTemperatureSelectionEnabled && {
                     selectedTemperature: selectedCleanupTemp,
                     onTemperatureChange: handleCleanupTempChange,
@@ -1405,11 +1423,13 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                       availableModels={analysisModels}
                       selectedModel={selectedAnalysisModel}
                       onModelChange={handleAnalysisModelChange}
+                      onShareFeedback={handleShareFeedback}
                     />
                   </div>
 
                   <div>
                     <FeedbackCard
+                      ref={feedbackCardRef}
                       rating={feedbackHook.rating}
                       feedback={feedbackHook.feedbackText}
                       onRatingChange={(rating: number) => {

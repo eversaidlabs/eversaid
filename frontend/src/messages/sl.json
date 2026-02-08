@@ -368,7 +368,10 @@
           "intent": "samoraziskovanje"
         }
       },
-      "modelChangeFailed": "Analiza z izbranim modelom ni uspela. Poskusite znova."
+      "modelChangeFailed": "Analiza z izbranim modelom ni uspela. Poskusite znova.",
+      "betaLabel": "Beta",
+      "betaNotice": "Izboljšujemo kakovost analize. Vaše mnenje pomaga!",
+      "shareFeedback": "Deli mnenje"
     },
     "history": {
       "title": "Vaše transkripcije",
@@ -391,6 +394,44 @@
         "clean": "Čisto",
         "edited": "Urejeno"
       },
+      "hints": {
+        "minimal": "Ohrani vse",
+        "clean": "Odstrani šum",
+        "edited": "+ Slovnica"
+      },
+      "compareAll": "Primerjaj vse",
+      "betaLabel": "Beta",
+      "betaNotice": "Izboljšujemo kakovost čiščenja. Vaše mnenje pomaga!",
+      "shareFeedback": "Deli mnenje",
+      "compare": {
+        "title": "Primerjaj sloge čiščenja",
+        "gotIt": "Razumem",
+        "features": {
+          "punctuation": "Ločila in ASR popravki",
+          "fillers": "Odstrani polnila (aa, em, eee)",
+          "discourseMarkers": "Odstrani diskurzne označevalce (pač, v bistvu)",
+          "stutters": "Odstrani jecljanje in napačne začetke",
+          "grammar": "Popravi slovnico (ujemanje, glagolske oblike)",
+          "sentences": "Razdeli predolge povedi"
+        },
+        "example": {
+          "title": "Primer",
+          "raw": "Surova transkripcija",
+          "rawText": "potem jaz sem mu aa rekel rekel kaj je stem...., pa smo ugotovil da je treba narest",
+          "rawNote": "Brez ločil, napaka v mejah besed, artefakt",
+          "minimalText": "Potem jaz sem mu, aa, rekel, rekel, kaj je s tem, pa, smo ugotovil, da je treba narest.",
+          "minimalNote": "+ Ločila, velike začetnice, ASR popravki",
+          "cleanText": "Potem jaz sem mu rekel, kaj je s tem, smo ugotovil, da je treba narest.",
+          "cleanNote": "+ Odstranjeno polnila, jecljanje, diskurzni označevalci",
+          "editedText": "Potem sem mu rekel, kaj je s tem. Ugotovili smo, da je treba narediti.",
+          "editedNote": "+ Popravljena slovnica, razdeljene povedi"
+        },
+        "useCases": {
+          "minimal": "Pravni postopki, raziskave, terapevtska dokumentacija",
+          "clean": "Poslovni sestanki, podkasti, splošna uporaba",
+          "edited": "Članki, poročila, dokumenti za stranke"
+        }
+      },
       "copy": "Kopiraj",
       "copySuccess": "Kopirano v odložišče",
       "modelChangeFailed": "Čiščenje z izbranim modelom ni uspelo. Poskusite znova.",
@@ -403,7 +444,7 @@
     },
     "feedback": {
       "title": "Kakšna je bila kakovost?",
-      "placeholder": "Kaj je šlo narobe? Vaše povratne informacije nam pomagajo izboljšati.",
+      "placeholder": "Delite svoje mnenje o rezultatih...",
       "placeholderPositive": "Kaj vam je bilo najbolj uporabno?",
       "submit": "Pošlji povratno informacijo",
       "update": "Posodobi povratno informacijo",

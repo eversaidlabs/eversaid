@@ -15,6 +15,7 @@ interface AnalyticsEventMap {
   copy_clicked: { side: 'raw' | 'cleaned' }
   waitlist_form_opened: Record<string, never>
   waitlist_joined: { user_role: string }
+  share_feedback_clicked: Record<string, never>
 }
 
 type EventName = keyof AnalyticsEventMap

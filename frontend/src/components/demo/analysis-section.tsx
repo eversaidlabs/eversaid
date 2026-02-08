@@ -40,6 +40,8 @@ export interface AnalysisSectionProps {
   availableModels?: ModelInfo[]
   selectedModel?: string
   onModelChange?: (modelId: string) => void
+  /** Callback when user clicks "Share feedback" link */
+  onShareFeedback?: () => void
 }
 
 export function AnalysisSection({
@@ -59,6 +61,7 @@ export function AnalysisSection({
   availableModels = [],
   selectedModel,
   onModelChange,
+  onShareFeedback,
 }: AnalysisSectionProps) {
   const [showModelMenu, setShowModelMenu] = useState(false)
   // Use onSelectProfile if available, fall back to onRerunAnalysis for backward compatibility
@@ -254,6 +257,21 @@ export function AnalysisSection({
         {isLoading && (
           <Loader2 className="w-4 h-4 animate-spin text-primary mt-2" />
         )}
+      </div>
+
+      {/* Beta notice banner */}
+      <div className="text-[11px] pl-3 py-1.5 border-l-2 border-l-violet-400 bg-gradient-to-r from-violet-50/50 to-transparent rounded-r mt-3">
+        <span className="text-muted-foreground">
+          <span className="font-medium text-violet-600">{t('betaLabel')}</span>
+          <span className="mx-1.5">·</span>
+          {t('betaNotice')}
+          <button
+            onClick={onShareFeedback}
+            className="text-violet-600 hover:text-violet-700 font-medium ml-1.5 hover:underline"
+          >
+            {t('shareFeedback')}
+          </button>
+        </span>
       </div>
 
       <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">{t('summary')}</h4>
