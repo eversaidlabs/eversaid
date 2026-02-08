@@ -134,13 +134,13 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row items-center gap-[60px]">
           {/* Left column - Text */}
-          <div className="flex-1 text-center lg:text-left">
+          <div className="flex-1 text-center">
             <MotionDiv
               variants={heroTitle}
               initial="hidden"
               animate="visible"
             >
-              <h1 className="text-4xl md:text-5xl lg:text-[56px] font-extrabold text-white mb-6 leading-[1.05] tracking-[-0.03em]">
+              <h1 className="text-4xl md:text-5xl lg:text-[64px] font-extrabold text-white mb-6 leading-[1.05] tracking-[-0.03em]">
                 {t('hero.title')}
                 <br />
                 <span className="bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] bg-clip-text text-transparent">
@@ -153,7 +153,7 @@ export default function HomePage() {
               initial="hidden"
               animate="visible"
             >
-              <p className="text-lg md:text-[20px] text-white/75 mb-10 leading-relaxed font-normal">
+              <p className="text-lg md:text-xl text-white/75 mb-10 leading-relaxed font-normal">
                 {t('hero.subtitle')}
               </p>
             </MotionDiv>
@@ -173,7 +173,7 @@ export default function HomePage() {
               variants={heroNote}
               initial="hidden"
               animate="visible"
-              className="mt-6 flex items-center justify-center lg:justify-start gap-2 text-sm text-white/60"
+              className="mt-6 flex items-center justify-center gap-2 text-sm text-white/60"
             >
               <Shield className="w-4 h-4 opacity-70" />
               {t('hero.noSignup')}
@@ -489,12 +489,12 @@ export default function HomePage() {
             variants={staggerContainer}
           >
             {([
-              { icon: '🧠', key: 'therapists' },
-              { icon: '💼', key: 'sales' },
-              { icon: '🎤', key: 'journalists' },
-              { icon: '🔬', key: 'uxResearch' },
-              { icon: '👥', key: 'hr' },
-              { icon: '⚖️', key: 'lawyers' },
+              { icon: '🧠', key: 'therapists', hasDescription: false },
+              { icon: '💼', key: 'sales', hasDescription: false },
+              { icon: '🎤', key: 'journalists', hasDescription: false },
+              { icon: '🔬', key: 'uxResearch', hasDescription: false },
+              { icon: '👥', key: 'hr', hasDescription: false },
+              { icon: '⚖️', key: 'lawyers', hasDescription: false },
               { icon: '📝', key: 'meetings', hasDescription: true },
               { icon: '👂', key: 'accessibility', hasDescription: true },
             ] as const).map(({ icon, key, hasDescription }) => (

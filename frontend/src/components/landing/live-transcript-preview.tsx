@@ -4,7 +4,6 @@ import type React from "react"
 import { useMemo, useEffect, useRef, useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
-import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
 import type { Segment, TextMoveSelection, ActiveSuggestion, SpellcheckError } from "@/components/demo/types"
 
 function useLocalizedSegments(): Segment[] {
@@ -602,7 +601,7 @@ export function LiveTranscriptPreview({
           textMoveSelection={textMoveSelectionState}
           isSelectingMoveTarget={isSelectingMoveTargetState}
           activeSuggestion={activeSuggestionState}
-          editingCount={editingCount}
+          editingCount={0}
           onSegmentClick={handleSegmentClick}
           onRevert={handleRevertSegment}
           onUndoRevert={handleUndoRevert}
@@ -623,15 +622,6 @@ export function LiveTranscriptPreview({
           showCopyButton={false}
           variant="preview"
         />
-
-        {textMoveSelectionState && (
-          <TextMoveToolbar
-            selectedText={textMoveSelectionState.text}
-            isSelectingTarget={isSelectingMoveTargetState}
-            onMoveClick={handleMoveClick}
-            onCancel={handleCancelTextMove}
-          />
-        )}
       </div>
     </>
   )
