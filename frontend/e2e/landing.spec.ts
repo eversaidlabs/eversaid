@@ -6,9 +6,11 @@ test.describe("Landing Page", () => {
   })
 
   test("displays hero section with main CTA", async ({ page }) => {
-    // Main headline
-    await expect(page.getByText("Smart transcription.")).toBeVisible()
-    await expect(page.getByText("AI listens. You decide.")).toBeVisible()
+    // Main headline - use heading role to avoid matching the page title
+    const heading = page.getByRole("heading", { name: /Smart transcription/ })
+    await expect(heading).toBeVisible()
+    // The tagline is inside the heading as a styled span
+    await expect(heading.getByText("AI listens. You decide.")).toBeVisible()
 
     // Subheadline
     await expect(page.getByText(/AI-powered cleanup you can review/)).toBeVisible()
@@ -30,8 +32,8 @@ test.describe("Landing Page", () => {
     await expect(page.getByRole("link", { name: "Features" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Use Cases" })).toBeVisible()
     await expect(page.getByRole("link", { name: "How It Works" })).toBeVisible()
-    // API Docs is shown as "Coming soon" tooltip, not a clickable link
-    await expect(page.getByText("API Docs")).toBeVisible()
+    // AI Insights link is in the navigation
+    await expect(page.getByRole("link", { name: "AI Insights" })).toBeVisible()
   })
 
   test("displays feature sections", async ({ page }) => {

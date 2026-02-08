@@ -41,8 +41,8 @@ test.describe("Feedback Rating on Demo Page", () => {
     await starButtons.nth(3).click()
 
     // The star should be highlighted (background color changes)
-    // For rating >= 4, no textarea should appear
-    await expect(page.getByPlaceholder(/What went wrong/)).not.toBeVisible()
+    // For rating >= 4, no "Share your thoughts" textarea appears (high ratings use different placeholder)
+    await expect(page.getByPlaceholder(/Share your thoughts/)).not.toBeVisible()
   })
 
   test("low rating (1-3 stars) shows feedback textarea", async ({ page }) => {
@@ -56,8 +56,8 @@ test.describe("Feedback Rating on Demo Page", () => {
     // Click the 2nd star (low rating)
     await starButtons.nth(1).click()
 
-    // Textarea should appear for feedback
-    await expect(page.getByPlaceholder(/What went wrong/)).toBeVisible()
+    // Textarea should appear for feedback (low ratings use "Share your thoughts" placeholder)
+    await expect(page.getByPlaceholder(/Share your thoughts/)).toBeVisible()
 
     // Submit button should appear
     await expect(
@@ -77,7 +77,7 @@ test.describe("Feedback Rating on Demo Page", () => {
     await starButtons.nth(1).click()
 
     // Fill in feedback
-    const feedbackInput = page.getByPlaceholder(/What went wrong/)
+    const feedbackInput = page.getByPlaceholder(/Share your thoughts/)
     await expect(feedbackInput).toBeVisible()
     await feedbackInput.fill(
       "The speaker attribution was incorrect in several places"
@@ -101,8 +101,8 @@ test.describe("Feedback Rating on Demo Page", () => {
     // Click the 5th star (highest rating)
     await starButtons.nth(4).click()
 
-    // "What went wrong" textarea should NOT appear
-    await expect(page.getByPlaceholder(/What went wrong/)).not.toBeVisible()
+    // "Share your thoughts" textarea (for low ratings) should NOT appear
+    await expect(page.getByPlaceholder(/Share your thoughts/)).not.toBeVisible()
 
     // "What did you find most useful?" textarea SHOULD appear for high ratings
     await expect(page.getByPlaceholder(/What did you find most useful/)).toBeVisible()
@@ -111,7 +111,7 @@ test.describe("Feedback Rating on Demo Page", () => {
     ).toBeVisible()
   })
 
-  test("changing rating from low to high hides textarea", async ({ page }) => {
+  test("changing rating from low to high changes textarea placeholder", async ({ page }) => {
     const feedbackCard = page
       .locator("div")
       .filter({ hasText: /^How was the quality/ })
@@ -120,12 +120,13 @@ test.describe("Feedback Rating on Demo Page", () => {
 
     // First give low rating
     await starButtons.nth(0).click()
-    await expect(page.getByPlaceholder(/What went wrong/)).toBeVisible()
+    await expect(page.getByPlaceholder(/Share your thoughts/)).toBeVisible()
 
     // Now give high rating
     await starButtons.nth(4).click()
 
-    // Textarea should disappear
-    await expect(page.getByPlaceholder(/What went wrong/)).not.toBeVisible()
+    // Low-rating placeholder should disappear, high-rating placeholder should appear
+    await expect(page.getByPlaceholder(/Share your thoughts/)).not.toBeVisible()
+    await expect(page.getByPlaceholder(/What did you find most useful/)).toBeVisible()
   })
 })

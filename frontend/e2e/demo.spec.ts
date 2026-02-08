@@ -157,10 +157,12 @@ test.describe("Demo Page - Upload Mode", () => {
     await expect(page.getByText("Your Transcriptions")).toBeVisible()
 
     // 2. Click on entry in history sidebar (simulates real user flow)
-    // Entry card shows display name (configured in playwright.config.ts) or filename as fallback
-    const entryCard = page.getByText("Test Demo EN")
-    await expect(entryCard).toBeVisible()
-    await entryCard.click()
+    // Demo entries show a "Sample" badge - find the entry card containing this badge
+    // The badge is inside a clickable entry card with cursor-pointer class
+    const sampleBadge = page.getByText("Sample", { exact: true })
+    await expect(sampleBadge).toBeVisible()
+    // Click the parent entry card (which has the onClick handler)
+    await sampleBadge.click()
 
     // Wait for transcript view to load (URL should update via router.push)
     await expect(page).toHaveURL(/entry=demo-en/, { timeout: 10000 })
