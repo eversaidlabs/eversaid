@@ -16,8 +16,9 @@ config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().DATABASE_URL)
 
 # Interpret the config file for Python logging.
+# disable_existing_loggers=False preserves our app logger configured in setup_logging()
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # MetaData object for autogenerate support
 target_metadata = Base.metadata

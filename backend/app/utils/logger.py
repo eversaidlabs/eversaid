@@ -161,6 +161,9 @@ def setup_logging(settings: "Settings") -> None:
     logger = logging.getLogger("app")
     logger.setLevel(getattr(logging, log_level))
 
+    # Ensure logger is not disabled (uvicorn may set this)
+    logger.disabled = False
+
     # Remove existing handlers to avoid duplicates
     logger.handlers.clear()
 

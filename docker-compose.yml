@@ -32,6 +32,8 @@ services:
     ports:
       - "8001:8001"  # Direct access for dev
     environment:
+      # Python runtime
+      PYTHONUNBUFFERED: "1"
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
