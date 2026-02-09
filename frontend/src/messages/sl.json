@@ -187,7 +187,7 @@
       "badge": "Prihaja kmalu",
       "sectionLabel": "Vaš arhiv pogovorov",
       "title": "Vaše transkribcije. Urejene. Inteligentne.",
-      "subtitle": "Vsi pogovori na enem mestu, razvrščeni po stranki ali temi.\nUI vam pomaga najti preverljive odgovore.",
+      "subtitle": "Vsi pogovori na enem mestu, razvrščeni po stranki ali temi.\nAI vam pomaga najti preverljive odgovore.",
       "library": {
         "toolbar": "EverSaid",
         "sidebarLabel": "Stranke",
@@ -218,14 +218,14 @@
         "session1Duration": "55 min",
         "session1Date": "2. jan. 2026"
       },
-      "connector": "Vprašajte UI",
+      "connector": "Vprašajte AI",
       "chat": {
-        "description": "Postavljajte vprašanja o pogovorih. UI uporabi kontekst prejšnjih pogovorov za utemeljene odgovore, katere lahko preverite z enim klikom.",
-        "toolbar": "EverSaid UI",
+        "description": "Postavljajte vprašanja o pogovorih. AI uporabi kontekst prejšnjih pogovorov za utemeljene odgovore, katere lahko preverite z enim klikom.",
+        "toolbar": "EverSaid AI",
         "contextName": "Ana Kovač",
         "contextBadge": "5 sej v kontekstu",
         "q1": "Katere ponavljajoče se teme so se pojavile skozi Anine seje?",
-        "aiLabel": "EverSaid UI",
+        "aiLabel": "EverSaid AI",
         "responseIntro": "Tri ponavljajoče se teme izstopajo skozi Anine seje:",
         "theme1Label": "Ravnovesje med delom in zasebnim življenjem",
         "theme1Text": "Ana je razpravljala o incidentu s postavljanjem meja s sodelavcem in omenila, da je to stalen izziv",
