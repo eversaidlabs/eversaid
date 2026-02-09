@@ -187,6 +187,7 @@ export function useDemoCleanupTrigger(
         const { data: cleanupJob } = await triggerCleanup(transcriptionId, {
           cleanupType: DEFAULT_CLEANUP_LEVEL,
           llmModel: getDefaultModelForLevel(DEFAULT_CLEANUP_LEVEL),
+          temperature: 0,
         })
         console.log(
           `[useDemoCleanupTrigger] Cleanup triggered for entry ${entry.id}:`,

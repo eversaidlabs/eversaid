@@ -74,6 +74,11 @@ interface RequestOptions {
   body?: FormData | Record<string, unknown>
   headers?: Record<string, string>
   turnstileToken?: string | null
+  /**
+   * Request timeout in milliseconds.
+   * Default: 30s for regular requests, 120s for FormData uploads.
+   */
+  timeout?: number
 }
 
 /**
@@ -83,7 +88,11 @@ async function request<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<{ data: T; rateLimitInfo: RateLimitInfo | null }> {
-  const { method = 'GET', body, headers = {}, turnstileToken } = options
+  const { method = 'GET', body, headers = {}, turnstileToken, timeout } = options
+
+  // Default timeout: 120s for uploads (FormData), 30s for other requests
+  const isUpload = body instanceof FormData
+  const timeoutMs = timeout ?? (isUpload ? 120_000 : 30_000)
 
   const fetchOptions: RequestInit = {
     method,
@@ -92,6 +101,7 @@ async function request<T>(
       ...headers,
       ...(turnstileToken ? { 'X-Turnstile-Token': turnstileToken } : {}),
     },
+    signal: AbortSignal.timeout(timeoutMs),
   }
 
   // Handle body - FormData or JSON
@@ -113,7 +123,10 @@ async function request<T>(
   let response: Response
   try {
     response = await fetch(url, fetchOptions)
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      throw new ApiError(0, 'Request timed out. Please check your connection and try again.')
+    }
     throw new ApiError(0, 'Network error: Unable to connect to server')
   }
 
@@ -260,6 +273,9 @@ export async function uploadAndTranscribe(
   formData.append('cleanup_type', options.cleanupType ?? 'edited')
   if (options.llmModel) {
     formData.append('llm_model', options.llmModel)
+  }
+  if (options.cleanupTemperature !== undefined) {
+    formData.append('cleanup_temperature', String(options.cleanupTemperature))
   }
 
   // Analysis options (separate from cleanup)

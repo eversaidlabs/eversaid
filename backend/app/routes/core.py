@@ -86,6 +86,7 @@ async def transcribe(
     # Cleanup options
     cleanup_type: str = Form("clean"),  # minimal, clean, edited
     llm_model: Optional[str] = Form(None),  # LLM model for cleanup
+    cleanup_temperature: float = Form(0.0),  # LLM temperature for cleanup (0-2, default 0 for deterministic)
     # Analysis options (separate from cleanup)
     analysis_llm_model: Optional[str] = Form(None),  # LLM model for analysis
     settings: Settings = Depends(get_settings),
@@ -118,6 +119,7 @@ async def transcribe(
         "enable_diarization": str(enable_diarization).lower(),
         "speaker_count": str(speaker_count),
         "cleanup_type": cleanup_type,
+        "cleanup_temperature": str(cleanup_temperature),
     }
 
     # Add optional LLM model for cleanup

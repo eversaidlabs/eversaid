@@ -241,6 +241,7 @@ describe('useDemoCleanupTrigger', () => {
       expect(api.triggerCleanup).toHaveBeenCalledWith('transcription-123', {
         cleanupType: DEFAULT_CLEANUP_LEVEL,
         llmModel: getDefaultModelForLevel(DEFAULT_CLEANUP_LEVEL),
+        temperature: 0,
       })
     })
 
@@ -628,10 +629,12 @@ describe('useDemoCleanupTrigger', () => {
       expect(api.triggerCleanup).toHaveBeenCalledWith('transcription-123', {
         cleanupType: DEFAULT_CLEANUP_LEVEL,
         llmModel: getDefaultModelForLevel(DEFAULT_CLEANUP_LEVEL),
+        temperature: 0,
       })
       expect(api.triggerCleanup).toHaveBeenCalledWith('transcription-456', {
         cleanupType: DEFAULT_CLEANUP_LEVEL,
         llmModel: getDefaultModelForLevel(DEFAULT_CLEANUP_LEVEL),
+        temperature: 0,
       })
       expect(result.current.isProcessing).toBe(true)
     })

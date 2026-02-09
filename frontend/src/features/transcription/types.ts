@@ -106,6 +106,7 @@ export interface TranscribeOptions {
   // Cleanup options
   cleanupType?: CleanupType
   llmModel?: string        // LLM model for cleanup
+  cleanupTemperature?: number // LLM temperature for cleanup (0-2, default: 0)
   // Analysis options (separate from cleanup)
   analysisLlmModel?: string // LLM model for analysis (falls back to llmModel if not specified)
   // Turnstile CAPTCHA token
