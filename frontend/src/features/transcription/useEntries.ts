@@ -51,10 +51,15 @@ export interface UseEntriesReturn {
 
 /**
  * Derive UI status from API statuses
+ *
+ * @param transcriptionStatus - Transcription job status
+ * @param cleanupStatus - Cleanup job status (may be undefined for demo entries)
+ * @param isDemo - Whether this is a demo entry (cleanup deferred until click)
  */
 function deriveEntryStatus(
   transcriptionStatus: string | undefined,
-  cleanupStatus: string | undefined
+  cleanupStatus: string | undefined,
+  isDemo: boolean
 ): HistoryEntry["status"] {
   // If either failed, show error
   if (transcriptionStatus === "failed" || cleanupStatus === "failed") {
@@ -62,6 +67,10 @@ function deriveEntryStatus(
   }
   // If both completed, show complete
   if (transcriptionStatus === "completed" && cleanupStatus === "completed") {
+    return "complete"
+  }
+  // Demo entries with completed transcription are ready (cleanup on click)
+  if (isDemo && transcriptionStatus === "completed") {
     return "complete"
   }
   // Otherwise, processing (pending or processing)
@@ -85,7 +94,8 @@ function transformEntry(entry: EntrySummary, demoConfig?: DemoConfig): HistoryEn
     duration: formatDuration(entry.duration_seconds),
     status: deriveEntryStatus(
       entry.primary_transcription?.status,
-      entry.latest_cleaned_entry?.status
+      entry.latest_cleaned_entry?.status,
+      isDemoEntry
     ),
     timestamp: entry.uploaded_at,
     isDemo: isDemoEntry || undefined,

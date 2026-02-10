@@ -195,11 +195,12 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   })
 
   // Auto-trigger cleanup for demo entries when they load
-  // This updates sidebar from "Processing" → "Complete" without user clicking
+  // Disabled: cleanup now triggers on click via loadEntry() to avoid wasted API calls
   useDemoCleanupTrigger({
     entries: entriesHook.rawEntries,
     isLoading: entriesHook.isLoading,
     onRefresh: entriesHook.refresh,
+    enabled: false,
   })
 
   // Audio playback hook
