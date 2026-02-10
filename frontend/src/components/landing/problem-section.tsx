@@ -144,20 +144,25 @@ export function ProblemSection() {
           viewport={{ once: true, amount: 0.2 }}
           variants={staggerContainer}
         >
-          {/* Connecting Line (desktop only) */}
-          <div className="hidden lg:block absolute top-9 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-[#38BDF8] via-[#A855F7] to-[#DC2626] opacity-30 z-0" />
+          {/* Connecting Lines (desktop only) - split to skip the loop area */}
+          {/* Left line: icon 1 to loop container (with gaps on both ends) */}
+          <div className="hidden lg:block absolute top-[72px] left-[calc(12.5%+36px)] w-[calc(25%-70px)] h-0.5 bg-gradient-to-r from-[#38BDF8] to-[#A855F7] opacity-30 z-0" />
+          {/* Right line: loop container to icon 4 (with gaps on both ends) */}
+          <div className="hidden lg:block absolute top-[72px] right-[calc(12.5%+36px)] w-[calc(25%-70px)] h-0.5 bg-gradient-to-r from-[#A855F7] to-[#DC2626] opacity-30 z-0" />
 
-          <WorkflowStep
-            number={1}
-            icon="📝"
-            title={t("step1.title")}
-            description={t("step1.description")}
-          />
+          <div className="lg:mt-9">
+            <WorkflowStep
+              number={1}
+              icon="📝"
+              title={t("step1.title")}
+              description={t("step1.description")}
+            />
+          </div>
 
           {/* ChatGPT Loop Container */}
-          <div className="sm:col-span-2 relative bg-gradient-to-br from-[#F59E0B]/[0.06] to-[#D97706]/[0.06] border border-dashed border-[#F59E0B]/30 rounded-[20px] p-5 pt-8 grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Loop Label */}
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+          <div className="sm:col-span-2 relative bg-gradient-to-br from-[#F59E0B]/[0.06] to-[#D97706]/[0.06] border border-dashed border-[#F59E0B]/30 rounded-[20px] p-5 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Loop Label - sits on top border */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
               <svg
                 className="w-3.5 h-3.5"
                 viewBox="0 0 24 24"
@@ -170,15 +175,48 @@ export function ProblemSection() {
               {t("chatgptLoop")}
             </div>
 
-            {/* Arrow between steps (desktop only) */}
-            <div className="hidden sm:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#D97706]/40">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            {/* Loop arrows - curved arcs between icons (desktop only) */}
+            <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 top-6 pointer-events-none">
+              <svg width="120" height="56" viewBox="0 0 120 56" fill="none">
+                {/* Top arc: left to right with arrow */}
                 <path
-                  d="M12 16H20M20 16L17 13M20 16L17 19"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  d="M 10 28 Q 60 4, 110 28"
+                  stroke="#D97706"
+                  strokeOpacity="0.4"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                <path
+                  d="M 104 22 L 110 28 L 103 30"
+                  stroke="#D97706"
+                  strokeOpacity="0.5"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 bottom-4 pointer-events-none">
+              <svg width="120" height="56" viewBox="0 0 120 56" fill="none">
+                {/* Bottom arc: right to left with arrow */}
+                <path
+                  d="M 110 28 Q 60 52, 10 28"
+                  stroke="#D97706"
+                  strokeOpacity="0.4"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                <path
+                  d="M 16 34 L 10 28 L 17 26"
+                  stroke="#D97706"
+                  strokeOpacity="0.5"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
                 />
               </svg>
             </div>
@@ -201,14 +239,16 @@ export function ProblemSection() {
             />
           </div>
 
-          <WorkflowStep
-            number={4}
-            icon="❓"
-            title={t("step4.title")}
-            description={t("step4.description")}
-            painStat={t("step4.painStat")}
-            variant="danger"
-          />
+          <div className="lg:mt-9">
+            <WorkflowStep
+              number={4}
+              icon="❓"
+              title={t("step4.title")}
+              description={t("step4.description")}
+              painStat={t("step4.painStat")}
+              variant="danger"
+            />
+          </div>
         </MotionDiv>
 
         {/* Value Proposition - Alternative A */}
