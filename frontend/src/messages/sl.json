@@ -47,6 +47,47 @@
       "like": "pač",
       "improveTheUserExperience": "bistveno izboljšati uporabniško izkušnjo..."
     },
+    "problem": {
+      "sectionLabel": "Problem",
+      "title": "Pokvarjen potek dela, ki ga vsi uporabljajo",
+      "subtitle": "Trenutna orodja za transkripcijo vam dajo surove prepise. Zato se strokovnjaki zatečejo k zamudnemu, napakam podvržnemu obvozu, ki požre čas, ki naj bi ga AI prihranil.",
+      "chatgptLoop": "ChatGPT zanka",
+      "step1": {
+        "title": "Pridobite surovi prepis",
+        "description": "Iz Otterja, Trinta ali Reva. Poln \"um\", \"uh\", zatikanj, napačno slišanih besed in govorjene slovnice."
+      },
+      "step2": {
+        "title": "Kopirajte v ChatGPT",
+        "description": "Razdelite na kose, da preprečite pretirano urejanje. Prilepite. Kopirajte. Ponovite.",
+        "painStat": "30+ min na 1h prepisa"
+      },
+      "step3": {
+        "title": "Popravljajte ChatGPT rezultat",
+        "description": "Napačen rezultat? Popravite navodila. Poskusite znova. Zamenjajte model. Upajte.",
+        "painStat": "3-5x izguba računske moči"
+      },
+      "step4": {
+        "title": "Izgubljen kontekst",
+        "description": "Kaj je AI spremenil? Kaj je odstranil? Kaj si je izmislil? Ni načina, da bi vedeli.",
+        "painStat": "76% napak neodkritih"
+      },
+      "stat": {
+        "text": "napak AI ostane neodkritih brez orodij za preverjanje",
+        "source": "Executable and Verifiable Text-Editing with LLMs, UC Berkeley"
+      },
+      "solution": {
+        "title": "Strokovno delo zahteva oboje",
+        "requirement1": {
+          "label": "Surova natančnost",
+          "text": "— preverljiva s poslušanjem"
+        },
+        "requirement2": {
+          "label": "Očiščena berljivost",
+          "text": "— profesionalno, uglajeno"
+        },
+        "tagline": "vam ponuja oboje — vzporedno, preverljivo."
+      }
+    },
     "proofVisual": {
       "sectionLabel": "Poglejte razliko",
       "title": "Vsaka sprememba vidna. Vsaka beseda preverljiva.",

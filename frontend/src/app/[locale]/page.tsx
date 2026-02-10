@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { MotionDiv } from "@/components/motion"
 import { SectionDivider, DIVIDER_COLORS } from "@/components/landing/section-divider"
 import { ComingSoonSection } from "@/components/landing/coming-soon-section"
+import { ProblemSection } from "@/components/landing/problem-section"
 import {
   heroTitle,
   heroSubtitle,
@@ -193,8 +194,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Divider: Hero → Proof Visual */}
+      {/* Divider: Hero → Problem */}
       <SectionDivider fillColor={DIVIDER_COLORS.light} />
+
+      {/* Problem Section */}
+      <ProblemSection />
+
+      {/* Divider: Problem → Proof Visual */}
+      <SectionDivider fillColor={DIVIDER_COLORS.light} flip />
 
       {/* Proof Visual Section */}
       <section className="snap-start snap-always min-h-screen flex items-center px-8 md:px-16 py-20 bg-[#F8FAFC]">
