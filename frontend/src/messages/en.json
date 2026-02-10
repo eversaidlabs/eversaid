@@ -30,7 +30,7 @@
     "hero": {
       "title": "Smart transcription.",
       "titleAccent": "AI listens. You decide.",
-      "subtitle": "AI-powered cleanup you can review, refine, and trust. See every edit. Verify against the original audio.",
+      "subtitle": "No more chunking transcripts into ChatGPT. No more prompt engineering. Upload once, see every AI edit, verify against the audio.",
       "cta": "Try Free Demo",
       "noSignup": "No sign-up required · Free demo available"
     },
@@ -49,7 +49,8 @@
     },
     "proofVisual": {
       "sectionLabel": "See the Difference",
-      "title": "Every edit visible. Every word verifiable."
+      "title": "Every edit visible. Every word verifiable.",
+      "subtitle": "ChatGPT over-edits, summarizes, makes things up. Our prompts minimize this. Our diff view catches the rest."
     },
     "mockTranscript": {
       "segment1": {
@@ -86,7 +87,7 @@
     "features": {
       "sectionLabel": "Features",
       "title": "Why Choose EverSaid?",
-      "subtitle": "Built for professionals who need accuracy and accountability",
+      "subtitle": "Verification, control, and transparency built in.",
       "verifyEveryWord": "Verify Every Word",
       "dataProtected": "Your Data, Protected",
       "sideBySide": {
@@ -104,8 +105,12 @@
       },
       "editRevert": {
         "title": "Edit & Revert",
-        "description": "Edit or revert each segment.",
+        "description": "AI got it wrong? Fix it yourself or revert to the original. You're always in control.",
         "comingSoon": "Move text between segments"
+      },
+      "cleanupLevels": {
+        "title": "Choose Your Level",
+        "description": "Prompts we continuously refine, so you don't have to. From punctuation-only to fully edited."
       },
       "gdpr": {
         "title": "GDPR",
@@ -131,27 +136,27 @@
       "subtitle": "Professionals who need transcripts they can trust and insights they can use",
       "therapists": {
         "title": "Therapists & Coaches",
-        "description": "Document sessions with speaker attribution."
+        "description": "Document sessions accurately. AI errors in clinical notes have real consequences."
       },
       "sales": {
         "title": "Sales Teams",
-        "description": "Review calls, track commitments, close faster."
+        "description": "Capture exact objections and commitments. AI summaries lose the details that close deals."
       },
       "journalists": {
         "title": "Journalists",
-        "description": "Transcribe interviews with verifiable quotes."
+        "description": "Quotes you can verify against audio. Misquoting is a career-ender."
       },
       "uxResearch": {
         "title": "UX Research",
-        "description": "Analyze user interviews with full context."
+        "description": "Choose how much to clean. Keep raw participant speech for analysis, or polish for reports."
       },
       "hr": {
         "title": "HR & Recruiting",
-        "description": "Capture interviews fairly and consistently."
+        "description": "Fair, consistent records without AI introducing bias."
       },
       "lawyers": {
         "title": "Lawyers",
-        "description": "Preserve testimony with word-level accuracy."
+        "description": "Every word matters in depositions. See what changed before you sign off."
       },
       "meetings": {
         "title": "Meeting Notes",
@@ -165,7 +170,7 @@
     "howItWorks": {
       "sectionLabel": "Process",
       "title": "How It Works",
-      "subtitle": "From audio to verified transcript in minutes",
+      "subtitle": "From audio to verified transcript with AI analysis in minutes",
       "step1": {
         "title": "Upload or Record",
         "description": "Drag-drop an audio file or record directly in browser."

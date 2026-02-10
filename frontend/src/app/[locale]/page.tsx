@@ -209,9 +209,14 @@ export default function HomePage() {
               <div className="text-[13px] font-semibold text-[#38BDF8] uppercase tracking-[2px] mb-4">
                 {t('proofVisual.sectionLabel')}
               </div>
-              <h2 className="text-[32px] md:text-[40px] font-extrabold text-[#0F172A] mb-10 tracking-[-0.02em]">
+              <h2 className="text-[32px] md:text-[40px] font-extrabold text-[#0F172A] mb-4 tracking-[-0.02em]">
                 {t('proofVisual.title')}
               </h2>
+            </MotionDiv>
+            <MotionDiv variants={sectionSubtitle}>
+              <p className="text-lg text-[#64748B] mb-10 max-w-[750px] mx-auto">
+                {t('proofVisual.subtitle')}
+              </p>
             </MotionDiv>
           </MotionDiv>
 
@@ -265,7 +270,7 @@ export default function HomePage() {
               {t('features.verifyEveryWord')}
             </MotionDiv>
             <MotionDiv
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
@@ -313,6 +318,14 @@ export default function HomePage() {
                   </svg>
                   {t('features.editRevert.comingSoon')}
                 </span>
+              </MotionDiv>
+
+              <MotionDiv variants={cardItem} whileHover={{ y: -4 }} className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[20px] p-7 text-center transition-shadow duration-200 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
+                <div className="w-[72px] h-[72px] bg-white rounded-[20px] flex items-center justify-center text-[32px] mx-auto mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                  🎚️
+                </div>
+                <h3 className="text-base font-bold text-[#0F172A] mb-3">{t('features.cleanupLevels.title')}</h3>
+                <p className="text-sm text-[#64748B] leading-relaxed">{t('features.cleanupLevels.description')}</p>
               </MotionDiv>
             </MotionDiv>
           </div>
@@ -475,7 +488,7 @@ export default function HomePage() {
               </h2>
             </MotionDiv>
             <MotionDiv variants={sectionSubtitle}>
-              <p className="text-lg text-[#64748B] mb-12 max-w-[600px] mx-auto">
+              <p className="text-lg text-[#64748B] mb-12 max-w-[850px] mx-auto">
                 {t('useCases.subtitle')}
               </p>
             </MotionDiv>
@@ -489,12 +502,12 @@ export default function HomePage() {
             variants={staggerContainer}
           >
             {([
-              { icon: '🧠', key: 'therapists', hasDescription: false },
-              { icon: '💼', key: 'sales', hasDescription: false },
-              { icon: '🎤', key: 'journalists', hasDescription: false },
-              { icon: '🔬', key: 'uxResearch', hasDescription: false },
-              { icon: '👥', key: 'hr', hasDescription: false },
-              { icon: '⚖️', key: 'lawyers', hasDescription: false },
+              { icon: '🧠', key: 'therapists', hasDescription: true },
+              { icon: '💼', key: 'sales', hasDescription: true },
+              { icon: '🎤', key: 'journalists', hasDescription: true },
+              { icon: '🔬', key: 'uxResearch', hasDescription: true },
+              { icon: '👥', key: 'hr', hasDescription: true },
+              { icon: '⚖️', key: 'lawyers', hasDescription: true },
               { icon: '📝', key: 'meetings', hasDescription: true },
               { icon: '👂', key: 'accessibility', hasDescription: true },
             ] as const).map(({ icon, key, hasDescription }) => (

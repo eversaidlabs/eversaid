@@ -13,7 +13,7 @@ test.describe("Landing Page", () => {
     await expect(heading.getByText("AI listens. You decide.")).toBeVisible()
 
     // Subheadline
-    await expect(page.getByText(/AI-powered cleanup you can review/)).toBeVisible()
+    await expect(page.getByText(/No more chunking transcripts into ChatGPT/)).toBeVisible()
 
     // Try Free Demo button
     const demoButton = page.getByRole("link", { name: "Try Free Demo" }).first()

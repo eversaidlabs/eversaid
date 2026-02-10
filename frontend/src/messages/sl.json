@@ -30,7 +30,7 @@
     "hero": {
       "title": "Pametna transkripcija.",
       "titleAccent": "AI posluša. Vi odločate.",
-      "subtitle": "AI čiščenje, ki ga lahko pregledate, izboljšate in mu zaupate. Vsaka sprememba vidna. Vsaka beseda preverljiva.",
+      "subtitle": "Nič več kopiranja transkripcij v ChatGPT in iskanja pravih navodil. Naložite enkrat, pregledajte vse spremembe, preverite s poslušanjem.",
       "cta": "Preizkusite brezplačni demo",
       "noSignup": "Brez registracije · Brezplačni demo na voljo"
     },
@@ -49,7 +49,8 @@
     },
     "proofVisual": {
       "sectionLabel": "Poglejte razliko",
-      "title": "Vsaka sprememba vidna. Vsaka beseda preverljiva."
+      "title": "Vsaka sprememba vidna. Vsaka beseda preverljiva.",
+      "subtitle": "ChatGPT ureja preveč, povzema in si izmišlja. Naša navodila to zmanjšajo. Naš prikaz sprememb ujame ostalo."
     },
     "mockTranscript": {
       "segment1": {
@@ -86,7 +87,7 @@
     "features": {
       "sectionLabel": "Funkcije",
       "title": "Zakaj izbrati EverSaid?",
-      "subtitle": "Narejeno za strokovnjake, ki potrebujejo natančnost in odgovornost",
+      "subtitle": "Preverite vsako spremembo in ohranite nadzor.",
       "verifyEveryWord": "Preverite vsako besedo",
       "dataProtected": "Vaši podatki, zaščiteni",
       "sideBySide": {
@@ -104,8 +105,12 @@
       },
       "editRevert": {
         "title": "Urejanje in povrnitev",
-        "description": "Uredite ali povrnite vsak segment.",
+        "description": "AI se je zmotil? Popravite sami ali povrnite na izvirnik. Vedno imate nadzor.",
         "comingSoon": "Premikanje besedila med segmenti"
+      },
+      "cleanupLevels": {
+        "title": "Izberite raven",
+        "description": "Pozive nenehno izboljšujemo, da vam ni treba. Od samo ločil do popolnoma urejenega."
       },
       "gdpr": {
         "title": "GDPR",
@@ -131,27 +136,27 @@
       "subtitle": "Strokovnjaki, ki potrebujejo prepise, ki jim lahko zaupajo, in vpoglede, ki jih lahko uporabijo",
       "therapists": {
         "title": "Terapevti in mentorji",
-        "description": "Dokumentirajte seje z označenimi govorci."
+        "description": "Natančno dokumentirajte seje. Napake AI v kliničnih zapisih imajo resne posledice."
       },
       "sales": {
         "title": "Prodajne ekipe",
-        "description": "Preglejte klice, sledite dogovorom, hitreje zaključite."
+        "description": "Ujemite natančne ugovore in zaveze. AI povzetki izgubijo podrobnosti, ki zaključijo posel."
       },
       "journalists": {
         "title": "Novinarji",
-        "description": "Prepišite intervjuje s preverljivimi citati."
+        "description": "Citati, ki jih lahko preverite z zvokom. Napačno citiranje uniči kariero."
       },
       "uxResearch": {
         "title": "UX raziskave",
-        "description": "Analizirajte uporabniške intervjuje s polnim kontekstom."
+        "description": "Izberite stopnjo čiščenja. Ohranite surovi govor udeležencev za analizo ali polirajte za poročila."
       },
       "hr": {
         "title": "HR in zaposlovanje",
-        "description": "Zabeležite razgovore pošteno in dosledno."
+        "description": "Pošteni, dosledni zapisi brez AI-vnesene pristranskosti."
       },
       "lawyers": {
         "title": "Odvetniki",
-        "description": "Ohranite pričevanja z besedno natančnostjo."
+        "description": "Vsaka beseda šteje pri pričevanjih. Poglejte, kaj se je spremenilo, preden podpišete."
       },
       "meetings": {
         "title": "Zapiski sestankov",
@@ -165,7 +170,7 @@
     "howItWorks": {
       "sectionLabel": "Postopek",
       "title": "Kako deluje",
-      "subtitle": "Od zvoka do preverjenega prepisa v minutah",
+      "subtitle": "Od zvoka do preverjenega prepisa z AI analizo v minutah",
       "step1": {
         "title": "Naložite ali posnemite",
         "description": "Povlecite zvočno datoteko ali posnemite neposredno v brskalniku."
