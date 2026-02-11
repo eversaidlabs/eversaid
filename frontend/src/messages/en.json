@@ -49,43 +49,54 @@
     },
     "problem": {
       "sectionLabel": "The Problem",
-      "title": "The Broken Workflow Everyone Uses",
-      "subtitle": "Current transcription tools give you raw transcripts. So professionals resort to a tedious, error-prone workaround that eats into the time AI was supposed to save.",
-      "chatgptLoop": "The ChatGPT Loop",
-      "step1": {
-        "title": "Get Raw Transcript",
-        "description": "From Otter, Trint, or Rev. Full of \"um\", \"uh\", stutters, misheard words, and spoken grammar."
+      "title": "Current Tools Only Give You Half",
+      "subtitle": "Current tools give you raw transcripts full of fillers and errors. To clean them: edit manually for hours, or use ChatGPT, exposing client data, getting over-edited results, with no way to verify what changed.",
+      "without": {
+        "header": "Without EverSaid",
+        "item1": {
+          "title": "Messy raw transcripts",
+          "description": "Full of \"um\", stutters, and spoken grammar. Unprofessional to share."
+        },
+        "item2": {
+          "title": "Hours of manual editing",
+          "description": "Tedious word-by-word cleanup that drains your time."
+        },
+        "item3": {
+          "title": "ChatGPT cleanup = black box",
+          "description": "Generic prompts over-edit, make things up and summarise. Can't see what changed. No way to verify."
+        },
+        "item4": {
+          "title": "Your data exposed",
+          "description": "Your data trains their model. No control over how it's stored or used."
+        }
       },
-      "step2": {
-        "title": "Copy-Paste to ChatGPT",
-        "description": "Split into chunks to avoid over-editing. Paste each one. Copy. Repeat.",
-        "painStat": "30+ min per 1h transcript"
-      },
-      "step3": {
-        "title": "Fix ChatGPT's Output",
-        "description": "Wrong result? Tweak prompt. Try again. Switch models. Hope it works.",
-        "painStat": "3-5x compute waste"
-      },
-      "step4": {
-        "title": "Lost All Context",
-        "description": "What did AI change? What got removed? What was fabricated? No way to know.",
-        "painStat": "76% errors undetected"
+      "with": {
+        "header": "With EverSaid",
+        "item1": {
+          "title": "Both versions, automatically",
+          "description": "Raw for accuracy, cleaned for readability. Side by side."
+        },
+        "item2": {
+          "title": "Instant AI cleanup",
+          "description": "No more tedious word-by-word editing. AI cleans in seconds."
+        },
+        "item3": {
+          "title": "Full transparency & verification",
+          "description": "Diff view shows every edit. Click any segment to hear the original audio."
+        },
+        "item4": {
+          "title": "Your data stays private",
+          "description": "GDPR compliant, fully encrypted, never used for AI training."
+        }
       },
       "stat": {
+        "intro": "Most professionals turn to ChatGPT with generic prompts for cleanup. The result?",
         "text": "of AI text-editing errors go undetected without verification tools",
         "source": "Executable and Verifiable Text-Editing with LLMs, UC Berkeley"
       },
-      "solution": {
-        "title": "Professional Work Demands Both",
-        "requirement1": {
-          "label": "Raw accuracy",
-          "text": "— verifiable against audio"
-        },
-        "requirement2": {
-          "label": "Cleaned readability",
-          "text": "— professional, polished"
-        },
-        "tagline": "gives you both — side-by-side, verifiable."
+      "cta": {
+        "tagline": "shows what changed, so you stay in control.",
+        "features": "Audio playback for context. Revert any AI change with one click."
       }
     },
     "proofVisual": {

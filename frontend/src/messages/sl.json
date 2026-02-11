@@ -49,43 +49,54 @@
     },
     "problem": {
       "sectionLabel": "Problem",
-      "title": "Pokvarjen potek dela, ki ga vsi uporabljajo",
-      "subtitle": "Trenutna orodja za transkripcijo vam dajo surove prepise. Zato se strokovnjaki zatečejo k zamudnemu, napakam podvržnemu obvozu, ki požre čas, ki naj bi ga AI prihranil.",
-      "chatgptLoop": "ChatGPT zanka",
-      "step1": {
-        "title": "Pridobite surovi prepis",
-        "description": "Iz Otterja, Trinta ali Reva. Poln \"um\", \"uh\", zatikanj, napačno slišanih besed in govorjene slovnice."
+      "title": "Trenutna orodja vam dajo le polovico",
+      "subtitle": "Trenutna orodja vam dajo surove prepise polne polnil in napak. Za čiščenje: ročno urejajte več ur ali uporabite ChatGPT, izpostavite podatke strank, dobite preveč urejen rezultat, brez možnosti preverjanja sprememb.",
+      "without": {
+        "header": "Brez EverSaid",
+        "item1": {
+          "title": "Neurejeni surovi prepisi",
+          "description": "Polni \"um\", zatikanj, jecljanj in govorjene slovnice. Neprofesionalno za deljenje."
+        },
+        "item2": {
+          "title": "Ure ročnega urejanja",
+          "description": "Zamudno čiščenje besedo za besedo, ki vam krade čas."
+        },
+        "item3": {
+          "title": "ChatGPT čiščenje = črna škatla",
+          "description": "Generična navodila preveč urejajo, si izmišljajo in povzemajo. Ne vidite sprememb."
+        },
+        "item4": {
+          "title": "Vaši podatki izpostavljeni",
+          "description": "Vaši podatki trenirajo AI modele. Brez nadzora, kako so shranjeni ali uporabljeni."
+        }
       },
-      "step2": {
-        "title": "Kopirajte v ChatGPT",
-        "description": "Razdelite na kose, da preprečite pretirano urejanje. Prilepite. Kopirajte. Ponovite.",
-        "painStat": "30+ min na 1h prepisa"
-      },
-      "step3": {
-        "title": "Popravljajte ChatGPT rezultat",
-        "description": "Napačen rezultat? Popravite navodila. Poskusite znova. Zamenjajte model. Upajte.",
-        "painStat": "3-5x izguba računske moči"
-      },
-      "step4": {
-        "title": "Izgubljen kontekst",
-        "description": "Kaj je AI spremenil? Kaj je odstranil? Kaj si je izmislil? Ni načina, da bi vedeli.",
-        "painStat": "76% napak neodkritih"
+      "with": {
+        "header": "Z EverSaid",
+        "item1": {
+          "title": "Obe verziji, samodejno",
+          "description": "Surova za natančnost, očiščena za berljivost. Ena zraven druge."
+        },
+        "item2": {
+          "title": "Takojšnje AI čiščenje",
+          "description": "Nič več zamudnega urejanja, AI očisti v sekundah."
+        },
+        "item3": {
+          "title": "Polna transparentnost in preverjanje",
+          "description": "Prikaz sprememb pokaže vsako urejanje. Kliknite kateri koli segment za poslušanje originala."
+        },
+        "item4": {
+          "title": "Vaši podatki ostanejo zasebni",
+          "description": "Skladno z GDPR, popolnoma šifrirano, nikoli uporabljeno za AI treniranje."
+        }
       },
       "stat": {
-        "text": "napak AI ostane neodkritih brez orodij za preverjanje",
+        "intro": "Večina strokovnjakov uporablja ChatGPT z generičnimi navodili za čiščenje. Rezultat?",
+        "text": "napak AI urejanja ostane neodkritih brez orodij za preverjanje",
         "source": "Executable and Verifiable Text-Editing with LLMs, UC Berkeley"
       },
-      "solution": {
-        "title": "Strokovno delo zahteva oboje",
-        "requirement1": {
-          "label": "Surova natančnost",
-          "text": "— preverljiva s poslušanjem"
-        },
-        "requirement2": {
-          "label": "Očiščena berljivost",
-          "text": "— profesionalno, uglajeno"
-        },
-        "tagline": "vam ponuja oboje — vzporedno, preverljivo."
+      "cta": {
+        "tagline": "pokaže, kaj se je spremenilo. Vi ostanete v kontroli.",
+        "features": "Predvajanje zvoka za kontekst. Razveljavite katero koli AI spremembo z enim klikom."
       }
     },
     "proofVisual": {
