@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useCallback, useRef, useEffect, useMemo, Suspense } from "react"
 import { DemoNavigation } from "@/components/demo/demo-navigation"
+import { DemoAttribution } from "@/components/demo/demo-attribution"
 import { AnalysisSection } from "@/components/demo/analysis-section"
 import { DemoWarningBanner } from "@/components/demo/demo-warning-banner"
 import { EntryHistoryCard } from "@/components/demo/entry-history-card"
@@ -1354,6 +1355,15 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                     />
                   </div>
                 )}
+              </div>
+
+              {/* Demo Source Attribution - sticky at bottom */}
+              <div className="flex-shrink-0 bg-background">
+                <DemoAttribution
+                  isDemo={transcription.isDemo}
+                  filename={transcription.demoLocale ? `demo-${transcription.demoLocale}.mp3` : undefined}
+                  demoConfig={config.demo}
+                />
               </div>
             </div>
 
