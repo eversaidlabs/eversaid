@@ -560,6 +560,14 @@
       "aiCleanup": "AI-powered cleanup",
       "audioLinked": "Audio-linked segments",
       "analysis": "Conversation analysis"
+    },
+    "tabs": {
+      "transcript": "Transcript",
+      "analysis": "Analysis"
+    },
+    "feedbackWidget": {
+      "collapsed": "Rate Quality",
+      "close": "Close"
     }
   },
   "waitlist": {

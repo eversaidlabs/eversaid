@@ -4,8 +4,6 @@ import type React from "react"
 
 import { useRef, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { motion, AnimatePresence } from "@/components/motion"
-import { Maximize2 } from "lucide-react"
 import { RawSegmentList } from "./raw-segment-list"
 import { EditableSegmentList } from "./editable-segment-list"
 import { TranscriptHeader, type CleanupOptionsProps } from "./transcript-header"
@@ -28,12 +26,6 @@ interface TranscriptComparisonLayoutProps {
   activeWordIndex?: number
   /** Whether audio is currently playing */
   isPlaying?: boolean
-  /** Whether the editor is in expanded (fullscreen) mode */
-  isExpanded?: boolean
-  /** Callback when user clicks to expand from collapsed state */
-  onExpandToggle?: () => void
-  /** Callback when user clicks X or presses ESC to collapse */
-  onClose?: () => void
   onSegmentClick: (segmentId: string) => void
   onRevert: (segmentId: string) => void
   onUndoRevert: (segmentId: string) => void
@@ -52,7 +44,6 @@ interface TranscriptComparisonLayoutProps {
   onCleanedMoveTargetClick: (segmentId: string) => void
   showRevertButton?: boolean
   showCopyButton?: boolean
-  variant?: "demo" | "preview"
   /** Cleanup options for AI CLEANED header (model/level selection) */
   cleanupOptions?: CleanupOptionsProps
 }
@@ -72,9 +63,6 @@ export function TranscriptComparisonLayout({
   editingCount,
   activeWordIndex = -1,
   isPlaying = false,
-  isExpanded = true,
-  onExpandToggle,
-  onClose,
   onSegmentClick,
   onRevert,
   onUndoRevert,
@@ -93,7 +81,6 @@ export function TranscriptComparisonLayout({
   onCleanedMoveTargetClick,
   showRevertButton = true,
   showCopyButton = true,
-  variant = "demo",
   cleanupOptions,
 }: TranscriptComparisonLayoutProps) {
   const t = useTranslations('demo.transcript')
@@ -180,7 +167,7 @@ export function TranscriptComparisonLayout({
   }, [segments, showDiff, editingSegmentId])
 
   return (
-    <div className={`relative flex flex-col ${variant === "demo" && !isExpanded ? "" : "flex-1 min-h-0"}`}>
+    <div className="relative flex flex-col flex-1 min-h-0">
       <div className="grid grid-cols-2 border-b border-border">
         <TranscriptHeader
           title={t('rawTitle')}
@@ -196,16 +183,11 @@ export function TranscriptComparisonLayout({
           showDiff={showDiff}
           onToggleDiff={onToggleDiff}
           showCopyButton={showCopyButton}
-          showCloseButton={isExpanded && variant === "demo"}
-          onClose={onClose}
           cleanupOptions={cleanupOptions}
         />
       </div>
 
-      <div
-        className={`grid grid-cols-2 overflow-hidden ${variant === "demo" && !isExpanded ? "" : "flex-1"}`}
-        style={{ height: variant === "demo" && !isExpanded ? "280px" : undefined }}
-      >
+      <div className="grid grid-cols-2 overflow-hidden flex-1">
         <RawSegmentList
           ref={rawScrollRef}
           segments={segments}
@@ -253,35 +235,6 @@ export function TranscriptComparisonLayout({
           showRevertButton={showRevertButton}
         />
       </div>
-
-      {/* Expand overlay - only shown when collapsed */}
-      <AnimatePresence>
-        {!isExpanded && onExpandToggle && variant === "demo" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
-            onClick={onExpandToggle}
-            className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80
-                       cursor-pointer z-10 flex items-end justify-center pb-6"
-            role="button"
-            aria-label={t('expandEditor')}
-          >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 10, opacity: 0 }}
-              transition={{ delay: 0.15 }}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
-                         rounded-full text-sm font-medium shadow-lg"
-            >
-              <Maximize2 className="w-4 h-4" />
-              <span>{t('clickToExpand')}</span>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

@@ -3,25 +3,23 @@
 import type React from "react"
 import { useState, useCallback, useRef, useEffect, useMemo, Suspense } from "react"
 import { DemoNavigation } from "@/components/demo/demo-navigation"
-import { DemoAttribution } from "@/components/demo/demo-attribution"
 import { AnalysisSection } from "@/components/demo/analysis-section"
 import { DemoWarningBanner } from "@/components/demo/demo-warning-banner"
 import { EntryHistoryCard } from "@/components/demo/entry-history-card"
-import { FeedbackCard, type FeedbackCardRef } from "@/components/demo/feedback-card"
+import { FloatingFeedbackWidget } from "@/components/demo/floating-feedback-widget"
+import { DemoTabs, type DemoTabType } from "@/components/demo/demo-tabs"
 // TextMoveToolbar temporarily disabled - kept for future use
 // import { TextMoveToolbar } from "@/components/demo/text-move-toolbar"
 import { TranscriptComparisonLayout } from "@/components/demo/transcript-comparison-layout"
 import { TranscriptLoadingSkeleton } from "@/components/demo/transcript-loading-skeleton"
 import { AudioPlayer } from "@/components/demo/audio-player"
 import { UploadZone } from "@/components/demo/upload-zone"
-import { ExpandableCard } from "@/components/demo/expandable-card"
 import type { SpellcheckError, TextMoveSelection } from "@/components/demo/types"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 import { useWaitlist } from "@/features/transcription/useWaitlist"
 import { useTranslations, useLocale } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
-import { motion, AnimatePresence } from "@/components/motion"
 import { OfflineBanner } from "@/components/ui/offline-banner"
 import { PersistentWarning } from "@/components/ui/persistent-warning"
 import { ErrorDisplay } from "@/components/demo/error-display"
@@ -59,7 +57,6 @@ interface StoredEntryState {
   entryId: string
   model: string
   hasManual: boolean
-  isExpanded?: boolean
 }
 
 function getStoredEntryState(): StoredEntryState | null {
@@ -137,12 +134,9 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     feedbackType: 'transcription'
   })
 
-  // Feedback card ref for focus/highlight from beta banner
-  const feedbackCardRef = useRef<FeedbackCardRef>(null)
-
   // UI State
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null)
-  const [isEditorExpanded, setIsEditorExpanded] = useState(false)
+  const [activeTab, setActiveTab] = useState<DemoTabType>("transcript")
 
   // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -327,50 +321,12 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     }
   }, [transcription.entryId, transcription.status, searchParams, router])
 
-  // Helper to set expanded state and persist it
-  const setExpandedAndPersist = useCallback((expanded: boolean) => {
-    if (expanded) {
-      capture('diff_view_opened')
-    }
-    setIsEditorExpanded(expanded)
-    if (transcription.entryId) {
-      const stored = getStoredEntryState()
-      storeEntryState({
-        entryId: transcription.entryId,
-        model: stored?.model || selectedCleanupModel,
-        hasManual: stored?.hasManual || hasManualCleanupModelSelection,
-        isExpanded: expanded,
-      })
-    }
-  }, [transcription.entryId, selectedCleanupModel, hasManualCleanupModelSelection])
-
-  // Handler for "Share feedback" link in beta banner
+  // Handler for "Share feedback" link in beta banner - scrolls to feedback widget
   const handleShareFeedback = useCallback(() => {
     capture('share_feedback_clicked')
-    if (isEditorExpanded) {
-      // Exit fullscreen first, then focus feedback after animation
-      setExpandedAndPersist(false)
-      setTimeout(() => {
-        feedbackCardRef.current?.focusAndHighlight()
-      }, 400) // Wait for exit animation
-    } else {
-      feedbackCardRef.current?.focusAndHighlight()
-    }
-  }, [isEditorExpanded, setExpandedAndPersist])
-
-  // ESC key handler to collapse editor
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isEditorExpanded && transcription.segments.length > 0) {
-        setExpandedAndPersist(false)
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isEditorExpanded, transcription.segments.length, setExpandedAndPersist])
-
-  // Height sync logic removed - moved to transcript-comparison-layout component
+    // The floating feedback widget is always visible, so we just need to track the click
+    // The widget handles its own expand state
+  }, [])
 
   // Segment Handlers
   const handleRevertSegment = useCallback(
@@ -659,7 +615,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     setHasManualCleanupModelSelection(true)
     // Persist selection for this entry (survives refresh)
     if (transcription.entryId) {
-      storeEntryState({ entryId: transcription.entryId, model: modelId, hasManual: true, isExpanded: isEditorExpanded })
+      storeEntryState({ entryId: transcription.entryId, model: modelId, hasManual: true })
     }
     if (!transcription.transcriptionId || !transcription.entryId) return
 
@@ -698,7 +654,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
       setSelectedCleanupModel(previousModel)
       toast.error(t('demo.cleanup.modelChangeFailed'))
     }
-  }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, isEditorExpanded, turnstile, t])
+  }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, turnstile, t])
 
   // Handler for cleanup level change - uses cached cleanup if available
   const handleCleanupLevelChange = useCallback(async (level: CleanupType) => {
@@ -958,11 +914,6 @@ function DemoPageContent({ config }: DemoPageContentProps) {
       } else {
         // Different entry - reset to defaults
         setHasManualCleanupModelSelection(false)
-      }
-
-      // Restore fullscreen state (simple UI state, no data sync needed)
-      if (isSameEntry && stored.isExpanded) {
-        setIsEditorExpanded(true)
       }
 
       getCleanedEntries(transcription.entryId).then(async ({ data }) => {
@@ -1302,26 +1253,21 @@ function DemoPageContent({ config }: DemoPageContentProps) {
             </div>
           </div>
         ) : (
-          /* Transcript Mode */
+          /* Transcript Mode - Full screen tab-based interface */
           <>
-            <ExpandableCard
-              isExpanded={isEditorExpanded}
-              topOffset={64}
-              collapsedClassName="rounded-xl mb-12"
-              expandedClassName="rounded-none border-x-0"
-            >
+            <div className="bg-card border-y border-border overflow-hidden flex flex-col fixed inset-x-0 top-16 bottom-0 z-30">
               {audioUrl && (
                 <audio src={audioUrl} {...audioPlayer.audioProps} preload="metadata" className="hidden" />
               )}
-              <div className={`bg-gradient-to-b from-muted/30 to-transparent border-b border-border/50 flex-shrink-0 ${
-                isEditorExpanded ? "rounded-none" : "rounded-t-lg"
-              }`}>
+
+              {/* Audio Player - sticky header */}
+              <div className="bg-gradient-to-b from-muted/30 to-transparent border-b border-border/50 flex-shrink-0">
                 <AudioPlayer
                   isPlaying={audioPlayer.isPlaying}
                   currentTime={audioPlayer.currentTime}
                   duration={audioPlayer.duration}
                   playbackSpeed={audioPlayer.playbackSpeed}
-                  isFullscreen={isEditorExpanded}
+                  isFullscreen={true}
                   onPlayPause={handlePlayPause}
                   onSeek={handleSeek}
                   onSpeedChange={handleSpeedChange}
@@ -1330,84 +1276,64 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                 />
               </div>
 
-              {/* Transcript comparison directly below */}
-              <TranscriptComparisonLayout
-                segments={transcription.segments}
-                activeSegmentId={activeSegmentId}
-                editingSegmentId={editingSegmentId}
-                editedTexts={editedTexts}
-                revertedSegments={revertedSegments}
-                spellcheckErrors={spellcheckErrors}
-                showDiff={showDiff}
-                showSpeakerLabels={showSpeakerLabels}
-                textMoveSelection={textMoveSelection}
-                isSelectingMoveTarget={isSelectingMoveTarget}
-                activeSuggestion={activeSuggestion}
-                editingCount={editingCount}
-                onSegmentClick={handleSegmentClick}
-                onRevert={handleRevertSegment}
-                onUndoRevert={handleUndoRevert}
-                onSave={handleSaveSegment}
-                onEditStart={handleSegmentEditStart}
-                onEditCancel={handleSegmentEditCancel}
-                onTextChange={handleTextChange}
-                onWordClick={handleWordClick}
-                onSuggestionSelect={handleSuggestionSelect}
-                onCloseSuggestions={handleCloseSuggestions}
-                onUpdateAll={handleUpdateAllSegments}
-                onToggleDiff={handleToggleDiff}
-                onRawTextSelect={handleRawTextSelect}
-                onCleanedTextSelect={handleCleanedTextSelect}
-                onRawMoveTargetClick={handleRawMoveTargetClick}
-                onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
-                activeWordIndex={wordHighlight.activeWordIndex}
-                isPlaying={audioPlayer.isPlaying}
-                isExpanded={isEditorExpanded}
-                onExpandToggle={() => setExpandedAndPersist(true)}
-                onClose={() => setExpandedAndPersist(false)}
-                cleanupOptions={{
-                  models: cleanupModels,
-                  selectedModel: selectedCleanupModel,
-                  selectedLevel: selectedCleanupLevel,
-                  isProcessing: transcription.status === 'cleaning',
-                  onModelChange: handleCleanupModelChange,
-                  onLevelChange: handleCleanupLevelChange,
-                  cachedCleanups: cleanupCache,
-                  hasManualSelection: hasManualCleanupModelSelection,
-                  currentPromptName: transcription.cleanupPromptName,
-                  currentTemperature: transcription.cleanupTemperature,
-                  onShareFeedback: handleShareFeedback,
-                  ...(isTemperatureSelectionEnabled && {
-                    selectedTemperature: selectedCleanupTemp,
-                    onTemperatureChange: handleCleanupTempChange,
-                  }),
-                }}
-              />
+              {/* Tab Navigation */}
+              <DemoTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-              {/* Attribution for demo entries */}
-              <DemoAttribution
-                isDemo={transcription.isDemo}
-                filename={transcription.demoLocale ? `demo-${transcription.demoLocale}.mp3` : undefined}
-                demoConfig={config.demo}
-              />
-            </ExpandableCard>
-
-            {/* Analysis and Feedback - animated visibility */}
-            <AnimatePresence mode="wait">
-              {!isEditorExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{
-                    type: "spring",
-                    damping: 25,
-                    stiffness: 200,
-                    delay: 0.1
-                  }}
-                  className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-                >
-                  <div className="lg:col-span-2">
+              {/* Tab Content */}
+              <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                {activeTab === "transcript" ? (
+                  <TranscriptComparisonLayout
+                      segments={transcription.segments}
+                      activeSegmentId={activeSegmentId}
+                      editingSegmentId={editingSegmentId}
+                      editedTexts={editedTexts}
+                      revertedSegments={revertedSegments}
+                      spellcheckErrors={spellcheckErrors}
+                      showDiff={showDiff}
+                      showSpeakerLabels={showSpeakerLabels}
+                      textMoveSelection={textMoveSelection}
+                      isSelectingMoveTarget={isSelectingMoveTarget}
+                      activeSuggestion={activeSuggestion}
+                      editingCount={editingCount}
+                      onSegmentClick={handleSegmentClick}
+                      onRevert={handleRevertSegment}
+                      onUndoRevert={handleUndoRevert}
+                      onSave={handleSaveSegment}
+                      onEditStart={handleSegmentEditStart}
+                      onEditCancel={handleSegmentEditCancel}
+                      onTextChange={handleTextChange}
+                      onWordClick={handleWordClick}
+                      onSuggestionSelect={handleSuggestionSelect}
+                      onCloseSuggestions={handleCloseSuggestions}
+                      onUpdateAll={handleUpdateAllSegments}
+                      onToggleDiff={handleToggleDiff}
+                      onRawTextSelect={handleRawTextSelect}
+                      onCleanedTextSelect={handleCleanedTextSelect}
+                      onRawMoveTargetClick={handleRawMoveTargetClick}
+                      onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
+                      activeWordIndex={wordHighlight.activeWordIndex}
+                      isPlaying={audioPlayer.isPlaying}
+                      cleanupOptions={{
+                        models: cleanupModels,
+                        selectedModel: selectedCleanupModel,
+                        selectedLevel: selectedCleanupLevel,
+                        isProcessing: transcription.status === 'cleaning',
+                        onModelChange: handleCleanupModelChange,
+                        onLevelChange: handleCleanupLevelChange,
+                        cachedCleanups: cleanupCache,
+                        hasManualSelection: hasManualCleanupModelSelection,
+                        currentPromptName: transcription.cleanupPromptName,
+                        currentTemperature: transcription.cleanupTemperature,
+                        onShareFeedback: handleShareFeedback,
+                        ...(isTemperatureSelectionEnabled && {
+                          selectedTemperature: selectedCleanupTemp,
+                          onTemperatureChange: handleCleanupTempChange,
+                        }),
+                      }}
+                    />
+                ) : (
+                  /* Analysis Tab */
+                  <div className="h-full overflow-y-auto p-6">
                     <AnalysisSection
                       analysisType={analysisType}
                       analysisData={analysisHook.data}
@@ -1427,28 +1353,26 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                       onShareFeedback={handleShareFeedback}
                     />
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <div>
-                    <FeedbackCard
-                      ref={feedbackCardRef}
-                      rating={feedbackHook.rating}
-                      feedback={feedbackHook.feedbackText}
-                      onRatingChange={(rating: number) => {
-                        capture('quality_rated', { rating })
-                        feedbackHook.setRating(rating)
-                      }}
-                      onFeedbackChange={feedbackHook.setFeedbackText}
-                      onSubmit={feedbackHook.submit}
-                      isLoading={feedbackHook.isLoading}
-                      isSubmitting={feedbackHook.isSubmitting}
-                      isSubmitted={feedbackHook.isSubmitted}
-                      hasExisting={feedbackHook.hasExisting}
-                      disabled={!transcription.entryId}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Floating Feedback Widget */}
+            <FloatingFeedbackWidget
+              rating={feedbackHook.rating}
+              feedback={feedbackHook.feedbackText}
+              onRatingChange={(rating: number) => {
+                capture('quality_rated', { rating })
+                feedbackHook.setRating(rating)
+              }}
+              onFeedbackChange={feedbackHook.setFeedbackText}
+              onSubmit={feedbackHook.submit}
+              isLoading={feedbackHook.isLoading}
+              isSubmitting={feedbackHook.isSubmitting}
+              isSubmitted={feedbackHook.isSubmitted}
+              hasExisting={feedbackHook.hasExisting}
+              disabled={!transcription.entryId}
+            />
           </>
         )}
       </main>

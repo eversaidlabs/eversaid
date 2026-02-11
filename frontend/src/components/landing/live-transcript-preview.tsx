@@ -620,7 +620,6 @@ export function LiveTranscriptPreview({
           onCleanedMoveTargetClick={handleCleanedMoveTargetClick}
           showRevertButton={true}
           showCopyButton={false}
-          variant="preview"
         />
       </div>
     </>

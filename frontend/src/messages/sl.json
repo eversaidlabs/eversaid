@@ -560,6 +560,14 @@
       "aiCleanup": "AI čiščenje",
       "audioLinked": "Segmenti povezani z zvokom",
       "analysis": "Analiza pogovora"
+    },
+    "tabs": {
+      "transcript": "Prepis",
+      "analysis": "Analiza"
+    },
+    "feedbackWidget": {
+      "collapsed": "Oceni kakovost",
+      "close": "Zapri"
     }
   },
   "waitlist": {

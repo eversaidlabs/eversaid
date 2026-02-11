@@ -2,7 +2,7 @@
 import { useState, useRef } from "react"
 import type { Segment } from "@/components/demo/types"
 import type { ModelInfo, CleanupType, CleanupSummary } from "@/features/transcription/types"
-import { Eye, EyeOff, Copy, X, ChevronDown, Loader2, Check, Medal, Info } from "lucide-react"
+import { Eye, EyeOff, Copy, ChevronDown, Loader2, Check, Medal, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { capture } from "@/lib/analytics"
@@ -46,8 +46,6 @@ export interface TranscriptHeaderProps {
   showDiff?: boolean
   onToggleDiff?: () => void
   showCopyButton?: boolean
-  showCloseButton?: boolean
-  onClose?: () => void
   /** Cleanup options (only for AI CLEANED header) */
   cleanupOptions?: CleanupOptionsProps
 }
@@ -60,8 +58,6 @@ export function TranscriptHeader({
   showDiff = false,
   onToggleDiff,
   showCopyButton = true,
-  showCloseButton = false,
-  onClose,
   cleanupOptions,
 }: TranscriptHeaderProps) {
   const t = useTranslations("demo.cleanup")
@@ -313,15 +309,6 @@ export function TranscriptHeader({
           >
             <Copy className="w-3.5 h-3.5" />
             {t("copy")}
-          </button>
-        )}
-        {showCloseButton && onClose && (
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 p-1.5 bg-muted/80 hover:bg-red-100 hover:text-red-600 rounded-md text-muted-foreground transition-all"
-            aria-label="Exit fullscreen"
-          >
-            <X className="w-4 h-4" />
           </button>
         )}
         </div>
