@@ -425,6 +425,17 @@
           "intent": "samoraziskovanje"
         }
       },
+      "fields": {
+        "summary": "Povzetek",
+        "topics": "Obravnavane teme",
+        "key_points": "Ključne točke",
+        "themes": "Teme",
+        "underlying_questions": "Osnovna vprašanja",
+        "reflection_prompts": "Spodbude za razmislek",
+        "action_items": "Naloge",
+        "decisions": "Odločitve",
+        "follow_ups": "Nadaljnji koraki"
+      },
       "modelChangeFailed": "Analiza z izbranim modelom ni uspela. Poskusite znova.",
       "betaLabel": "Beta",
       "betaNotice": "Izboljšujemo kakovost analize. Vaše mnenje pomaga!",

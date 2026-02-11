@@ -5,7 +5,25 @@ import type { AnalysisProfile, AnalysisResult } from './types'
 import { ApiError } from './types'
 
 /**
- * Parsed analysis data structure
+ * Field value can be a string or array of strings
+ */
+export type AnalysisFieldValue = string | string[]
+
+/**
+ * Dynamic analysis data structure that works with any profile
+ */
+export interface DynamicAnalysisData {
+  /** Ordered field names from profile.outputs */
+  fieldOrder: string[]
+  /** Field values keyed by field name */
+  fields: Record<string, AnalysisFieldValue>
+  /** Profile ID for context */
+  profileId: string
+}
+
+/**
+ * @deprecated Use DynamicAnalysisData instead
+ * Kept for backward compatibility during transition
  */
 export interface ParsedAnalysisData {
   summary: string
@@ -30,7 +48,7 @@ export interface UseAnalysisOptions {
  */
 export interface UseAnalysisReturn {
   /** Parsed analysis data */
-  data: ParsedAnalysisData | null
+  data: DynamicAnalysisData | null
   /** Whether analysis is loading */
   isLoading: boolean
   /** Whether polling for results */
@@ -66,29 +84,44 @@ export interface UseAnalysisReturn {
 }
 
 /**
- * Parse raw analysis result into typed structure
+ * Parse raw analysis result into dynamic structure based on profile outputs
+ * @param result - Raw result from API
+ * @param profile - Profile with outputs array defining field order
+ * @returns DynamicAnalysisData or null if no usable data
  */
-function parseAnalysisResult(result: Record<string, unknown> | null | undefined): ParsedAnalysisData | null {
-  if (!result) return null
+function parseAnalysisResult(
+  result: Record<string, unknown> | null | undefined,
+  profile: AnalysisProfile | null | undefined
+): DynamicAnalysisData | null {
+  if (!result || !profile) return null
 
-  // The API returns different fields based on profile
-  // For generic-summary, we expect: summary, topics, key_points
-  const summary = typeof result.summary === 'string' ? result.summary : ''
-  const topics = Array.isArray(result.topics)
-    ? result.topics.filter((t): t is string => typeof t === 'string')
-    : []
-  const keyPoints = Array.isArray(result.key_points)
-    ? result.key_points.filter((kp): kp is string => typeof kp === 'string')
-    : []
+  const fieldOrder = profile.outputs || []
+  const fields: Record<string, AnalysisFieldValue> = {}
+  let hasData = false
 
-  if (!summary && topics.length === 0 && keyPoints.length === 0) {
+  for (const fieldName of fieldOrder) {
+    const value = result[fieldName]
+
+    if (typeof value === 'string' && value.trim()) {
+      fields[fieldName] = value
+      hasData = true
+    } else if (Array.isArray(value)) {
+      const filtered = value.filter((v): v is string => typeof v === 'string' && v.trim() !== '')
+      if (filtered.length > 0) {
+        fields[fieldName] = filtered
+        hasData = true
+      }
+    }
+  }
+
+  if (!hasData) {
     return null
   }
 
   return {
-    summary,
-    topics,
-    keyPoints,
+    fieldOrder,
+    fields,
+    profileId: profile.id,
   }
 }
 
@@ -122,7 +155,7 @@ function parseAnalysisResult(result: Record<string, unknown> | null | undefined)
 export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
   const { cleanupId, analysisId: initialAnalysisId, defaultProfile: defaultProfileOverride } = options
 
-  const [data, setData] = useState<ParsedAnalysisData | null>(null)
+  const [data, setData] = useState<DynamicAnalysisData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isPolling, setIsPolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -188,7 +221,9 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
           setAnalysisCache(prev => new Map(prev).set(result.profile_id, result))
         }
 
-        const parsed = parseAnalysisResult(result.result)
+        // Find the profile to get outputs for parsing
+        const profile = profiles.find(p => p.id === result.profile_id)
+        const parsed = parseAnalysisResult(result.result, profile)
         if (parsed) {
           setData(parsed)
         } else {
@@ -219,7 +254,7 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
       setError(errorMessage)
       toast.error(errorMessage)
     }
-  }, [clearPolling])
+  }, [clearPolling, profiles])
 
   /**
    * Start polling for analysis results
@@ -304,7 +339,9 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
         if (fullAnalysis.profile_id) {
           setAnalysisCache(prev => new Map(prev).set(fullAnalysis.profile_id, fullAnalysis))
         }
-        const parsed = parseAnalysisResult(fullAnalysis.result)
+        // Find the profile to get outputs for parsing
+        const profile = profiles.find(p => p.id === fullAnalysis.profile_id)
+        const parsed = parseAnalysisResult(fullAnalysis.result, profile)
         if (parsed) {
           setData(parsed)
           setError(null)
@@ -318,18 +355,21 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
       // Still processing - start polling
       startPolling(defaultAnalysis.id)
     }
-  }, [defaultProfileId, startPolling])
+  }, [defaultProfileId, startPolling, profiles])
 
   /**
    * Select a profile - checks cache, then API, then triggers LLM if needed
    */
   const selectProfile = useCallback(async (profileId: string) => {
+    // Find the profile for parsing
+    const profile = profiles.find(p => p.id === profileId)
+
     // 1. Check memory cache first (cache has full results from individual fetches)
     const cached = analysisCache.get(profileId)
     if (cached && cached.status === 'completed') {
       setCurrentProfileId(profileId)
       setAnalysisId(cached.id)
-      const parsed = parseAnalysisResult(cached.result)
+      const parsed = parseAnalysisResult(cached.result, profile)
       if (parsed) {
         setData(parsed)
         setError(null)
@@ -358,7 +398,7 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
             setAnalysisCache(prev => new Map(prev).set(fullAnalysis.profile_id, fullAnalysis))
           }
 
-          const parsed = parseAnalysisResult(fullAnalysis.result)
+          const parsed = parseAnalysisResult(fullAnalysis.result, profile)
           if (parsed) {
             setData(parsed)
             setError(null)
@@ -383,7 +423,7 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     // 3. Not found in API - trigger new LLM analysis
     setCurrentProfileId(profileId)
     await analyze(profileId)
-  }, [analysisCache, cleanupId, analyze, startPolling])
+  }, [analysisCache, cleanupId, analyze, startPolling, profiles])
 
   /**
    * Load available profiles

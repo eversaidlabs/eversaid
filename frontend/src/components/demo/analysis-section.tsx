@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Check, ChevronDown, Loader2, AlertCircle, RefreshCw } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ModelInfo } from "@/features/transcription/types"
+import type { DynamicAnalysisData } from "@/features/transcription/useAnalysis"
+import { AnalysisField } from "./analysis-field"
 
 export interface AnalysisProfile {
   id: string
@@ -15,11 +17,7 @@ export interface AnalysisProfile {
 
 export interface AnalysisSectionProps {
   analysisType: "summary" | "action-items" | "sentiment"
-  analysisData: {
-    summary: string
-    topics: string[]
-    keyPoints: string[]
-  } | null
+  analysisData: DynamicAnalysisData | null
   showAnalysisMenu: boolean
   isLoading?: boolean
   error?: string | null
@@ -274,32 +272,18 @@ export function AnalysisSection({
         </span>
       </div>
 
-      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">{t('summary')}</h4>
-      <p className="text-[15px] text-foreground leading-[1.7] mb-4">{analysisData.summary}</p>
-
-      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">
-        {t('topicsDiscussed')}
-      </h4>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {analysisData.topics.map((topic) => (
-          <span
-            key={topic}
-            className="px-3 py-1.5 bg-background border border-border rounded-full text-[13px] text-muted-foreground"
-          >
-            {topic}
-          </span>
-        ))}
-      </div>
-
-      <h4 className="text-[13px] font-bold text-muted-foreground uppercase tracking-[0.5px] mb-2 mt-4">{t('keyPoints')}</h4>
-      <ul className="space-y-2">
-        {analysisData.keyPoints.map((point, i) => (
-          <li key={i} className="relative pl-5 text-sm text-foreground leading-[1.6]">
-            <div className="absolute left-0 top-2 w-1.5 h-1.5 bg-[linear-gradient(135deg,var(--color-primary)_0%,#A855F7_100%)] rounded-full" />
-            {point}
-          </li>
-        ))}
-      </ul>
+      {/* Dynamic field rendering based on profile outputs */}
+      {analysisData.fieldOrder.map((fieldName) => {
+        const value = analysisData.fields[fieldName]
+        if (!value) return null
+        return (
+          <AnalysisField
+            key={fieldName}
+            fieldName={fieldName}
+            value={value}
+          />
+        )
+      })}
     </div>
   )
 }

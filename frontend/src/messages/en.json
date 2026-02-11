@@ -425,6 +425,17 @@
           "intent": "self-discovery"
         }
       },
+      "fields": {
+        "summary": "Summary",
+        "topics": "Topics Discussed",
+        "key_points": "Key Points",
+        "themes": "Themes",
+        "underlying_questions": "Underlying Questions",
+        "reflection_prompts": "Reflection Prompts",
+        "action_items": "Action Items",
+        "decisions": "Decisions",
+        "follow_ups": "Follow-ups"
+      },
       "modelChangeFailed": "Failed to rerun analysis with selected model. Please try again.",
       "betaLabel": "Beta",
       "betaNotice": "We're refining analysis quality. Your feedback helps!",
