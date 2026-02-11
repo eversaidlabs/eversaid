@@ -111,7 +111,7 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
                 isActive={seg.id === activeSegmentId}
                 isReverted={revertedSegments.has(seg.id)}
                 isEditing={editingSegmentId === seg.id}
-                editedText={editedTexts.get(seg.id) || seg.cleanedText}
+                editedText={editedTexts.has(seg.id) ? editedTexts.get(seg.id)! : seg.cleanedText}
                 hasUnsavedEdits={hasUnsavedEdits}
                 showDiff={showDiff}
                 showSpeakerLabels={showSpeakerLabels}

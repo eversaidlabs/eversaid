@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Sparkles, X, MessageSquare } from "lucide-react"
+import { Sparkles, X, Star } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "@/components/motion"
 
@@ -172,12 +172,23 @@ export function FloatingFeedbackWidget({
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={() => setIsExpanded(true)}
             disabled={disabled}
-            className={`flex items-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 ${
+            className={`flex flex-col items-center justify-center w-[220px] h-[85px] bg-white rounded-2xl border-2 border-blue-500 transition-all hover:scale-105 ${
               disabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
+            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
           >
-            <MessageSquare className="w-4 h-4" />
-            <span className="text-sm font-medium">{tWidget("collapsed")}</span>
+            {/* Gold stars with glow */}
+            <div className="flex gap-1 mb-1.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className="w-5 h-5 fill-yellow-500 text-yellow-500"
+                  style={{ filter: "drop-shadow(0 0 2px rgba(234, 179, 8, 0.4))" }}
+                />
+              ))}
+            </div>
+            {/* Question text */}
+            <span className="text-sm text-gray-500">{tWidget("collapsed")}</span>
           </motion.button>
         )}
       </AnimatePresence>

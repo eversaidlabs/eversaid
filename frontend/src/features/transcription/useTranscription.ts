@@ -255,7 +255,7 @@ function transformApiSegments(
       speaker: rawSeg.speaker ?? 0,
       time: timeStr,
       rawText: rawSeg.text,
-      cleanedText: cleanedSeg?.text || rawSeg.text,
+      cleanedText: cleanedSeg?.text ?? rawSeg.text,
       originalRawText: rawSeg.text, // Store immutable original raw text
       words: segmentWords, // Word-level timing for playback highlighting
     }
@@ -1156,7 +1156,7 @@ export function useTranscription(
             const cleanedSeg = cleanedSegments[index]
             return {
               ...seg,
-              cleanedText: cleanedSeg?.text || seg.rawText,
+              cleanedText: cleanedSeg?.text ?? seg.rawText,
             }
           })
         )
