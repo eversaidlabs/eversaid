@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { forwardRef } from "react"
-import { Check } from "lucide-react"
 import { EditableSegmentRow } from "./editable-segment-row"
 import type { SpellcheckError, TextMoveSelection } from "./types"
 
@@ -91,17 +90,6 @@ export const EditableSegmentList = forwardRef<HTMLDivElement, EditableSegmentLis
         className="p-5 pb-16 overflow-y-auto bg-[linear-gradient(180deg,rgba(56,189,248,0.02)_0%,transparent_100%)]"
         onScroll={onScroll}
       >
-        {editingCount > 0 && (
-          <div className="flex items-center justify-end mb-4">
-            <button
-              onClick={onUpdateAll}
-              className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,#38BDF8_0%,#A855F7_100%)] hover:opacity-90 text-white text-sm font-semibold rounded-lg transition-all shadow-sm"
-            >
-              <Check className="w-4 h-4" />
-              Update all segments ({editingCount})
-            </button>
-          </div>
-        )}
         <div className="space-y-0 pb-12">
           {segments.map((seg) => {
             const hasUnsavedEdits = editedTexts.has(seg.id) && editedTexts.get(seg.id) !== seg.cleanedText

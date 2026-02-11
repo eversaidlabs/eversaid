@@ -177,7 +177,7 @@ export function TranscriptComparisonLayout({
     // Re-sync on window resize
     window.addEventListener('resize', syncHeights)
     return () => window.removeEventListener('resize', syncHeights)
-  }, [segments, showDiff, editedTexts, editingSegmentId])
+  }, [segments, showDiff, editingSegmentId])
 
   return (
     <div className={`relative flex flex-col ${variant === "demo" && !isExpanded ? "" : "flex-1 min-h-0"}`}>
