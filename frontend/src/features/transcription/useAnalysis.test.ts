@@ -338,7 +338,7 @@ describe('useAnalysis', () => {
       })
 
       vi.mocked(api.getAnalysis).mockResolvedValue({
-        data: mockAnalysisResult,
+        data: { ...mockAnalysisResult, profile_id: 'action-items' },
         rateLimitInfo: null,
       })
 
