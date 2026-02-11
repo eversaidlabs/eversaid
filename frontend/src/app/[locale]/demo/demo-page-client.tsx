@@ -755,6 +755,13 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     }
   }, [transcription, selectedCleanupModel, selectedCleanupLevel, cleanupCache, selectedCleanupTemp, turnstile, t])
 
+  // Handler for force re-running analysis (bypasses cache)
+  const handleForceRerunAnalysis = useCallback(() => {
+    if (analysisHook.currentProfileId) {
+      analysisHook.runAnalysis(analysisHook.currentProfileId)
+    }
+  }, [analysisHook])
+
   // Handler for analysis model change - auto-triggers re-analysis
   const handleAnalysisModelChange = useCallback(async (modelId: string) => {
     const previousModel = selectedAnalysisModel
@@ -1352,6 +1359,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                       selectedModel={selectedAnalysisModel}
                       onModelChange={handleAnalysisModelChange}
                       onShareFeedback={handleShareFeedback}
+                      onForceRerun={handleForceRerunAnalysis}
                     />
                   </div>
                 )}

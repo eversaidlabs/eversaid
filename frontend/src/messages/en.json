@@ -437,6 +437,7 @@
         "follow_ups": "Follow-ups"
       },
       "modelChangeFailed": "Failed to rerun analysis with selected model. Please try again.",
+      "rerunAnalysis": "Re-run analysis",
       "betaLabel": "Beta",
       "betaNotice": "We're refining analysis quality. Your feedback helps!",
       "shareFeedback": "Share feedback"

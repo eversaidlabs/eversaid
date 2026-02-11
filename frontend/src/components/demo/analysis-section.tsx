@@ -40,6 +40,8 @@ export interface AnalysisSectionProps {
   onModelChange?: (modelId: string) => void
   /** Callback when user clicks "Share feedback" link */
   onShareFeedback?: () => void
+  /** Force fresh analysis, bypassing cache (dev feature) */
+  onForceRerun?: () => void
 }
 
 export function AnalysisSection({
@@ -60,6 +62,7 @@ export function AnalysisSection({
   selectedModel,
   onModelChange,
   onShareFeedback,
+  onForceRerun,
 }: AnalysisSectionProps) {
   const [showModelMenu, setShowModelMenu] = useState(false)
   // Use onSelectProfile if available, fall back to onRerunAnalysis for backward compatibility
@@ -249,6 +252,22 @@ export function AnalysisSection({
               </div>
             )}
           </div>
+        )}
+
+        {/* Re-run button (dev feature) */}
+        {process.env.NEXT_PUBLIC_ENABLE_COPY_METADATA === 'true' && onForceRerun && (
+          <button
+            onClick={onForceRerun}
+            disabled={isLoading}
+            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-[12px] font-medium transition-all ${
+              isLoading
+                ? "bg-muted text-muted-foreground cursor-not-allowed border-border"
+                : "bg-background hover:bg-secondary border-border hover:border-muted-foreground text-muted-foreground hover:text-foreground"
+            }`}
+            title={t('rerunAnalysis')}
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
         )}
 
         {/* Loading spinner */}

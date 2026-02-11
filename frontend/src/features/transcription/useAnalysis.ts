@@ -216,9 +216,11 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
         setIsPolling(false)
         setIsLoading(false)
 
-        // Add to cache by profile_id
+        // Add to cache by profile_id and sync currentProfileId
         if (result.profile_id) {
           setAnalysisCache(prev => new Map(prev).set(result.profile_id, result))
+          // Sync currentProfileId with the actual analysis result to avoid UI mismatch
+          setCurrentProfileId(result.profile_id)
         }
 
         // Find the profile to get outputs for parsing
@@ -335,9 +337,10 @@ export function useAnalysis(options: UseAnalysisOptions): UseAnalysisReturn {
     if (defaultAnalysis.status === 'completed') {
       setIsLoading(true)
       getAnalysis(defaultAnalysis.id).then(({ data: fullAnalysis }) => {
-        // Add to cache
+        // Add to cache and sync currentProfileId to ensure UI consistency
         if (fullAnalysis.profile_id) {
           setAnalysisCache(prev => new Map(prev).set(fullAnalysis.profile_id, fullAnalysis))
+          setCurrentProfileId(fullAnalysis.profile_id)
         }
         // Find the profile to get outputs for parsing
         const profile = profiles.find(p => p.id === fullAnalysis.profile_id)

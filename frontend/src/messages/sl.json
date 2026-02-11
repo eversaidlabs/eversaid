@@ -437,6 +437,7 @@
         "follow_ups": "Nadaljnji koraki"
       },
       "modelChangeFailed": "Analiza z izbranim modelom ni uspela. Poskusite znova.",
+      "rerunAnalysis": "Ponovi analizo",
       "betaLabel": "Beta",
       "betaNotice": "Izboljšujemo kakovost analize. Vaše mnenje pomaga!",
       "shareFeedback": "Deli mnenje"
