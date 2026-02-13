@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { setupDemoMocks } from "./mocks/setup-mocks"
+import { setupDemoMocks, clickAnalysisTab } from "./mocks/setup-mocks"
 
 /**
  * Analysis Section E2E Tests
@@ -13,6 +13,9 @@ test.describe("Analysis Section", () => {
     await setupDemoMocks(page)
     // Use ?entry=demo-en to trigger demo loading via useTranscription.loadEntry
     await page.goto("/en/demo?entry=demo-en")
+
+    // Switch to Analysis tab (UI now uses tabs: Transcript | Analysis)
+    await clickAnalysisTab(page)
 
     // Wait for analysis section to be visible
     await expect(page.getByText("AI Analysis")).toBeVisible({ timeout: 10000 })

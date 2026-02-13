@@ -56,12 +56,8 @@ test.describe("Audio Player", () => {
   })
 
   test("speed control changes playback rate", async ({ page }) => {
-    // First expand editor so the speed menu dropdown isn't blocked by the expand overlay
-    const expandOverlay = page.getByRole("button", { name: /expand editor/i })
-    await expandOverlay.click()
-    await page.waitForTimeout(300)
-
     // Find speed button (shows "1x")
+    // After refactor, controls are directly accessible (no expand overlay)
     const speedButton = audioPlayerBar
       .locator("button")
       .filter({ hasText: /^1x$/ })
@@ -107,12 +103,7 @@ test.describe("Audio Player", () => {
   })
 
   test("stays visible after clicking segment and playing", async ({ page }) => {
-    // First expand to access segments (overlay covers them in collapsed mode)
-    const expandOverlay = page.getByRole("button", { name: /expand editor/i })
-    await expandOverlay.click()
-    await page.waitForTimeout(300)
-
-    // Click segment 2
+    // Click segment 2 (after refactor, segments are directly accessible)
     const segment2 = page.locator('[data-segment-id="seg-2"]').first()
     await expect(segment2).toBeVisible()
     await segment2.click()

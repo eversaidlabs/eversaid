@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { setupDemoMocks } from "./mocks/setup-mocks"
+import { setupDemoMocks, expandFeedbackWidget } from "./mocks/setup-mocks"
 
 test.describe("Feedback Rating on Demo Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -7,37 +7,32 @@ test.describe("Feedback Rating on Demo Page", () => {
     await setupDemoMocks(page, { withFeedback: true })
     // Use ?entry=demo-en to trigger demo loading via useTranscription.loadEntry
     await page.goto("/en/demo?entry=demo-en")
+
+    // Expand the floating feedback widget (it starts collapsed)
+    await expandFeedbackWidget(page)
   })
 
   test("feedback card is visible with star rating", async ({ page }) => {
-    // Find the feedback section
+    // Find the feedback section (floating widget)
     await expect(page.getByText("How was the quality?")).toBeVisible()
 
-    // Should have 5 star buttons
-    const feedbackSection = page
-      .locator("div")
-      .filter({ hasText: "How was the quality?" })
-      .first()
-    const starButtons = feedbackSection
-      .locator("button")
-      .filter({ has: page.locator("svg") })
+    // Should have 5 star buttons in the rating container (flex gap-1 mb-4)
+    const feedbackWidget = page.locator(".fixed.bottom-6.right-6")
+    const starContainer = feedbackWidget.locator(".flex.gap-1.mb-4")
+    const starButtons = starContainer.locator("button")
 
-    // At least 5 buttons should exist (the stars)
+    // Exactly 5 star buttons should exist
     const count = await starButtons.count()
-    expect(count).toBeGreaterThanOrEqual(5)
+    expect(count).toBe(5)
   })
 
   test("clicking a star updates the rating", async ({ page }) => {
-    // Find the feedback card
-    const feedbackCard = page
-      .locator("div")
-      .filter({ hasText: /^How was the quality/ })
-      .first()
+    // Find star buttons within the floating widget's rating container
+    const feedbackWidget = page.locator(".fixed.bottom-6.right-6")
+    const starContainer = feedbackWidget.locator(".flex.gap-1.mb-4")
+    const starButtons = starContainer.locator("button")
 
-    // Find star buttons within the feedback card (they contain Sparkles SVG)
-    const starButtons = feedbackCard.locator("button")
-
-    // Click the 4th star (good rating)
+    // Click the 4th star (good rating) - index 3
     await starButtons.nth(3).click()
 
     // The star should be highlighted (background color changes)
@@ -46,14 +41,12 @@ test.describe("Feedback Rating on Demo Page", () => {
   })
 
   test("low rating (1-3 stars) shows feedback textarea", async ({ page }) => {
-    // Find the feedback card
-    const feedbackCard = page
-      .locator("div")
-      .filter({ hasText: /^How was the quality/ })
-      .first()
-    const starButtons = feedbackCard.locator("button")
+    // Find star buttons within the floating widget's rating container
+    const feedbackWidget = page.locator(".fixed.bottom-6.right-6")
+    const starContainer = feedbackWidget.locator(".flex.gap-1.mb-4")
+    const starButtons = starContainer.locator("button")
 
-    // Click the 2nd star (low rating)
+    // Click the 2nd star (low rating) - index 1
     await starButtons.nth(1).click()
 
     // Textarea should appear for feedback (low ratings use "Share your thoughts" placeholder)
@@ -66,14 +59,12 @@ test.describe("Feedback Rating on Demo Page", () => {
   })
 
   test("can type feedback and submit when rating is low", async ({ page }) => {
-    // Find the feedback card and click low star
-    const feedbackCard = page
-      .locator("div")
-      .filter({ hasText: /^How was the quality/ })
-      .first()
-    const starButtons = feedbackCard.locator("button")
+    // Find star buttons within the floating widget's rating container
+    const feedbackWidget = page.locator(".fixed.bottom-6.right-6")
+    const starContainer = feedbackWidget.locator(".flex.gap-1.mb-4")
+    const starButtons = starContainer.locator("button")
 
-    // Give a 2-star rating
+    // Give a 2-star rating (index 1)
     await starButtons.nth(1).click()
 
     // Fill in feedback
@@ -91,14 +82,12 @@ test.describe("Feedback Rating on Demo Page", () => {
   })
 
   test("high rating (4-5 stars) shows positive feedback prompt", async ({ page }) => {
-    // Find the feedback card
-    const feedbackCard = page
-      .locator("div")
-      .filter({ hasText: /^How was the quality/ })
-      .first()
-    const starButtons = feedbackCard.locator("button")
+    // Find star buttons within the floating widget's rating container
+    const feedbackWidget = page.locator(".fixed.bottom-6.right-6")
+    const starContainer = feedbackWidget.locator(".flex.gap-1.mb-4")
+    const starButtons = starContainer.locator("button")
 
-    // Click the 5th star (highest rating)
+    // Click the 5th star (highest rating) - index 4
     await starButtons.nth(4).click()
 
     // "Share your thoughts" textarea (for low ratings) should NOT appear
@@ -112,17 +101,16 @@ test.describe("Feedback Rating on Demo Page", () => {
   })
 
   test("changing rating from low to high changes textarea placeholder", async ({ page }) => {
-    const feedbackCard = page
-      .locator("div")
-      .filter({ hasText: /^How was the quality/ })
-      .first()
-    const starButtons = feedbackCard.locator("button")
+    // Find star buttons within the floating widget's rating container
+    const feedbackWidget = page.locator(".fixed.bottom-6.right-6")
+    const starContainer = feedbackWidget.locator(".flex.gap-1.mb-4")
+    const starButtons = starContainer.locator("button")
 
-    // First give low rating
+    // First give low rating (1 star - index 0)
     await starButtons.nth(0).click()
     await expect(page.getByPlaceholder(/Share your thoughts/)).toBeVisible()
 
-    // Now give high rating
+    // Now give high rating (5 stars - index 4)
     await starButtons.nth(4).click()
 
     // Low-rating placeholder should disappear, high-rating placeholder should appear

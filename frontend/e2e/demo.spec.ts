@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { setupDemoMocks, setupUploadModeMocks } from "./mocks/setup-mocks"
+import { setupDemoMocks, setupUploadModeMocks, clickAnalysisTab } from "./mocks/setup-mocks"
 
 test.describe("Demo Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -43,15 +43,8 @@ test.describe("Demo Page", () => {
   })
 
   test("can toggle diff view", async ({ page }) => {
-    // First expand the editor by clicking the overlay (required since fullscreen mode was added)
-    const expandOverlay = page.getByRole("button", { name: /expand editor/i })
-    await expect(expandOverlay).toBeVisible()
-    await expandOverlay.click()
-
-    // Wait for editor to expand
-    await page.waitForTimeout(300)
-
     // Find the diff toggle button by its aria-label (button with Eye icon)
+    // After refactor, controls are directly accessible (no expand overlay)
     const diffButton = page.getByRole("button", { name: /hide changes/i })
 
     await expect(diffButton).toBeVisible()
@@ -72,15 +65,8 @@ test.describe("Demo Page", () => {
   })
 
   test("transcript copy buttons work", async ({ page }) => {
-    // First expand the editor by clicking the overlay (required since fullscreen mode was added)
-    const expandOverlay = page.getByRole("button", { name: /expand editor/i })
-    await expect(expandOverlay).toBeVisible()
-    await expandOverlay.click()
-
-    // Wait for editor to expand
-    await page.waitForTimeout(300)
-
     // Copy button should be visible (there are multiple, pick first)
+    // After refactor, controls are directly accessible (no expand overlay)
     const copyButton = page.getByRole("button", { name: "Copy" }).first()
     await expect(copyButton).toBeVisible()
 
@@ -89,6 +75,9 @@ test.describe("Demo Page", () => {
   })
 
   test("analysis section displays content", async ({ page }) => {
+    // Switch to Analysis tab (UI now uses tabs: Transcript | Analysis)
+    await clickAnalysisTab(page)
+
     // Analysis section header
     await expect(page.getByText("AI Analysis")).toBeVisible()
 
@@ -96,9 +85,9 @@ test.describe("Demo Page", () => {
   })
 
   test("sidebar elements are visible in transcript mode", async ({ page }) => {
-    // In transcript mode, FeedbackCard is visible (not EntryHistoryCard)
-    // Feedback card - actual text is "How was the quality?"
-    await expect(page.getByText("How was the quality?")).toBeVisible()
+    // In transcript mode, floating feedback widget is visible (collapsed state)
+    // After refactor, FeedbackCard was replaced with FloatingFeedbackWidget
+    await expect(page.getByText("We want to hear your feedback")).toBeVisible()
 
     // Waitlist CTA (appears in various places)
     await expect(page.getByText(/waitlist/i).first()).toBeVisible()

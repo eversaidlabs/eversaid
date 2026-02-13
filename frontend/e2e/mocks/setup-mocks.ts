@@ -349,3 +349,50 @@ export async function setupUploadModeMocks(page: Page): Promise<void> {
     await route.fulfill({ json: { profiles: mockProfiles } })
   })
 }
+
+// ============================================================================
+// UI Navigation Helpers
+// ============================================================================
+
+/**
+ * Click the Analysis tab to switch from Transcript view to Analysis view.
+ * After the refactor, the UI uses tabs (Transcript | Analysis) instead of
+ * showing everything on one page.
+ */
+export async function clickAnalysisTab(page: Page): Promise<void> {
+  // Tabs are buttons in a sticky header (border-b border-border)
+  const analysisTab = page.getByRole("button", { name: "Analysis", exact: true })
+  await analysisTab.click()
+  // Wait for tab switch animation
+  await page.waitForTimeout(200)
+}
+
+/**
+ * Click the Transcript tab to switch from Analysis view to Transcript view.
+ */
+export async function clickTranscriptTab(page: Page): Promise<void> {
+  const transcriptTab = page.getByRole("button", { name: "Transcript", exact: true })
+  await transcriptTab.click()
+  // Wait for tab switch animation
+  await page.waitForTimeout(200)
+}
+
+/**
+ * Expand the floating feedback widget.
+ * The widget starts collapsed showing "We want to hear your feedback".
+ * After expansion, it shows the full feedback form with "How was the quality?".
+ */
+export async function expandFeedbackWidget(page: Page): Promise<void> {
+  // Wait for any animations to settle before clicking
+  await page.waitForTimeout(500)
+
+  // Find the collapsed widget button (contains the feedback prompt text)
+  const collapsedWidget = page.locator(".fixed.bottom-6.right-6 button")
+  await collapsedWidget.click({ force: true })
+
+  // Wait for expansion animation
+  await page.waitForTimeout(300)
+
+  // Verify it expanded by checking for "How was the quality?"
+  await page.waitForSelector("text=How was the quality?", { state: "visible" })
+}
