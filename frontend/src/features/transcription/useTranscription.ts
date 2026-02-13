@@ -817,6 +817,7 @@ export function useTranscription(
 
         setUploadProgress(100)
         setEntryId(response.entry_id)
+        setTranscriptionId(response.transcription_id)
         setCleanupId(response.cleanup_id)
         setAnalysisId(response.analysis_id ?? null)
 

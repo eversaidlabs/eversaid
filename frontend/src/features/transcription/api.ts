@@ -269,8 +269,8 @@ export async function uploadAndTranscribe(
   formData.append('enable_analysis', String(options.enableAnalysis ?? true))
   formData.append('analysis_profile', options.analysisProfile ?? 'generic-summary')
 
-  // Cleanup options
-  formData.append('cleanup_type', options.cleanupType ?? 'edited')
+  // Cleanup options (default to 'clean' - matching DEFAULT_CLEANUP_LEVEL)
+  formData.append('cleanup_type', options.cleanupType ?? 'clean')
   if (options.llmModel) {
     formData.append('llm_model', options.llmModel)
   }
