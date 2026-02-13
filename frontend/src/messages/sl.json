@@ -50,7 +50,7 @@
     "problem": {
       "sectionLabel": "Problem",
       "title": "Trenutna orodja vam dajo le polovico",
-      "subtitle": "Trenutna orodja vam dajo surove prepise polne polnil in napak. Za čiščenje: ročno urejajte več ur ali uporabite ChatGPT, izpostavite podatke strank, dobite preveč urejen rezultat, brez možnosti preverjanja sprememb.",
+      "subtitle": "Trenutna orodja vam dajo surove prepise polne polnil, napak in govorjene slovnice. Za čiščenje: ročno urejajte več ur ali uporabite ChatGPT, izpostavite podatke strank, dobite preveč urejen rezultat, brez možnosti preverjanja sprememb.",
       "without": {
         "header": "Brez EverSaid",
         "item1": {
@@ -467,6 +467,9 @@
         "minimal": "Ohrani vse",
         "clean": "Odstrani šum",
         "edited": "+ Slovnica"
+      },
+      "examples": {
+        "label": "Primer:"
       },
       "compareAll": "Primerjaj vse",
       "betaLabel": "Beta",

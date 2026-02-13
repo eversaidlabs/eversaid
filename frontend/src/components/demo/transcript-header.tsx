@@ -2,12 +2,83 @@
 import { useState, useRef } from "react"
 import type { Segment } from "@/components/demo/types"
 import type { ModelInfo, CleanupType, CleanupSummary } from "@/features/transcription/types"
-import { Eye, EyeOff, Copy, ChevronDown, Loader2, Check, Medal, Info } from "lucide-react"
+import { Eye, EyeOff, Copy, Loader2, Check, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { capture } from "@/lib/analytics"
 import { CLEANUP_LEVELS, CLEANUP_TEMPERATURES, getDefaultModelForLevel, temperaturesMatch, DEFAULT_CLEANUP_LEVEL } from "@/lib/level-config"
 import { CleanupCompareModal } from "./cleanup-compare-modal"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+/** Renders example text with removed parts shown as red strikethrough */
+function ExampleDiff({ levelId }: { levelId: CleanupType }) {
+  // Base: "So I I think you know um we're gonna im-improve user experience"
+  // Each level shows what gets removed/added
+  const examples: Record<CleanupType, { parts: Array<{ text: string; removed: boolean; added?: boolean }> }> = {
+    minimal: {
+      // Fixes ASR artifacts + adds punctuation. Keeps fillers, stutters, discourse markers, informal grammar.
+      parts: [
+        { text: "So", removed: false },
+        { text: "§", removed: true },
+        { text: " I, I think, you know, um", removed: false },
+        { text: "...,...", removed: true },
+        { text: ",", removed: false, added: true },
+        { text: " we're gonna im-improve user experience", removed: false },
+        { text: ".", removed: false, added: true },
+      ]
+    },
+    clean: {
+      // Removes: fillers (um), discourse markers (you know), stutters (I I, im-). Keeps grammar as-is.
+      parts: [
+        { text: "So I", removed: false },
+        { text: " I", removed: true },
+        { text: " think", removed: false },
+        { text: " you know", removed: true },
+        { text: " um", removed: true },
+        { text: " we're gonna", removed: false },
+        { text: " im-", removed: true },
+        { text: "improve user experience.", removed: false },
+      ]
+    },
+    edited: {
+      // Clean + removes leading "So", fixes grammar (gonna → going to)
+      parts: [
+        { text: "So", removed: true },
+        { text: " I", removed: false },
+        { text: " I", removed: true },
+        { text: " think", removed: false },
+        { text: " you know", removed: true },
+        { text: " um", removed: true },
+        { text: " we're", removed: false },
+        { text: " gonna", removed: true },
+        { text: " going to", removed: false, added: true },
+        { text: " im-", removed: true },
+        { text: "improve user experience.", removed: false },
+      ]
+    }
+  }
+
+  const { parts } = examples[levelId]
+
+  return (
+    <span className="text-[11px] leading-relaxed">
+      {parts.map((part, i) => (
+        part.removed ? (
+          <span key={i} className="text-red-500 line-through decoration-red-500/70">{part.text}</span>
+        ) : part.added ? (
+          <span key={i} className="text-green-600 font-medium">{part.text}</span>
+        ) : (
+          <span key={i} className="text-foreground">{part.text}</span>
+        )
+      ))}
+    </span>
+  )
+}
 
 export interface CleanupOptionsProps {
   /** Available LLM models */
@@ -61,8 +132,6 @@ export function TranscriptHeader({
   cleanupOptions,
 }: TranscriptHeaderProps) {
   const t = useTranslations("demo.cleanup")
-  const [showModelMenu, setShowModelMenu] = useState(false)
-  const [showLevelMenu, setShowLevelMenu] = useState(false)
   const [showCompareModal, setShowCompareModal] = useState(false)
   // Long-press state for temperature chips
   const [holdingTemp, setHoldingTemp] = useState<number | null | 'none'>('none')
@@ -96,10 +165,6 @@ export function TranscriptHeader({
     toast.success(t("copySuccess"))
   }
 
-  const selectedModelName = cleanupOptions?.models.find(m => m.id === cleanupOptions.selectedModel)?.name
-    || cleanupOptions?.selectedModel
-    || "Default"
-
   return (
     <div className={`px-6 py-4 border-r border-border last:border-r-0 ${cleanupOptions ? 'flex flex-col gap-2' : 'flex justify-between items-center'}`}>
       {/* Beta notice banner - shown when cleanup options are available */}
@@ -119,12 +184,12 @@ export function TranscriptHeader({
         </div>
       )}
 
-      {/* Main row: Title, Model, Style, and action buttons */}
+      {/* Main row: Title, Style cards, and action buttons */}
       <div className="flex justify-between items-center w-full">
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-[1px]">{title}</span>
 
-          {/* Cleanup options dropdowns */}
+          {/* Cleanup options */}
           {cleanupOptions && (
             <>
             {/* Vertical divider */}
@@ -135,151 +200,68 @@ export function TranscriptHeader({
               <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
             )}
 
-            {/* Model dropdown - only shown when models are available */}
-            {cleanupOptions.models.length > 0 && (
-              <div className="flex items-center">
-                <span className="text-xs font-semibold text-foreground/70 mr-1.5">{t("openSourceModel")}</span>
-                <div className="relative">
-                  <button
-                    onClick={() => !cleanupOptions.isProcessing && setShowModelMenu(!showModelMenu)}
-                    disabled={cleanupOptions.isProcessing}
-                    className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all ${
-                      cleanupOptions.isProcessing
-                        ? "bg-muted text-muted-foreground cursor-not-allowed"
-                        : "bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <span className="max-w-[80px] truncate">{selectedModelName}</span>
-                    <ChevronDown className="w-3 h-3 flex-shrink-0" />
-                  </button>
-                  {showModelMenu && (
-                    <div className="absolute left-0 top-full mt-1 bg-background border border-border rounded-md overflow-hidden z-20 shadow-lg min-w-[160px]">
-                      {cleanupOptions.models.map((model) => {
-                        // Check if this is the recommended model for current level
-                        const isRecommendedForLevel = model.id === getDefaultModelForLevel(cleanupOptions.selectedLevel)
-                        // Check if cached (exact match on cleanup_type, and temperature if enabled)
-                        const isCached = cleanupOptions.cachedCleanups?.some(c =>
-                          c.llm_model === model.id &&
-                          c.cleanup_type === cleanupOptions.selectedLevel &&
-                          // Only match temperature when temperature selection is enabled
-                          (cleanupOptions.onTemperatureChange === undefined || temperaturesMatch(c.temperature, cleanupOptions.selectedTemperature)) &&
-                          c.status === 'completed'
-                        )
-                        return (
-                          <button
-                            key={model.id}
-                            onClick={() => {
-                              cleanupOptions.onModelChange(model.id)
-                              setShowModelMenu(false)
-                            }}
-                            className={`flex items-center justify-between w-full px-3 py-2 text-left text-[11px] transition-colors hover:bg-muted ${
-                              cleanupOptions.selectedModel === model.id ? "bg-secondary font-medium" : ""
-                            }`}
-                          >
-                            <span className="flex items-center gap-1.5">
-                              {model.name}
-                              {isRecommendedForLevel && <Medal className="w-3 h-3 text-amber-500" />}
-                            </span>
-                            {isCached && <Check className="w-3 h-3 text-green-500 flex-shrink-0" />}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Level dropdown with subtitles */}
+            {/* Style card selection */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-foreground/70">{t("style")}</span>
-              <div className="relative">
-                <button
-                  onClick={() => !cleanupOptions.isProcessing && setShowLevelMenu(!showLevelMenu)}
-                  disabled={cleanupOptions.isProcessing}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-left transition-all min-w-[120px] ${
-                    cleanupOptions.isProcessing
-                      ? "bg-muted text-muted-foreground cursor-not-allowed"
-                      : "bg-secondary hover:bg-muted"
-                  }`}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[11px] font-medium text-foreground">
-                        {t(`levels.${cleanupOptions.selectedLevel}`)}
-                      </span>
-                      {cleanupOptions.selectedLevel === DEFAULT_CLEANUP_LEVEL && (
-                        <span className="text-[8px] bg-primary text-primary-foreground px-1 rounded">
-                          {t("temperatureDefault")}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[9px] text-muted-foreground block">
-                      {t(`hints.${cleanupOptions.selectedLevel}`)}
-                    </span>
-                  </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                </button>
-                {showLevelMenu && (
-                  <div className="absolute left-0 top-full mt-1 bg-background border border-border rounded-md overflow-hidden z-20 shadow-lg min-w-[160px]">
-                    {CLEANUP_LEVELS.map((levelId) => {
-                      const modelToCheck = cleanupOptions.hasManualSelection
-                        ? cleanupOptions.selectedModel
-                        : getDefaultModelForLevel(levelId)
-                      const isCached = cleanupOptions.cachedCleanups?.some(c =>
-                        c.llm_model === modelToCheck &&
-                        c.cleanup_type === levelId &&
-                        (cleanupOptions.onTemperatureChange === undefined || temperaturesMatch(c.temperature, cleanupOptions.selectedTemperature)) &&
-                        c.status === 'completed'
-                      )
-                      const isSelected = cleanupOptions.selectedLevel === levelId
-                      const isDefault = levelId === DEFAULT_CLEANUP_LEVEL
-                      return (
-                        <button
-                          key={levelId}
-                          onClick={() => {
-                            cleanupOptions.onLevelChange(levelId)
-                            setShowLevelMenu(false)
-                          }}
-                          className={`flex items-start justify-between w-full px-3 py-2 text-left transition-colors hover:bg-muted ${
-                            isSelected ? "bg-secondary" : ""
-                          }`}
-                        >
-                          <div>
-                            <div className="flex items-center gap-1">
+              <TooltipProvider delayDuration={300}>
+                <div className="flex gap-2">
+                  {CLEANUP_LEVELS.map((levelId) => {
+                    const modelToCheck = cleanupOptions.hasManualSelection
+                      ? cleanupOptions.selectedModel
+                      : getDefaultModelForLevel(levelId)
+                    const isCached = cleanupOptions.cachedCleanups?.some(c =>
+                      c.llm_model === modelToCheck &&
+                      c.cleanup_type === levelId &&
+                      (cleanupOptions.onTemperatureChange === undefined || temperaturesMatch(c.temperature, cleanupOptions.selectedTemperature)) &&
+                      c.status === 'completed'
+                    )
+                    const isSelected = cleanupOptions.selectedLevel === levelId
+                    const isDefault = levelId === DEFAULT_CLEANUP_LEVEL
+                    return (
+                      <Tooltip key={levelId}>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => !cleanupOptions.isProcessing && cleanupOptions.onLevelChange(levelId)}
+                            disabled={cleanupOptions.isProcessing}
+                            className={`px-3 py-2 rounded-lg text-left transition-all ${
+                              cleanupOptions.isProcessing ? "opacity-50 cursor-not-allowed" : ""
+                            } ${
+                              isSelected
+                                ? "border-2 border-primary bg-primary/5"
+                                : "border border-border hover:border-muted-foreground/30"
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5">
                               <span className={`text-[11px] font-medium ${isSelected ? "text-primary" : "text-foreground"}`}>
                                 {t(`levels.${levelId}`)}
                               </span>
                               {isDefault && (
-                                <span className="text-[8px] bg-primary/10 text-primary px-1 rounded">
-                                  {t("temperatureDefault")}
-                                </span>
+                                <span className="w-1.5 h-1.5 bg-primary rounded-full" />
                               )}
+                              {isCached && <Check className="w-3 h-3 text-green-500 flex-shrink-0" />}
                             </div>
-                            <span className="text-[9px] text-muted-foreground block">
+                            <span className={`text-[9px] block mt-0.5 ${isSelected ? "text-primary/70" : "text-muted-foreground"}`}>
                               {t(`hints.${levelId}`)}
                             </span>
-                          </div>
-                          {isCached && <Check className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />}
-                        </button>
-                      )
-                    })}
-                    {/* Compare all link in dropdown */}
-                    <div className="border-t border-border">
-                      <button
-                        onClick={() => {
-                          setShowLevelMenu(false)
-                          setShowCompareModal(true)
-                        }}
-                        className="w-full px-3 py-2 text-left text-[10px] text-primary hover:bg-muted flex items-center gap-1"
-                      >
-                        <Info className="w-3 h-3" />
-                        {t("compareAll")}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[280px] p-3">
+                          <p className="text-[10px] font-medium text-muted-foreground mb-1.5">{t("examples.label")}</p>
+                          <ExampleDiff levelId={levelId} />
+                        </TooltipContent>
+                      </Tooltip>
+                    )
+                  })}
+                </div>
+              </TooltipProvider>
+              {/* Compare all link */}
+              <button
+                onClick={() => setShowCompareModal(true)}
+                className="p-1 rounded hover:bg-muted transition-colors ml-1"
+                aria-label={t("compareAll")}
+              >
+                <Info className="w-4 h-4 text-muted-foreground hover:text-primary" strokeWidth={2.5} />
+              </button>
             </div>
 
           </div>

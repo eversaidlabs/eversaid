@@ -50,7 +50,7 @@
     "problem": {
       "sectionLabel": "The Problem",
       "title": "Current Tools Only Give You Half",
-      "subtitle": "Current tools give you raw transcripts full of fillers and errors. To clean them: edit manually for hours, or use ChatGPT, exposing client data, getting over-edited results, with no way to verify what changed.",
+      "subtitle": "Current tools give you raw transcripts full of fillers, errors and spoken grammar. To clean them: edit manually for hours, or use ChatGPT, exposing client data, getting over-edited results, with no way to verify what changed.",
       "without": {
         "header": "Without EverSaid",
         "item1": {
@@ -467,6 +467,9 @@
         "minimal": "Keep all",
         "clean": "Remove noise",
         "edited": "+ Fix grammar"
+      },
+      "examples": {
+        "label": "Example:"
       },
       "compareAll": "Compare all",
       "betaLabel": "Beta",
