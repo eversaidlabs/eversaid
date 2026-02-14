@@ -658,7 +658,8 @@ function DemoPageContent({ config }: DemoPageContentProps) {
   }, [transcription, selectedCleanupLevel, selectedCleanupModel, cleanupCache, selectedCleanupTemp, turnstile, t])
 
   // Handler for cleanup level change - uses cached cleanup if available
-  const handleCleanupLevelChange = useCallback(async (level: CleanupType) => {
+  // Long-press (500ms) passes forceRerun=true to bypass cache (non-production only)
+  const handleCleanupLevelChange = useCallback(async (level: CleanupType, forceRerun?: boolean) => {
     const previousLevel = selectedCleanupLevel
     setSelectedCleanupLevel(level)
     if (!transcription.transcriptionId || !transcription.entryId) return
@@ -674,8 +675,8 @@ function DemoPageContent({ config }: DemoPageContentProps) {
     }
 
     try {
-      // Check if cleanup already exists (exact match on cleanup_type, and temperature if enabled)
-      const existing = modelToUse ? cleanupCache.find(c =>
+      // Check cache UNLESS forceRerun is true (long-press)
+      const existing = !forceRerun && modelToUse ? cleanupCache.find(c =>
         c.llm_model === modelToUse &&
         c.cleanup_type === level &&
         // Only match temperature when temperature selection is enabled
@@ -1333,6 +1334,7 @@ function DemoPageContent({ config }: DemoPageContentProps) {
                         currentPromptName: transcription.cleanupPromptName,
                         currentTemperature: transcription.cleanupTemperature,
                         onShareFeedback: handleShareFeedback,
+                        environment: config.environment,
                         ...(isTemperatureSelectionEnabled && {
                           selectedTemperature: selectedCleanupTemp,
                           onTemperatureChange: handleCleanupTempChange,

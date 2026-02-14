@@ -193,6 +193,8 @@ def setup_logging(settings: "Settings") -> None:
 
     # Print startup config in banner format
     print("=" * 60)
+    print(f"ENVIRONMENT:               {settings.ENVIRONMENT}")
+    print("=" * 60)
     print("LOGGING")
     print("=" * 60)
     print(f"LOG_LEVEL:                 {log_level}")

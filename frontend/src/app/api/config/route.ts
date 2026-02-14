@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server'
  */
 export async function GET() {
   return NextResponse.json({
+    environment: process.env.ENVIRONMENT || 'development',
     posthog: {
       key: process.env.POSTHOG_KEY || '',
       host: process.env.POSTHOG_HOST || '/ingest',

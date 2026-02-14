@@ -6,6 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
+    # Environment
+    ENVIRONMENT: str = "production"  # development, staging, production
+
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "text"  # "text" (human-readable) or "json" (for Loki)

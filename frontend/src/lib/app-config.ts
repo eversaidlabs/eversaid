@@ -23,6 +23,8 @@ export interface PostHogConfig {
 export interface AppConfig {
   demo: DemoConfig
   features: FeatureFlags
+  /** Environment: development, staging, production */
+  environment: string
 }
 
 /**

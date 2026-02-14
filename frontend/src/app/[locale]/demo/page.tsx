@@ -36,6 +36,7 @@ export default function Page() {
       modelSelection: process.env.ENABLE_MODEL_SELECTION === "true",
       temperatureSelection: process.env.ENABLE_TEMPERATURE_SELECTION === "true",
     },
+    environment: process.env.ENVIRONMENT || "production",
   }
 
   return <DemoPage config={config} />

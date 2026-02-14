@@ -91,8 +91,8 @@ export interface CleanupOptionsProps {
   isProcessing?: boolean
   /** Callback when model changes */
   onModelChange: (modelId: string) => void
-  /** Callback when level changes */
-  onLevelChange: (level: CleanupType) => void
+  /** Callback when level changes (forceRerun bypasses cache - non-production only) */
+  onLevelChange: (level: CleanupType, forceRerun?: boolean) => void
   /** Array of existing cleanups for cache indicator */
   cachedCleanups?: CleanupSummary[]
   /** Whether user has manually selected a model (vs using defaults) */
@@ -107,6 +107,8 @@ export interface CleanupOptionsProps {
   currentTemperature?: number | null
   /** Callback when user clicks "Share feedback" link (exits fullscreen and focuses feedback textarea) */
   onShareFeedback?: () => void
+  /** Environment (enables long-press re-cleanup when not production) */
+  environment?: string
 }
 
 export interface TranscriptHeaderProps {
@@ -137,6 +139,11 @@ export function TranscriptHeader({
   const [holdingTemp, setHoldingTemp] = useState<number | null | 'none'>('none')
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null)
   const didFireRef = useRef(false)
+  // Long-press state for level cards (non-production only)
+  const [holdingLevel, setHoldingLevel] = useState<CleanupType | 'none'>('none')
+  const levelHoldTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const levelDidFireRef = useRef(false)
+  const allowLevelLongPress = cleanupOptions?.environment && cleanupOptions.environment !== 'production'
 
   const handleCopy = () => {
     capture('copy_clicked', { side: textKey === 'rawText' ? 'raw' : 'cleaned' })
@@ -217,18 +224,45 @@ export function TranscriptHeader({
                     )
                     const isSelected = cleanupOptions.selectedLevel === levelId
                     const isDefault = levelId === DEFAULT_CLEANUP_LEVEL
+                    const isHolding = holdingLevel === levelId
                     return (
                       <Tooltip key={levelId}>
                         <TooltipTrigger asChild>
                           <button
-                            onClick={() => !cleanupOptions.isProcessing && cleanupOptions.onLevelChange(levelId)}
+                            onPointerDown={() => {
+                              if (cleanupOptions.isProcessing) return
+                              levelDidFireRef.current = false
+                              if (allowLevelLongPress) {
+                                setHoldingLevel(levelId)
+                                levelHoldTimerRef.current = setTimeout(() => {
+                                  levelDidFireRef.current = true
+                                  cleanupOptions.onLevelChange(levelId, true)
+                                  setHoldingLevel('none')
+                                }, 500)
+                              }
+                            }}
+                            onPointerUp={() => {
+                              if (levelHoldTimerRef.current) clearTimeout(levelHoldTimerRef.current)
+                              levelHoldTimerRef.current = null
+                              if (!levelDidFireRef.current && !cleanupOptions.isProcessing) {
+                                cleanupOptions.onLevelChange(levelId)
+                              }
+                              setHoldingLevel('none')
+                            }}
+                            onPointerLeave={() => {
+                              if (levelHoldTimerRef.current) clearTimeout(levelHoldTimerRef.current)
+                              levelHoldTimerRef.current = null
+                              setHoldingLevel('none')
+                            }}
                             disabled={cleanupOptions.isProcessing}
                             className={`px-3 py-2 rounded-lg text-left transition-all ${
                               cleanupOptions.isProcessing ? "opacity-50 cursor-not-allowed" : ""
                             } ${
-                              isSelected
-                                ? "border-2 border-primary bg-primary/5"
-                                : "border border-border hover:border-muted-foreground/30"
+                              isHolding
+                                ? "ring-2 ring-primary bg-primary/20"
+                                : isSelected
+                                  ? "border-2 border-primary bg-primary/5"
+                                  : "border border-border hover:border-muted-foreground/30"
                             }`}
                           >
                             <div className="flex items-center gap-1.5">
