@@ -18,6 +18,8 @@ services:
       - "4000:3000"
     environment:
       # Runtime config read by Server Components (not baked in at build time)
+      # Environment
+      ENVIRONMENT: ${ENVIRONMENT:-staging}
       # Demo content attribution
       DEMO_SL_DISPLAY_NAME: ${DEMO_SL_DISPLAY_NAME:-}
       DEMO_SL_SOURCE_URL: ${DEMO_SL_SOURCE_URL:-}
@@ -39,6 +41,8 @@ services:
     labels:
       logging: "loki"
     environment:
+      # Environment
+      ENVIRONMENT: ${ENVIRONMENT:-staging}
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
