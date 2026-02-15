@@ -42,6 +42,22 @@ describe('computeDiff', () => {
     expect(result.length).toBeGreaterThan(0)
   })
 
+  it('handles quotes and dashes', () => {
+    const raw = 'Prosti čas. "|Mogoče bo-"'
+    const cleaned = 'Prosti čas. Mogoče bo'
+
+    const result = computeDiff(raw, cleaned)
+
+    // Quotes and dash should be marked as deleted
+    const deleted = result.filter((t) => t.type === 'deleted').map((t) => t.text)
+    expect(deleted.some((t) => t.includes('"') || t.includes('|') || t.includes('-'))).toBe(true)
+
+    // Core words should still be present
+    const allText = result.map((t) => t.text).join('')
+    expect(allText).toContain('Mogoče')
+    expect(allText).toContain('bo')
+  })
+
   it('is case-insensitive for matching', () => {
     const result = computeDiff('Hello World', 'hello world')
     // Words should match despite case difference
