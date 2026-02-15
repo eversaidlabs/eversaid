@@ -56,7 +56,7 @@ export function HighlightedText({
                 "motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)]",
                 "motion-reduce:transition-none",
                 isActive &&
-                  "bg-blue-200/80 shadow-[0_0_0_1px_rgba(59,130,246,0.2),0_1px_3px_rgba(59,130,246,0.15)]",
+                  "bg-blue-400/90 text-blue-950 font-medium shadow-[0_0_0_2px_rgba(59,130,246,0.4),0_2px_8px_rgba(59,130,246,0.3)]",
                 !isActive && "bg-transparent shadow-none"
               )}
               style={{ opacity: isPast && !isActive ? PAST_WORD_OPACITY : 1 }}
