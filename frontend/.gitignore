@@ -57,3 +57,6 @@ storybook-static
 # v0 fetch script temp directory
 v0-utils/.tmp-v0-fetch/
 e2e/audio/
+
+# Large video files (served by nginx in production)
+/public/videos/

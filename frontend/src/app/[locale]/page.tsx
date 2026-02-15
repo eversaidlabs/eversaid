@@ -6,7 +6,7 @@ import { useState, useCallback, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { WaitlistFlow } from "@/components/waitlist/waitlist-flow"
 import { useWaitlist } from "@/features/transcription/useWaitlist"
-import { LiveTranscriptPreview } from "@/components/landing/live-transcript-preview"
+import { DemoVideo } from "@/components/landing/demo-video"
 import { HeroTranscript } from "@/components/landing/hero-transcript"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { MotionDiv } from "@/components/motion"
@@ -233,7 +233,11 @@ export default function HomePage() {
             viewport={{ once: true, amount: 0.2 }}
             variants={scaleFade}
           >
-            <LiveTranscriptPreview />
+            <DemoVideo
+              src="/videos/demo.mp4"
+              waveformStart={2}
+              waveformEnd={5}
+            />
           </MotionDiv>
         </div>
       </section>
